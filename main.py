@@ -4,7 +4,7 @@ main.py
 Punto di ingresso principale per l'esecuzione del sistema Mercurius∞.
 
 Funzionalità:
-- Caricamento configurazioni e logging
+- Caricamento ambiente e configurazioni
 - Inizializzazione pipeline: dati, features, modello
 - Esecuzione strategia di trading adattiva
 - Simulazione esperienza cognitiva (AI Evolutiva)
@@ -13,15 +13,24 @@ Funzionalità:
 import logging
 from utils.logger import setup_logger
 from utils.config_loader import load_config
+from utils.environment import Environment
 from data.market_data_handler import MarketDataHandler
 from data.feature_engineering import FeatureEngineer
 from models.model_trainer import ModelTrainer
 from strategies.strategy_executor import StrategyExecutor
 from agents.adaptive_trader import AdaptiveTrader
 from agents.memory_manager import MemoryManager
-
-# 🔁 Controllore per l'autonomia cognitiva
 from orchestrator.autonomy_controller import AutonomyController
+
+
+def load_env():
+    """Carica variabili d’ambiente e mostra lo stato di Mercurius∞."""
+    env = Environment()
+    print("🔐 Ambiente Mercurius∞ caricato:")
+    print(" - OpenAI Model:", env.get("OPENAI_CHAT_MODEL"))
+    print(" - WM_USER:", env.get("WM_USER"))
+    print(" - MCP_URL:", env.get("MCP_INTROSPECT_URL"))
+    return env
 
 
 def initialize_system():
@@ -109,6 +118,7 @@ def simulate_experience():
 
 
 if __name__ == "__main__":
+    env = load_env()
     components = initialize_system()
     run_pipeline(components)
     simulate_experience()
