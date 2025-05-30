@@ -1,0 +1,22 @@
+# Python standard
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# IDE/editor config
+.vscode/
+.idea/
+.DS_Store
+
+# Env
+.env
+.venv/
+
+# Output
+*.sqlite3
+*.db
+*.zip
+logs/
+memory/
