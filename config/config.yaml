@@ -1,0 +1,8 @@
+symbols:
+  - AAPL
+  - TSLA
+  - NVDA
+base_trade_qty: 100
+min_confidence: 0.55
+retrain_threshold: 0.65
+azr_profit_floor: 0.5
