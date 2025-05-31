@@ -1,0 +1,46 @@
+body {
+    background-color: black !important;
+    color: #00f5ff !important;
+    font-family: 'Orbitron', sans-serif;
+}
+
+div.stButton > button {
+    background-color: transparent;
+    border: 1px solid #00f5ff;
+    color: #00f5ff;
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 0px;
+    padding: 0.5em 1em;
+    transition: 0.3s;
+}
+div.stButton > button:hover {
+    background-color: #00f5ff;
+    color: black;
+}
+
+.hud-header {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    padding: 1em;
+    border-bottom: 2px solid #00f5ff;
+    margin-bottom: 20px;
+}
+
+.hud-panel {
+    font-size: 18px;
+    font-weight: bold;
+    padding-bottom: 0.5em;
+    border-bottom: 1px dashed #00f5ff;
+    margin-bottom: 10px;
+}
+
+.hud-footer {
+    text-align: center;
+    font-size: 14px;
+    color: #00f5ff;
+    padding-top: 1em;
+    border-top: 1px solid #00f5ff;
+    margin-top: 2em;
+}

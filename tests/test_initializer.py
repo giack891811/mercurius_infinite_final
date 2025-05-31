@@ -1,3 +1,4 @@
+import os
 import pytest
 from modules.start_fullmode.initializer import SystemInitializer
 
