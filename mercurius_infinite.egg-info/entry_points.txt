@@ -1,0 +1,2 @@
+[console_scripts]
+merc-start = start_fullmode:main

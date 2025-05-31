@@ -1,0 +1,16 @@
+README.md
+pyproject.toml
+setup.py
+generated_agents/__init__.py
+mercurius_infinite.egg-info/PKG-INFO
+mercurius_infinite.egg-info/SOURCES.txt
+mercurius_infinite.egg-info/dependency_links.txt
+mercurius_infinite.egg-info/entry_points.txt
+mercurius_infinite.egg-info/top_level.txt
+tests/test_autonomia_cognitiva.py
+tests/test_end2end.py
+tests/test_multimodal.py
+tests/test_neuro_learning.py
+tests/test_orchestrator.py
+tests/test_planner.py
+tests/test_supervisione.py
