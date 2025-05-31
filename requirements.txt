@@ -36,7 +36,7 @@ jsonschema-specifications==2025.4.1
 kiwisolver==1.4.8
 MarkupSafe==3.0.2
 matplotlib==3.10.3
--e git+https://github.com/giack891811/mercurius_infinite_final.git@c9a026d96964a87e44b9c432ceb60695b23b9217#egg=mercurius_infinite
+-e git+https://github.com/giack891811/mercurius_infinite_final.git@4294e28f25c69ff0065f44c2520851f8a124dfd2#egg=mercurius_infinite
 moviepy==2.2.1
 mpmath==1.3.0
 narwhals==1.41.0
