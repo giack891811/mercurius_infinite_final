@@ -2,28 +2,52 @@
 
 """
 Modulo: video_learner.py
-Descrizione: Estrazione e sintesi di contenuti da video YouTube per Mercurius∞.
-Utilizza pytube per scaricare e trascrivere automaticamente.
+Descrizione: Apprendimento da contenuti video. Estrae audio, converte in testo via STT,
+e genera sintesi concettuale.
 """
 
 from pytube import YouTube
 import os
 import tempfile
+import moviepy.editor as mp
+import speech_recognition as sr
 
 
-def extract_insights_from_video(url: str) -> list:
-    """
-    Scarica l'audio di un video e prepara un placeholder per la trascrizione/analisi.
-    (Nota: richiede trascrizione esterna o modello STT separato per l'audio)
-    """
-    yt = YouTube(url)
-    stream = yt.streams.filter(only_audio=True).first()
+class VideoLearner:
+    def __init__(self):
+        self.recognizer = sr.Recognizer()
 
-    temp_dir = tempfile.gettempdir()
-    output_path = os.path.join(temp_dir, "video_audio.mp4")
-    stream.download(output_path=output_path, filename="video_audio.mp4")
+    def download_audio(self, url: str) -> str:
+        yt = YouTube(url)
+        audio_stream = yt.streams.filter(only_audio=True).first()
+        output_path = os.path.join(tempfile.gettempdir(), "yt_audio.mp4")
+        audio_stream.download(output_path=output_path, filename="yt_audio.mp4")
+        return output_path
 
-    print(f"📥 Audio scaricato: {output_path}")
+    def convert_to_wav(self, mp4_path: str) -> str:
+        wav_path = mp4_path.replace(".mp4", ".wav")
+        try:
+            clip = mp.AudioFileClip(mp4_path)
+            clip.write_audiofile(wav_path, logger=None)
+        except Exception as e:
+            return f"[Errore conversione WAV]: {e}"
+        return wav_path
 
-    # Placeholder: simulazione di analisi contenuti
-    return [f"TITOLO: {yt.title}", f"AUTORE: {yt.author}", "📘 Analisi audio da completare con STT."]
+    def transcribe_audio(self, wav_path: str) -> str:
+        with sr.AudioFile(wav_path) as source:
+            audio = self.recognizer.record(source)
+        try:
+            return self.recognizer.recognize_google(audio, language="it-IT")
+        except sr.UnknownValueError:
+            return "[Audio non riconosciuto]"
+        except sr.RequestError:
+            return "[Errore richiesta STT]"
+
+    def extract_insights_from_video(self, url: str) -> str:
+        """
+        Processo completo: download → conversione → trascrizione.
+        """
+        mp4_path = self.download_audio(url)
+        wav_path = self.convert_to_wav(mp4_path)
+        transcript = self.transcribe_audio(wav_path)
+        return transcript
