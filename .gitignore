@@ -1,23 +1,32 @@
-# Python standard
+# 📦 Python standard
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 *.log
 
-# IDE/editor config
+# 🧠 IDE/editor config
 .vscode/
 .idea/
 .DS_Store
 
-# Env
+# 🔐 Env
 .env
 .venv/
 
-# Output
+# 🗃️ Output generico
 *.sqlite3
 *.db
 *.zip
-logs/
-memory/
+
+# 🧠 Logs - ignora tutto tranne file .md e .txt
+logs/*
+!logs/*.md
+!logs/*.txt
+
+# 🧬 Memory - ignora tutto tranne i moduli Python
+memory/*
+!memory/*.py
+
+# ⚙️ Config - ignora file specifici ma non l'intera cartella
 config/llm_config.yaml
