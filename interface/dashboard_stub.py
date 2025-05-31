@@ -12,7 +12,9 @@ Funzioni:
 
 import streamlit as st
 import tempfile
+import sys
 import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from learning.video_learner import extract_insights_from_video
 from learning.document_parser import parse_document
 from vision.ocr_module import extract_text_from_image
