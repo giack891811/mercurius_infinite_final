@@ -20,3 +20,4 @@ __pycache__/
 *.zip
 logs/
 memory/
+config/llm_config.yaml
