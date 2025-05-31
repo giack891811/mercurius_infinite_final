@@ -1,3 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+
+
 import streamlit as st
 from modules.voice_bridge.tts_engine import Pyttsx3TTS
 from modules.ai_kernel.agent_core import AgentCore
