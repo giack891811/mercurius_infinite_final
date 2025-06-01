@@ -1,0 +1,45 @@
+# ⚙️ Configurazione Centrale – GENESIS_MODE
+# Questo file controlla l'attivazione e la connessione tra i moduli AI di Mercurius∞
+
+genesis_mode:
+  activation_command: "#GENESIS_MODE"
+  voice_trigger: "Hey Mercurius, attiva GENESIS"
+  orchestrator_module: "core.orchestrator"
+  mission_module: "core.self_mission"
+
+agents:
+  cognitive_core:
+    - ChatGPT4
+    - AZR
+    - Ollama3
+    - GPT4o
+  evolution_engine:
+    - GPTEngineer
+    - MetaGPT
+    - AutoGPT
+    - AI2UI
+  trading_stack:
+    - FinRL
+    - FinGPT
+    - Qlib
+    - OpenBB
+    - Freqtrade
+  creative_organizers:
+    - SuperAGI
+    - MicrosoftAutogen
+    - CrewAI
+  hardware_integration:
+    - LocalAI
+    - LeonAI
+    - n8n
+    - HuggingFaceAgents
+  voice_system:
+    - NariDia
+    - ElevenLabs
+    - Whisper
+    - Vosk
+
+communication:
+  agent_protocol: "neural-messaging"
+  update_cycle_seconds: 10
+  feedback_loop: true
