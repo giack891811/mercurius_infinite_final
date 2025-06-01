@@ -8,6 +8,7 @@ from modules.gesture import GestureRecognizer
 from modules.planner import ActionPlanner
 from models.goal_manager import GoalManager
 from orchestrator.autonomy_controller import AutonomyController
+from modules.ai_kernel.command_interpreter import CommandInterpreter
 from typing import Optional
 
 class MultimodalController:

@@ -1,0 +1,6 @@
+- action: block
+  name: no_secrets
+  rule: password=
+- action: block
+  name: no_secrets
+  rule: password=

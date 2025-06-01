@@ -1,11 +1,7 @@
-# interop/colab_bridge.py
-
 """
 Modulo: colab_bridge.py
 Descrizione: Rilevamento ed estensione delle capacità di esecuzione su Google Colab.
 """
-
-import os
 
 def is_colab():
     try:
@@ -19,3 +15,8 @@ def setup_drive():
         from google.colab import drive
         drive.mount('/content/drive')
         print("✅ Google Drive montato.")
+    else:
+        print("⚠️ Non in ambiente Colab: salto montaggio Drive.")
+
+if __name__ == "__main__":
+    setup_drive()
