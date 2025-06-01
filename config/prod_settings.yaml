@@ -1,0 +1,17 @@
+# config/prod_settings.yaml
+---
+logging_level: INFO
+agents:
+  cognitive:
+    - ChatGPTAgent
+    - Ollama3Agent
+    - AZRAgent
+    - GPT4oAgent
+  trading:
+    - AdaptiveTrader
+  evolution:
+    - MetaTeamAgent
+communication:
+  feedback_loop: true
+  update_cycle_seconds: 30
+sleep_threshold: 300

@@ -1,0 +1,15 @@
+
+# docker-compose.yml
+version: "3.9"
+
+services:
+  mercurius:
+    build: .
+    container_name: mercurius_ai
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./memory/long_term_data:/app/memory/long_term_data
+      - ./logs:/app/logs
+    ports:
+      - "8088:8080"

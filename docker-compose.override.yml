@@ -1,0 +1,33 @@
+# docker-compose.override.yml
+version: "3.9"
+
+services:
+  mercurius:
+    environment:
+      - MERCURIUS_READY=true
+
+  healthcheck:
+    build: .
+    command: ["python", "monitoring/health_check.py"]
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mercurius
+
+  metrics:
+    build: .
+    command: ["python", "monitoring/metrics_exporter.py"]
+    ports:
+      - "9100:9100"
+    depends_on:
+      - mercurius
+
+  audit_dashboard:
+    build: .
+    command: ["streamlit", "run", "monitoring/log_dashboard.py", "--server.port", "8501"]
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - mercurius
