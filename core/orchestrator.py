@@ -1,14 +1,16 @@
 """
 🧠 core/orchestrator.py
 Modulo centrale di orchestrazione – Mercurius∞ Neural AI System
-Gestisce la rete multi-agente in modalità GENESIS.
+Gestisce la rete multi-agente in modalità GENESIS con auto-adattamento.
 """
 
 import importlib
 import yaml
 import time
-from threading import Thread
+import threading
 from pathlib import Path
+from core.self_tuner import SelfTuner
+from core.sleep_monitor import SleepMonitor
 
 CONFIG_PATH = Path("config/genesis_config.yaml")
 
@@ -17,6 +19,7 @@ class Orchestrator:
         self.config = self.load_config()
         self.agents = {}
         self.active = False
+        self.sleep_monitor = SleepMonitor(idle_threshold=self.config.get("sleep_threshold", 300))
 
     def load_config(self):
         with open(CONFIG_PATH, "r") as f:
@@ -27,6 +30,7 @@ class Orchestrator:
         self.active = True
         self.load_agents()
         self.start_feedback_loop()
+        self.start_sleep_monitor()
         print("✅ GENESIS attiva – Rete neurale in esecuzione.")
 
     def load_agents(self):
@@ -47,7 +51,7 @@ class Orchestrator:
     def start_feedback_loop(self):
         if self.config["communication"]["feedback_loop"]:
             print("🔁 Avvio feedback loop neurale...")
-            Thread(target=self.feedback_cycle, daemon=True).start()
+            threading.Thread(target=self.feedback_cycle, daemon=True).start()
 
     def feedback_cycle(self):
         cycle_time = self.config["communication"]["update_cycle_seconds"]
@@ -60,6 +64,19 @@ class Orchestrator:
                         except Exception as e:
                             print(f"⚠️ Errore feedback {agent.__class__.__name__}: {e}")
             time.sleep(cycle_time)
+
+    def start_sleep_monitor(self):
+        print("😴 Monitoraggio inattività attivo...")
+        threading.Thread(target=self._sleep_check_loop, daemon=True).start()
+
+    def _sleep_check_loop(self):
+        while self.active:
+            self.sleep_monitor.check_idle()
+            time.sleep(5)
+
+    def notify_activity(self):
+        self.sleep_monitor.notify_activity()
+
 
 if __name__ == "__main__":
     orchestrator = Orchestrator()
