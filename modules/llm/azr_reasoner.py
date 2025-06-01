@@ -1,15 +1,12 @@
-# modules/azr_reasoning.py
-
+# modules/llm/azr_reasoner.py
 """
-Modulo: azr_reasoning.py
-Descrizione: Sistema di validazione logica del codice e dei pensieri AI secondo la logica AZR (Analytical Zone Reasoning).
-Utilizza euristiche di analisi semantica, sintattica e funzionale per determinare la validità di frammenti di codice o ragionamenti.
+Modulo: azr_reasoner.py
+Descrizione: Sistema di validazione logica del codice e dei pensieri AI secondo la logica AZR.
+Utilizza analisi sintattica ed esecuzione controllata per determinare la validità di frammenti di codice.
 """
-
 import ast
 import traceback
-from typing import Tuple
-
+from typing import Any
 
 class AZRReasoning:
     def __init__(self):
@@ -26,10 +23,9 @@ class AZRReasoning:
         except SyntaxError as e:
             self.log.append(f"❌ Syntax Error: {e}")
             return False
-
         try:
             compiled = compile(tree, filename="<azr_check>", mode="exec")
-            test_env = {}
+            test_env: dict[str, Any] = {}
             exec(compiled, test_env)
             self.log.append("✅ Execution succeeded.")
             return True
@@ -38,10 +34,28 @@ class AZRReasoning:
             return False
 
     def last_validation_log(self) -> str:
+        """Restituisce le ultime voci di log della validazione."""
         return "\n".join(self.log[-5:])
-
 
 # Funzione diretta per uso esterno
 def validate_with_azr(code: str) -> bool:
     azr = AZRReasoning()
     return azr.validate_with_azr(code)
+
+# Agente AZR: utilizza AZRReasoning per analizzare task di debug/logica
+class AZRAgent:
+    def __init__(self):
+        self.azr = AZRReasoning()
+
+    def analyze(self, text: str, context: dict = None) -> str:
+        """
+        Analizza il testo (es. codice) con la logica AZR e restituisce un responso.
+        """
+        code_to_check = text if context is None else context.get("code", text)
+        success = self.azr.validate_with_azr(code_to_check)
+        if success:
+            return "✅ AZR: codice valido e logica consistente."
+        else:
+            # Include dettagli di errore nel risultato
+            error_log = self.azr.last_validation_log()
+            return f"❌ AZR: rilevate criticità logiche.\nLog: {error_log}"

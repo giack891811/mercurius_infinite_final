@@ -1,5 +1,6 @@
 import soundfile as sf
-from dia.model import Dia
+from modules.voice_bridge.dia_model_mock import Dia
+
 
 class NariDiaTTS:
     def __init__(self, model_name="nari-labs/Dia-1.6B"):

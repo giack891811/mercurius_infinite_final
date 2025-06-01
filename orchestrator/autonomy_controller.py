@@ -1,51 +1,46 @@
 """
 Modulo: autonomy_controller.py
-Responsabilità: Coordinare i moduli di riflessione e apprendimento continuo
-Autore: Mercurius∞ Engineer Mode
+Descrizione: Gestione autonoma delle esperienze e delle azioni eseguite da Mercurius∞.
+Permette di registrare eventi, esiti e attivare modelli di adattamento comportamentale.
 """
 
-from core.self_reflection import SelfReflection
-from core.learning import ContinuousLearner
-from typing import Dict, Any
-
+from datetime import datetime
 
 class AutonomyController:
-    """
-    Gestisce la riflessione cognitiva e l'apprendimento continuo del sistema.
-    """
-
     def __init__(self):
-        self.reflector = SelfReflection()
-        self.learner = ContinuousLearner()
+        self.experience_log = []
 
-    def process_experience(self, action: str, outcome: str, success: bool, context: Dict[str, Any]) -> Dict[str, Any]:
+    def process_experience(self, action: str, outcome: str, success: bool, metadata: dict = None):
         """
-        Coordina riflessione e apprendimento dopo un'esperienza.
+        Registra un'esperienza eseguita da Mercurius, utile per addestramento successivo.
         """
-        reflection = self.reflector.evaluate_action(action, outcome, success, context)
-        learning = self.learner.learn_from_experience(action, outcome, success, context)
-
-        return {
-            "reflection": reflection["insight"],
-            "learning": learning["insight"]
+        experience = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "action": action,
+            "outcome": outcome,
+            "success": success,
+            "metadata": metadata or {}
         }
+        self.experience_log.append(experience)
+        print(f"📒 Esperienza registrata → {action} | Successo: {success} | Extra: {metadata}")
 
-    def summarize_autonomy(self) -> Dict[str, Any]:
+    def get_history(self, limit=5):
         """
-        Restituisce un riepilogo delle prestazioni cognitive.
+        Restituisce le ultime esperienze registrate.
         """
-        reflection_stats = self.reflector.summarize_reflections()
-        learning_stats = self.learner.stats()
-        return {
-            "reflection_summary": reflection_stats,
-            "learning_summary": learning_stats
-        }
+        return self.experience_log[-limit:]
 
-    def report_insights(self) -> Dict[str, list]:
+    def reset_memory(self):
         """
-        Riporta tutte le osservazioni generate finora.
+        Pulisce la memoria esperienziale.
         """
-        return {
-            "reflections": self.reflector.reflect_on_log(),
-            "learnings": self.learner.retrieve_insights()
-        }
+        self.experience_log = []
+        print("♻️ Memoria esperienziale resettata.")
+
+    def summary(self):
+        """
+        Stampa un riassunto degli ultimi eventi appresi.
+        """
+        print("🧠 Riassunto Esperienze Recenti:")
+        for exp in self.get_history(5):
+            print(f"→ [{exp['timestamp']}] {exp['action']} => {exp['outcome']}")
