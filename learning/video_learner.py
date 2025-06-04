@@ -74,4 +74,10 @@ class VideoLearner:
         
         return self.transcribe_audio(audio_path)
 
+
+def extract_insights_from_video(source: str) -> str:
+    """Convenience wrapper to use VideoLearner in functional style."""
+    learner = VideoLearner()
+    return learner.extract_insights_from_video(source)
+
 # Fine modulo — Mercurius∞ è pronto a divorare video, audio e URL senza pietà.
