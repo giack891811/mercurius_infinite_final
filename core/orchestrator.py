@@ -22,7 +22,8 @@ class Orchestrator:
         self.sleep_monitor = SleepMonitor(idle_threshold=self.config.get("sleep_threshold", 300))
 
     def load_config(self):
-        with open(CONFIG_PATH, "r") as f:
+        with open('config/config.yaml', encoding='utf-8') as f:
+
             return yaml.safe_load(f)
 
     def activate_genesis(self):

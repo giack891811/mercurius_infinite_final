@@ -1,8 +1,17 @@
-symbols:
-  - AAPL
-  - TSLA
-  - NVDA
-base_trade_qty: 100
-min_confidence: 0.55
-retrain_threshold: 0.65
-azr_profit_floor: 0.5
+agents:
+  enabled: ["OPENAI", "OLLAMA", "AZR"]
+
+communication:
+  feedback_loop: true
+  max_retries: 3
+  retry_delay: 2
+
+mission_defaults:
+  run_mode: dialogic-autonomous
+  tasks:
+    - "#SELF_MISSION"
+    - "#RUN_SELF_CHECK"
+
+paths:
+  transcripts: "memory/transcripts/"
+  logs: "logs/"
