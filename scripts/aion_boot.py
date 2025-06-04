@@ -24,6 +24,14 @@ def main():
     orchestrator.execute_mission("#SELF_MISSION")
 
     try:
+        from deployment.aion_api import start_api
+        import threading
+        threading.Thread(target=start_api, daemon=True).start()
+        print("🌐 Aion API server avviato sulla porta 8000")
+    except Exception as exc:
+        print(f"⚠️ Avvio Aion API fallito: {exc}")
+
+    try:
         from modules.voice_bridge.voice_loop import start_listening
         print("🎙️ Voice recognition attiva...")
         start_listening()
