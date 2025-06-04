@@ -2,7 +2,7 @@
 import os
 import openai
 
-class OpenAI:
+class OPENAI:
     def __init__(self, model: str = "gpt-3.5-turbo"):
         self.model = model
         openai.api_key = os.getenv("OPENAI_API_KEY", "")

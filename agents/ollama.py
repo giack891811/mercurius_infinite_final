@@ -2,7 +2,7 @@
 import requests
 import json
 
-class Ollama:
+class OLLAMA:
     def __init__(self, url: str = "http://localhost:11434/api/generate", model: str = "llama3"):
         self.url = url
         self.model = model
@@ -15,6 +15,9 @@ class Ollama:
             return r.json().get("response", "").strip()
         except Exception as e:
             return f"[Ollama error] {e}"
+
+    def ask(self, prompt: str) -> str:
+        return self.chat(prompt)
 
     def neural_feedback(self):
         print("[Ollama] feedback cycle active")
