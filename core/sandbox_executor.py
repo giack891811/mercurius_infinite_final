@@ -1,16 +1,30 @@
-# core/sandbox_executor.py
-
 """
 Modulo: sandbox_executor.py
 Descrizione: Esecuzione sicura, isolata e autoregolata di codice Python generato da Mercurius∞.
-Include analisi statica, sandboxing con timeout, cattura stdout, e correzione automatica con AZR.
+Include analisi statica, sandboxing con timeout, cattura stdout, e correzione automatica con AZR e LLM.
+Autore: Mercurius∞ AI Engineer
 """
 
 import traceback
 import contextlib
 import io
 import multiprocessing
-from core.azr_reasoning import validate_with_azr
+import os
+
+from modules.llm.azr_reasoner import validate_with_azr 
+
+
+
+
+
+# ─── Correzione automatica con LLM esterno (opzionale) ────────────────────────
+try:
+    import openai
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", None)
+    OPENAI_READY = bool(OPENAI_API_KEY)
+except ImportError:
+    openai = None
+    OPENAI_READY = False
 
 
 class SandboxExecutor:
@@ -40,7 +54,7 @@ class SandboxExecutor:
                 exec(code, {}, local_vars)
             return_dict["success"] = True
             return_dict["output"] = buffer.getvalue()
-        except Exception as e:
+        except Exception:
             return_dict["success"] = False
             return_dict["output"] = traceback.format_exc()
 
@@ -73,10 +87,34 @@ class SandboxExecutor:
 
     def autofix_with_llm(self, code: str, error_msg: str) -> str:
         """
-        Richiede ad AZR una versione corretta del codice dato l'errore.
+        Prova a correggere il codice errato usando:
+        1. AZR Reasoner per correzioni ragionate.
+        2. Se disponibile, LLM esterno (es. GPT-4 via OpenAI API).
         """
-        prompt = f"Codice:\n{code}\n\nErrore:\n{error_msg}\n\nSuggerisci una versione corretta:"
-        return validate_with_azr(prompt)
+        # Primo tentativo: AZR Reasoner
+        prompt = (
+            f"Codice:\n{code}\n\n"
+            f"Errore:\n{error_msg}\n\n"
+            "Suggerisci una versione corretta:"
+        )
+        fix_azr = validate_with_azr(prompt)
+        if fix_azr and "[ERRORE]" not in fix_azr.upper():
+            return f"[AZR FIX]\n{fix_azr}"
+
+        # Secondo tentativo: LLM esterno (se configurato)
+        if OPENAI_READY and openai:
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-4",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.2,
+                    max_tokens=300
+                )
+                suggestion = response["choices"][0]["message"]["content"]
+                return f"[GPT-4 FIX]\n{suggestion.strip()}"
+            except Exception as e:
+                return f"[❌ Errore OpenAI LLM]: {e}"
+        return "[❌ Nessuna correzione automatica disponibile]"
 
     def report_stacktrace(self) -> str:
         return self.last_error or "Nessun errore registrato."
