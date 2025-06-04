@@ -93,6 +93,12 @@ class Orchestrator:
             except Exception as exc:
                 print(f"⚠️ Errore avvio SELF_MISSION: {exc}")
             self.activate_genesis()
+        elif mission_name == "#ACTIVATE_NOTE_JARVIS":
+            try:
+                from modules.vision_audio.note10_jarvis_bridge import start_jarvis_loop
+                start_jarvis_loop()
+            except Exception as exc:
+                print(f"⚠️ Errore attivazione Note10 Jarvis: {exc}")
         else:
             print(f"⚠️ Missione sconosciuta: {mission_name}")
 
