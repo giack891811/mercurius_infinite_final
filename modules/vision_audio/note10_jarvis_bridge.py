@@ -102,7 +102,9 @@ class VoiceListener:
         if self.use_whisper:
             try:
                 import numpy as np
-                result = self.whisper_model.transcribe(np.frombuffer(audio, dtype="int16"), language="it")
+                waveform = np.frombuffer(audio, dtype="int16").astype(np.float32) / 32768.0
+                result = self.whisper_model.transcribe(waveform, language="it")
+
                 return result.get("text", "")
             except Exception as exc:  # pragma: no cover
                 logger.error("Whisper error: %s", exc)
