@@ -43,3 +43,6 @@ communication:
   agent_protocol: "neural-messaging"
   update_cycle_seconds: 10
   feedback_loop: true
+
+# Abilita il thinking loop
+thinking_enabled: true

@@ -11,6 +11,7 @@ import threading
 from pathlib import Path
 from core.self_tuner import SelfTuner
 from core.sleep_monitor import SleepMonitor
+from core.thinking_loop import ThinkingLoop
 
 CONFIG_PATH = Path("config/genesis_config.yaml")
 
@@ -20,6 +21,7 @@ class Orchestrator:
         self.agents = {}
         self.active = False
         self.sleep_monitor = SleepMonitor(idle_threshold=self.config.get("sleep_threshold", 300))
+        self.thinking_loop: ThinkingLoop | None = None
 
     def load_config(self):
         with open('config/config.yaml', encoding='utf-8') as f:
@@ -31,6 +33,16 @@ class Orchestrator:
         self.load_agents()
         self.start_feedback_loop()
         self.start_sleep_monitor()
+        # Thinking loop opzionale
+        try:
+            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                cfg = yaml.safe_load(f)
+            if cfg.get("thinking_enabled", True):
+                self.thinking_loop = ThinkingLoop(CONFIG_PATH)
+                self.thinking_loop.start()
+                print("🧠 Thinking loop attivo.")
+        except Exception as e:
+            print(f"⚠️ Errore avvio thinking loop: {e}")
         # 🔧 Patch: attiva anche il bridge Note10+ in parallelo
         try:
             from modules.vision_audio.note10_jarvis_bridge import start_jarvis_loop
