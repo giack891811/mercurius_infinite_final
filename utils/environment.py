@@ -55,3 +55,7 @@ class Environment:
 
     def get_mercurius_api_key(self) -> str:
         return self.get("MERCURIUS_API_KEY")
+
+    def get_run_mode(self) -> str:
+        """Restituisce la modalità operativa di AION."""
+        return self.get("AION_RUN_MODE", "dialogic-autonomous")

@@ -1,6 +1,6 @@
-# Mercurius∞
+# AION – Advanced Intelligence Of Nexus
 
-🔬 **Mercurius∞** è un sistema AI evolutivo full-stack, autonomo, multimodale e cognitivamente attivo.  
+🔬 **AION** è un sistema AI evolutivo full-stack, autonomo, multimodale e cognitivamente attivo.
 Progettato per **apprendere**, **riflettere**, **generare codice** e **interagire** con ambienti complessi in tempo reale.
 
 ## 🧠 Caratteristiche Principali
