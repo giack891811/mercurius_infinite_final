@@ -1,10 +1,9 @@
-# learning/video_learner.py
-
 """
 Modulo: video_learner.py
-Descrizione: Apprendimento da contenuti video (es. YouTube).
+Descrizione: Apprendimento da contenuti video e audio (YouTube, file locali).
 Estrae audio → trascrive con Whisper → restituisce sintesi concettuale.
 Supporta fallback se i moduli non sono disponibili.
+Autore: Mercurius∞ AI Engineer
 """
 
 import os
@@ -19,7 +18,6 @@ except ImportError:
     YouTube = None
     whisper = None
     MODULES_AVAILABLE = False
-
 
 class VideoLearner:
     def __init__(self, model_name="large-v3"):
@@ -45,7 +43,8 @@ class VideoLearner:
 
     def transcribe_audio(self, file_path: str) -> str:
         """
-        Trascrive un file audio tramite Whisper.
+        Trascrive un file audio/video tramite Whisper.
+        Accetta qualsiasi file locale audio o video.
         """
         if not self.model:
             return "[❌ Whisper non disponibile]"
@@ -55,15 +54,24 @@ class VideoLearner:
         except Exception as e:
             return f"[❌ Errore Whisper]: {e}"
 
-    def extract_insights_from_video(self, url: str) -> str:
+    def extract_insights_from_video(self, source: str) -> str:
         """
-        Processo completo: download → trascrizione.
+        Processo completo:
+        - Se input è un file locale esistente (MP4/MP3/etc.), trascrive direttamente.
+        - Se input è un URL, scarica l'audio e poi trascrive.
         """
         if not MODULES_AVAILABLE:
             return "[❌ Moduli mancanti: pytube, whisper]"
-
-        audio_path = self.download_audio(url)
+        
+        if os.path.exists(source):
+            # Input è un file locale
+            return self.transcribe_audio(source)
+        
+        # Altrimenti tratta l’input come URL YouTube
+        audio_path = self.download_audio(source)
         if audio_path.startswith("[❌"):
             return audio_path
-
+        
         return self.transcribe_audio(audio_path)
+
+# Fine modulo — Mercurius∞ è pronto a divorare video, audio e URL senza pietà.
