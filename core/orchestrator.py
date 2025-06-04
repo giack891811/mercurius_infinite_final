@@ -77,6 +77,24 @@ class Orchestrator:
     def notify_activity(self):
         self.sleep_monitor.notify_activity()
 
+    def run_self_check(self, path: str = "."):
+        """Esegue una scansione del progetto e produce un report."""
+        print("🔍 Avvio self check dei moduli...")
+        tuner = SelfTuner(project_root=path)
+        tuner.run_autoanalysis()
+
+    def execute_mission(self, mission_name: str):
+        """Esegue una missione predefinita."""
+        if mission_name == "#SELF_MISSION":
+            try:
+                from core.self_mission import genesis_directive
+                genesis_directive()
+            except Exception as exc:
+                print(f"⚠️ Errore avvio SELF_MISSION: {exc}")
+            self.activate_genesis()
+        else:
+            print(f"⚠️ Missione sconosciuta: {mission_name}")
+
 
 if __name__ == "__main__":
     orchestrator = Orchestrator()
