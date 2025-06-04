@@ -50,6 +50,13 @@ class Orchestrator:
             print("📡 Note10+ Bridge attivo – In ascolto microfono e comandi vocali.")
         except Exception as e:
             print(f"⚠️ Errore avvio Note10+ Jarvis: {e}")
+        # Avvia l'interfaccia mobile Flutter se disponibile
+        try:
+            from modules.mobile_flutter.flutter_bridge import start_mobile_ui
+            threading.Thread(target=start_mobile_ui, daemon=True).start()
+            print("📱 Mobile Jarvis UI attivo.")
+        except Exception as e:
+            print(f"⚠️ Errore avvio Mobile UI: {e}")
         print("✅ GENESIS attiva – Rete neurale in esecuzione.")
 
     def load_agents(self):
@@ -117,6 +124,12 @@ class Orchestrator:
                 start_jarvis_loop()
             except Exception as exc:
                 print(f"⚠️ Errore attivazione Note10 Jarvis: {exc}")
+        elif mission_name == "#ACTIVATE_MOBILE_UI":
+            try:
+                from modules.mobile_flutter.flutter_bridge import start_mobile_ui
+                start_mobile_ui()
+            except Exception as exc:
+                print(f"⚠️ Errore attivazione Mobile UI: {exc}")
         else:
             print(f"⚠️ Missione sconosciuta: {mission_name}")
 
