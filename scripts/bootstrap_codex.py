@@ -3,7 +3,10 @@ Script iniziale per ambiente Codex.
 Attiva Mercurius, esegue check e lancia missione di completamento.
 """
 
-from modules.orchestrator import Orchestrator
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from core.orchestrator import Orchestrator
 
 def main():
     print("🚀 Avvio di Mercurius∞...")
