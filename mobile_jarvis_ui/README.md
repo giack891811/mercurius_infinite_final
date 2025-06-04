@@ -1,5 +1,12 @@
 # Mobile Jarvis UI
 
-Flutter-based HUD interface for Mercurius∞. This app provides a continuous voice assistant with a Jarvis style holographic UI. It communicates with the Mercurius backend via HTTP and plays responses using TTS.
+Flutter-based HUD interface for Mercurius∞. The app offers voice interaction using
+`speech_to_text` and `flutter_tts`, with simple hotword detection ("Hey Mercurius"
+or "Aion attivati"). Requests are sent to the local Aion API (`/ask`) which in
+turn forwards them to the orchestrator.
 
-This is a minimal skeleton; build the project using Flutter SDK.
+Build and run using the Flutter SDK on an Android device:
+
+```bash
+flutter run -d android
+```

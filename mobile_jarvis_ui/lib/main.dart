@@ -34,6 +34,7 @@ class _JarvisHomePageState extends State<JarvisHomePage> {
   bool _isListening = false;
   String _lastWords = '';
   String _response = '';
+  final List<String> _hotwords = ['hey mercurius', 'aion attivati'];
 
   Future<void> _listen() async {
     if (!_isListening) {
@@ -42,7 +43,12 @@ class _JarvisHomePageState extends State<JarvisHomePage> {
         setState(() => _isListening = true);
         _speech.listen(onResult: (val) {
           setState(() => _lastWords = val.recognizedWords);
-          if (val.hasConfidenceRating && val.confidence > 0) {
+          final words = val.recognizedWords.toLowerCase();
+          if (_hotwords.any((hw) => words.contains(hw))) {
+            _speech.stop();
+            setState(() => _isListening = false);
+            _speak('Pronto, Signore.');
+          } else if (val.hasConfidenceRating && val.confidence > 0) {
             _askBackend(_lastWords);
           }
         });
@@ -81,24 +87,35 @@ class _JarvisHomePageState extends State<JarvisHomePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        child: GestureDetector(
-          onTap: _listen,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: _isListening ? 200 : 150,
-            height: _isListening ? 200 : 150,
-            decoration: BoxDecoration(
-              color: Colors.tealAccent.withOpacity(0.2),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.tealAccent),
-            ),
-            child: Center(
-              child: Text(
-                _isListening ? 'Ascolto...' : 'Aion',
-                style: const TextStyle(color: Colors.tealAccent, fontSize: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: _listen,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: _isListening ? 200 : 150,
+                height: _isListening ? 200 : 150,
+                decoration: BoxDecoration(
+                  color: Colors.tealAccent.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.tealAccent),
+                ),
+                child: Center(
+                  child: Text(
+                    _isListening ? 'Ascolto...' : 'Aion',
+                    style: const TextStyle(color: Colors.tealAccent, fontSize: 24),
+                  ),
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: 20),
+            Text(
+              _response,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.tealAccent),
+            ),
+          ],
         ),
       ),
     );
