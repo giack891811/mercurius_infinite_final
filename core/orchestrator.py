@@ -31,6 +31,13 @@ class Orchestrator:
         self.load_agents()
         self.start_feedback_loop()
         self.start_sleep_monitor()
+        # 🔧 Patch: attiva anche il bridge Note10+ in parallelo
+        try:
+            from modules.vision_audio.note10_jarvis_bridge import start_jarvis_loop
+            threading.Thread(target=start_jarvis_loop, daemon=True).start()
+            print("📡 Note10+ Bridge attivo – In ascolto microfono e comandi vocali.")
+        except Exception as e:
+            print(f"⚠️ Errore avvio Note10+ Jarvis: {e}")
         print("✅ GENESIS attiva – Rete neurale in esecuzione.")
 
     def load_agents(self):
