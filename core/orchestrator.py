@@ -23,7 +23,6 @@ class Orchestrator:
 
     def load_config(self):
         with open('config/config.yaml', encoding='utf-8') as f:
-
             return yaml.safe_load(f)
 
     def activate_genesis(self):

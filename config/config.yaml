@@ -5,6 +5,7 @@ communication:
   feedback_loop: true
   max_retries: 3
   retry_delay: 2
+  update_cycle_seconds: 60  # <--- questa riga mancava!
 
 mission_defaults:
   run_mode: dialogic-autonomous
