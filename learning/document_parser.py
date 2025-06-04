@@ -49,3 +49,14 @@ class DocumentParser:
         words = re.findall(r"\b\w{5,}\b", content.lower())
         common = Counter(words).most_common(top_n)
         return [word for word, _ in common]
+
+
+def parse_document(source: str) -> dict:
+    """High level helper to parse a PDF file or URL."""
+    parser = DocumentParser()
+    if source.lower().startswith("http"):
+        text = parser.extract_text_from_url(source)
+    else:
+        text = parser.extract_text_from_pdf(source)
+    keywords = parser.extract_keywords(text)
+    return {"text": text, "keywords": keywords}
