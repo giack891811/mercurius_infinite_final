@@ -18,7 +18,8 @@ class MultimodalController:
     def __init__(self):
         self.speech_in = SpeechToText()
         self.speech_out = TextToSpeech()
-        self.interpreter = CommandInterpreter() if hasattr(self, "interpreter") else None
+        # Inizializza sempre l'interprete comandi
+        self.interpreter = CommandInterpreter()
         self.gesture = GestureRecognizer()
         self.planner = ActionPlanner()
         self.goal_mgr = GoalManager()

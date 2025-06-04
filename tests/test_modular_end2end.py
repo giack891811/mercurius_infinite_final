@@ -1,4 +1,4 @@
-# tests/test_end2end.py
+# tests/test_modular_end2end.py
 
 """
 Test End-to-End per Mercurius∞
