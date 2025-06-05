@@ -1,4 +1,3 @@
-import pytest
 from modules.sandbox_executor.secure_executor import SecureExecutor
 
 def test_successful_execution():

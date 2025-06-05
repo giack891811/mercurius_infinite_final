@@ -9,8 +9,6 @@ Descrizione: Gestisce il deploy di Mercurius∞ su:
 
 import subprocess
 import paramiko
-from pathlib import Path
-from typing import Literal
 from analytics.behavior_logger import BehaviorLogger
 
 log = BehaviorLogger()

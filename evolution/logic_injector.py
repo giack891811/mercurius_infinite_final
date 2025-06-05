@@ -61,7 +61,7 @@ class LogicInjector:
             self.logger.log_event("LogicInjector", "InjectionSuccess", f"✅ Funzione {function_name} iniettata nel modulo {module_name}")
             return True
 
-        except Exception as e:
+        except Exception:
             self.logger.log_event("LogicInjector", "InjectionFailed", traceback.format_exc())
             return False
 

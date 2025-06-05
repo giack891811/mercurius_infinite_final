@@ -7,7 +7,6 @@ Descrizione: Verifica versioni Python, dipendenze, GPU/CPU per deployment sicuro
 import importlib
 import platform
 import subprocess
-import pkg_resources
 from typing import List, Dict
 
 
