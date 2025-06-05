@@ -37,8 +37,8 @@ def launch_service(name: str, url: str, command: List[str], delay: int = 5, retr
 def ensure_ai_online():
     launch_service("Ollama", "http://localhost:11434", ["ollama", "serve"], delay=3)
     launch_service("Ollama3", "http://localhost:11434/api/tags", ["ollama", "run", "llama3"], delay=3)
-    launch_service("AZR", "http://localhost:4010/introspect", ["python", "azr_server.py"], delay=2)
-    launch_service("JOSCH", "http://localhost:3020/ping", ["python", "josch_server.py"], delay=2)
+    launch_service("AZR", "http://localhost:4010/introspect", ["python", "agents/azr_server.py"], delay=2)
+    launch_service("JOSCH", "http://localhost:3020/ping", ["python", "integrations/bridge_josch.py"], delay=2)
     launch_service("n8n", "http://localhost:5678", ["n8n", "start"], delay=4)
 
 if __name__ == "__main__":

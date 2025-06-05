@@ -1,39 +1,50 @@
-"""bridge_josch.py
-Interfaccia REST locale per esecuzione comandi su PC.
-Permette a Mercurius∞ di inviare comandi tramite HTTP.
-"""
+# integrations/bridge_josch.py
 
-from __future__ import annotations
-
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 import subprocess
-import requests
-from fastapi import FastAPI
 import uvicorn
+import time
 
 app = FastAPI(title="JOSCH Bridge")
+start_time = time.time()
 
 
-@app.get("/cmd")
-def run_cmd(run: str):
-    """Esegue un comando di shell e restituisce l'output."""
+class CommandRequest(BaseModel):
+    command: str
+    mode: str = "cmd"  # cmd | powershell | python
+
+
+@app.get("/ping")
+def ping():
+    return {"status": "online", "uptime": f"{int(time.time() - start_time)}s"}
+
+
+@app.post("/cmd")
+def run_command(req: CommandRequest):
     try:
-        result = subprocess.run(run, shell=True, capture_output=True, text=True)
-        output = (result.stdout or result.stderr).strip()
-        return {"output": output}
-    except Exception as exc:  # pragma: no cover
-        return {"error": str(exc)}
+        if req.mode == "cmd":
+            result = subprocess.run(req.command, shell=True, capture_output=True, text=True)
+        elif req.mode == "powershell":
+            result = subprocess.run(["powershell", "-Command", req.command], capture_output=True, text=True)
+        elif req.mode == "python":
+            result = subprocess.run(["python", "-c", req.command], capture_output=True, text=True)
+        else:
+            raise HTTPException(status_code=400, detail="Invalid mode specified")
+
+        return {
+            "returncode": result.returncode,
+            "stdout": result.stdout.strip(),
+            "stderr": result.stderr.strip(),
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-def start_bridge(host: str = "0.0.0.0", port: int = 5123) -> None:
-    """Avvia il server FastAPI che ascolta i comandi."""
+def start_bridge(host="0.0.0.0", port=3020):
     uvicorn.run(app, host=host, port=port)
 
 
-def send_command_to_pc(command: str, url: str = "http://localhost:5123/cmd") -> str:
-    """Invia un comando al bridge locale e restituisce l'output."""
-    try:
-        resp = requests.get(url, params={"run": command}, timeout=10)
-        data = resp.json()
-        return data.get("output", data.get("error", ""))
-    except Exception as exc:  # pragma: no cover
-        return f"[Errore invio comando]: {exc}"
+if __name__ == "__main__":
+    start_bridge()
