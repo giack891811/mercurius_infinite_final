@@ -9,6 +9,8 @@ import yaml
 import time
 import threading
 from pathlib import Path
+import sys
+import os
 from core.self_tuner import SelfTuner
 from core.sleep_monitor import SleepMonitor
 from core.thinking_loop import ThinkingLoop
@@ -33,7 +35,7 @@ class Orchestrator:
         self.load_agents()
         self.start_feedback_loop()
         self.start_sleep_monitor()
-        # Thinking loop opzionale
+
         try:
             with open(CONFIG_PATH, "r", encoding="utf-8") as f:
                 cfg = yaml.safe_load(f)
@@ -43,20 +45,21 @@ class Orchestrator:
                 print("🧠 Thinking loop attivo.")
         except Exception as e:
             print(f"⚠️ Errore avvio thinking loop: {e}")
-        # 🔧 Patch: attiva anche il bridge Note10+ in parallelo
+
         try:
             from modules.vision_audio.note10_jarvis_bridge import start_jarvis_loop
             threading.Thread(target=start_jarvis_loop, daemon=True).start()
             print("📡 Note10+ Bridge attivo – In ascolto microfono e comandi vocali.")
         except Exception as e:
             print(f"⚠️ Errore avvio Note10+ Jarvis: {e}")
-        # Avvia l'interfaccia mobile Flutter se disponibile
+
         try:
             from modules.mobile_flutter.flutter_bridge import start_mobile_ui
             threading.Thread(target=start_mobile_ui, daemon=True).start()
             print("📱 Mobile Jarvis UI attivo.")
         except Exception as e:
             print(f"⚠️ Errore avvio Mobile UI: {e}")
+
         print("✅ GENESIS attiva – Rete neurale in esecuzione.")
 
     def load_agents(self):
@@ -104,20 +107,17 @@ class Orchestrator:
         self.sleep_monitor.notify_activity()
 
     def run_self_check(self, path: str = "."):
-        """Esegue una scansione del progetto e produce un report."""
         print("🔍 Avvio self check dei moduli...")
         tuner = SelfTuner(project_root=path)
         tuner.run_autoanalysis()
 
     def execute_mission(self, mission_name: str):
-        """Esegue una missione predefinita."""
         if mission_name == "#SELF_MISSION":
             try:
                 from core.self_mission import genesis_directive
                 genesis_directive()
             except Exception as exc:
                 print(f"⚠️ Errore avvio SELF_MISSION: {exc}")
-            self.activate_genesis()
         elif mission_name == "#ACTIVATE_NOTE_JARVIS":
             try:
                 from modules.vision_audio.note10_jarvis_bridge import start_jarvis_loop
@@ -134,6 +134,48 @@ class Orchestrator:
             print(f"⚠️ Missione sconosciuta: {mission_name}")
 
 
+# 🎯 LOOP INTERATTIVO CLI – In fondo al file
 if __name__ == "__main__":
     orchestrator = Orchestrator()
     orchestrator.activate_genesis()
+
+    print("\n🤖 Mercurius∞ pronto. Inserisci un comando (es: #SELF_MISSION, run_codex, ai: ..., pc: ...). Digita 'exit' per uscire.")
+    while True:
+        try:
+            user_input = input("🧠 Mercurius> ").strip()
+            if user_input.lower() == "exit":
+                print("👋 Uscita dal sistema.")
+                break
+            elif user_input.startswith("ai:"):
+                prompt = user_input[3:].strip()
+                print(f"🧠 [AI] Elaborazione prompt: {prompt}")
+                try:
+                    from modules.reasoner_dispatcher import dispatch_to_reasoner
+                    response = dispatch_to_reasoner(prompt)
+                    print(f"📩 Risposta:\n{response}")
+                except Exception as e:
+                    print(f"⚠️ Errore Reasoner dispatcher: {e}")
+            elif user_input.startswith("pc:"):
+                command = user_input[3:].strip()
+                print(f"💻 [PC] Eseguo comando: {command}")
+                os.system(command)
+            elif user_input == "run_codex":
+                print("🧪 Avvio modulo Codex CLI...")
+                try:
+                    from modules.codex.codex_cli import run_codex
+                    run_codex()
+                except Exception as e:
+                    print(f"⚠️ Errore avvio Codex: {e}")
+            elif user_input == "#SELF_MISSION":
+                orchestrator.execute_mission("#SELF_MISSION")
+            elif user_input == "#ACTIVATE_NOTE_JARVIS":
+                orchestrator.execute_mission("#ACTIVATE_NOTE_JARVIS")
+            elif user_input == "#ACTIVATE_MOBILE_UI":
+                orchestrator.execute_mission("#ACTIVATE_MOBILE_UI")
+            elif user_input == "self_check":
+                orchestrator.run_self_check(".")
+            else:
+                print("⚠️ Comando non riconosciuto.")
+        except KeyboardInterrupt:
+            print("\n🛑 Interruzione manuale.")
+            break
