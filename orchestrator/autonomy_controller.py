@@ -92,6 +92,37 @@ class AutonomyController:
             },
         }
 
+    # ------------------------------------------------------------------ #
+    #                        INSIGHT GLOBALI (NUOVO)                    #
+    # ------------------------------------------------------------------ #
+    def report_insights(self) -> dict:
+        """
+        Restituisce insight globali semplici sulla memoria autonoma:
+         - Azioni più frequenti
+         - Tassi di successo e fallimento
+         - Ultime azioni eseguite
+        """
+        total = len(self.experience_log)
+        if total == 0:
+            return {"insight": "Nessuna esperienza registrata."}
+
+        actions = [e["action"] for e in self.experience_log]
+        outcomes = [e["outcome"] for e in self.experience_log]
+        successes = [e for e in self.experience_log if e["success"]]
+        failures = [e for e in self.experience_log if not e["success"]]
+
+        most_common = Counter(actions).most_common(3)
+        outcome_types = Counter(outcomes).most_common()
+
+        return {
+            "totale_esperienze": total,
+            "azioni_frequenti": [a for a, _ in most_common],
+            "tasso_successo": round(len(successes) / total, 2),
+            "tasso_fallimento": round(len(failures) / total, 2),
+            "ultime_azioni": actions[-5:],
+            "outcome_summary": outcome_types,
+        }
+
 
 # -------------------------- TEST MANUALE RAPIDO -------------------------- #
 if __name__ == "__main__":
@@ -100,4 +131,5 @@ if __name__ == "__main__":
     ac.process_experience("richiedi_input", "ok", True)
     ac.process_experience("rispondi", "errore", False)
     print(ac.summarize_autonomy())
+    print(ac.report_insights())
     ac.summary()

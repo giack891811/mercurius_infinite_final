@@ -107,8 +107,8 @@ def simulate_experience():
             context=exp["context"]
         )
         print("\n🧪 Esperienza:")
-        print(f" - Riflesso: {output['reflection']}")
-        print(f" - Apprendimento: {output['learning']}")
+        print(f" - Riflesso: {output.get('reflection', 'N/D')}")
+        print(f" - Apprendimento: {output.get('learning', 'N/D')}")
 
     print("\n📊 Riepilogo Cognitivo:")
     print(auto.summarize_autonomy())

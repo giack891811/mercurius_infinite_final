@@ -36,6 +36,9 @@ class ExperienceMemory:
         # Creiamo la cartella se non esiste
         os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
 
+        # 🔥 Patch: inizializziamo il limite PRIMA di caricare la storia!
+        self._max_recent: int = config.get("max_recent", 50)
+
         # Inizializziamo LongTermMemory in modalità JSON, usando il file indicato
         self.store = LongTermMemory(
             backend="json",
@@ -45,9 +48,6 @@ class ExperienceMemory:
         # Carichiamo la storia esistente dal file JSON, se esiste
         self.recent: List[Dict[str, Any]] = self._load_existing_history()
 
-        # Massimo numero di esperienze da tenere in cache “recent”
-        self._max_recent: int = config.get("max_recent", 50)
-
     def _load_existing_history(self) -> List[Dict[str, Any]]:
         """
         Legge il file JSON e restituisce la lista completa delle esperienze salvate.
@@ -56,7 +56,6 @@ class ExperienceMemory:
         try:
             with open(self.storage_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                # Se il file era vuoto o non ben formato, data potrebbe non essere lista
                 if not isinstance(data, list):
                     return []
                 # Manteniamo in recent solo gli ultimi max_recent elementi
@@ -125,7 +124,6 @@ class ExperienceMemory:
          - Sovrascrive il file JSON con lista vuota
         """
         self.recent.clear()
-        # Sovrascriviamo il file JSON con lista vuota
         try:
             with open(self.storage_path, "w", encoding="utf-8") as f:
                 json.dump([], f, indent=2)
