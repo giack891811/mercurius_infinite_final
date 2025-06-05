@@ -62,9 +62,9 @@ class Orchestrator:
             print("📱 Mobile Jarvis UI attivo.")
         except Exception as e:
             print(f"⚠️ Errore avvio Mobile UI: {e}")
-<<<<<<< HEAD
 
-=======
+
+
         #REMOTE_EXEC
         try:
             send_command_to_pc("start vscode")
@@ -76,7 +76,7 @@ class Orchestrator:
                 listen_microphone()
             except Exception as e:
                 print(f"⚠️ Errore avvio sensori: {e}")
->>>>>>> 62db5641464ea6b2f5604d7bf8dbb6de12a109c9
+
         print("✅ GENESIS attiva – Rete neurale in esecuzione.")
 
     def load_agents(self):
