@@ -1,5 +1,4 @@
 import argparse
-import sys
 from modules.Neo.trainer_orchestrator import bootstrap_agents
 from modules.LocalAI.local_ai import LocalAI
 from modules.LeonAI.leon_ai import LeonAI

@@ -1,4 +1,3 @@
-import pytest
 from modules.voice_bridge.audio_interface import AudioInterface
 
 def test_audio_initialization():

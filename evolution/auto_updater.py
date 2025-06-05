@@ -10,7 +10,6 @@ import os
 from core.sandbox_executor import SandboxExecutor
 from evolution.web_scraper import WebScraper
 from memory.synaptic_log import SynapticLog
-import re
 import datetime
 
 

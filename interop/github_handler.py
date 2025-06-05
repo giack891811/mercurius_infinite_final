@@ -5,7 +5,6 @@ Modulo: github_handler.py
 Descrizione: Gestione automatica della sincronizzazione con GitHub.
 """
 
-import os
 from git import Repo, GitCommandError
 
 class GitHubHandler:

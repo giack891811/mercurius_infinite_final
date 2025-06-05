@@ -6,11 +6,11 @@ AZR_API = "http://localhost:11434/validate"
 
 def analyze_and_validate_code(code_snippet, objective="check logic and suggest improvements"):
     request_payload = {
-        "prompt": f"Analyze the following code:
-{code_snippet}
-Objective: {objective}",
+        "prompt": (
+            f"Analyze the following code:\n{code_snippet}\nObjective: {objective}"
+        ),
         "model": "azr-logic",
-        "stream": False
+        "stream": False,
     }
 
     try:

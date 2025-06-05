@@ -5,7 +5,6 @@ Descrizione: Interfaccia per comunicare con il server locale di Ollama 3 e otten
 
 import requests
 import json
-import os
 
 
 class Ollama3Interface:

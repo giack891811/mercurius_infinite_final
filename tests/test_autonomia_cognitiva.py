@@ -6,7 +6,6 @@ Autore: Mercurius∞ Engineer Mode
 
 import unittest
 import os
-import shutil
 
 from core.self_reflection import SelfReflection
 from core.learning import ContinuousLearner

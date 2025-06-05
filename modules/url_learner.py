@@ -3,11 +3,12 @@
 Scarica pagine web, le riassume con GPT e salva in Long-Term Memory.
 """
 
-import requests, os, openai, readability
+import requests
+import os
+import openai
+import readability
 from bs4 import BeautifulSoup
 from memory.long_term_memory import LongTermMemory
-from datetime import datetime
-from pathlib import Path
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 mem = LongTermMemory()                           # usa backend JSON

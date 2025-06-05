@@ -8,7 +8,6 @@ Autore: Mercurius∞ AI Engineer
 
 import os
 import sys
-import tempfile
 
 # Importa i moduli core di Mercurius∞
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
