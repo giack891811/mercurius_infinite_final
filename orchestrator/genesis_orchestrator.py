@@ -1,8 +1,8 @@
-# orchestrator/genesis_orchestrator.py
 """
 Modulo: genesis_orchestrator.py
 Descrizione: Coordinamento neurale tra agenti cognitivi (ChatGPT-4, AZR, Ollama3, GPT-4o).
 """
+
 from utils.logger import setup_logger
 logger = setup_logger("MercuriusGenesis")
 
@@ -39,6 +39,7 @@ class GenesisOrchestrator:
         """
         Ogni agente contribuisce con un parere per un task comune; 
         il sistema seleziona la risposta più coerente tra quelle fornite.
+        Se nessuna risposta è valida, attiva fallback evolutivo su AZR.
         """
         logger.info(f"[GENESIS] Task condiviso per risposta congiunta: {task}")
         responses = {
@@ -47,13 +48,21 @@ class GenesisOrchestrator:
             "azr": self.agents["azr"].analyze(task),
             "gpt4o": self.agents["gpt4o"].validate(task)
         }
+
         # Valutazione semplice basata su priorità predefinita (in futuro: ponderazione dinamica)
         priority = ["azr", "gpt4o", "chatgpt4", "ollama3"]
         for agent_key in priority:
             resp = str(responses.get(agent_key, "")).lower()
             if responses[agent_key] and "error" not in resp and "errore" not in resp:
                 return {"source": agent_key, "response": responses[agent_key]}
-        return {"source": "none", "response": "Nessuna risposta valida disponibile."}
+
+        # 🧠 Fallback evolutivo AZR – auto-ragionamento
+        logger.warning("⚠️ Nessuna risposta valida disponibile. Attivazione fallback AZR Reasoner...")
+        azr_retry = self.agents["azr"].solve(task)  # Metodo custom evolutivo
+        if azr_retry and isinstance(azr_retry, dict):
+            return {"source": "azr-fallback", "response": azr_retry}
+        return {"source": "none", "response": "Nessuna risposta utile nemmeno da fallback AZR."}
+
 
 if __name__ == "__main__":
     orchestrator = GenesisOrchestrator()
