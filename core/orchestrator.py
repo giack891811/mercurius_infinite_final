@@ -14,6 +14,8 @@ import os
 from core.self_tuner import SelfTuner
 from core.sleep_monitor import SleepMonitor
 from core.thinking_loop import ThinkingLoop
+from integrations.bridge_josch import send_command_to_pc
+from sensors.sensor_hub import capture_screen_stream, listen_microphone
 
 CONFIG_PATH = Path("config/genesis_config.yaml")
 
@@ -24,6 +26,7 @@ class Orchestrator:
         self.active = False
         self.sleep_monitor = SleepMonitor(idle_threshold=self.config.get("sleep_threshold", 300))
         self.thinking_loop: ThinkingLoop | None = None
+        self.multisensorial_enabled = True
 
     def load_config(self):
         with open('config/config.yaml', encoding='utf-8') as f:
@@ -59,7 +62,21 @@ class Orchestrator:
             print("📱 Mobile Jarvis UI attivo.")
         except Exception as e:
             print(f"⚠️ Errore avvio Mobile UI: {e}")
+<<<<<<< HEAD
 
+=======
+        #REMOTE_EXEC
+        try:
+            send_command_to_pc("start vscode")
+        except Exception as e:
+            print(f"⚠️ Errore invio comando PC: {e}")
+        if self.multisensorial_enabled:
+            try:
+                capture_screen_stream()
+                listen_microphone()
+            except Exception as e:
+                print(f"⚠️ Errore avvio sensori: {e}")
+>>>>>>> 62db5641464ea6b2f5604d7bf8dbb6de12a109c9
         print("✅ GENESIS attiva – Rete neurale in esecuzione.")
 
     def load_agents(self):
