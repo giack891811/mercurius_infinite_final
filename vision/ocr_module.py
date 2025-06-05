@@ -6,7 +6,7 @@ Descrizione: Estrae testo da immagini tramite OCR (Tesseract o alternativa).
 try:
     import pytesseract
     from PIL import Image
-except ImportError as e:
+except ImportError:
     raise ImportError("Modulo OCR non installato: usa `pip install pytesseract pillow`")
 
 def extract_text_from_image(image_path: str) -> str:

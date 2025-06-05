@@ -1,5 +1,4 @@
 import os
-import pytest
 from modules.start_fullmode.initializer import SystemInitializer
 
 def test_system_initializer():

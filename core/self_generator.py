@@ -4,8 +4,7 @@ Responsabilità: Autogenerazione e autoadattamento del codice
 Autore: Mercurius∞ Engineer Mode
 """
 
-import os
-import datetime
+
 from typing import Optional
 import openai
 
