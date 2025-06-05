@@ -17,9 +17,10 @@ except ImportError:
     mt5 = None
 
 try:
-    from ib_insync import IB, Stock, util
+    from ib_insync import IB, Stock
 except ImportError:
     IB = None
+    Stock = None
 
 # ─── Logging Base ────────────────────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO)

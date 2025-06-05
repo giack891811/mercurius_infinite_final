@@ -6,7 +6,6 @@ Descrizione: Riconoscimento oggetti con YOLOv5/YOLOv8 tramite OpenCV per Mercuri
 """
 
 from typing import List
-import cv2
 import torch
 import numpy as np
 

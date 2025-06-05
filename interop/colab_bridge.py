@@ -5,7 +5,7 @@ Descrizione: Rilevamento ed estensione delle capacità di esecuzione su Google C
 
 def is_colab():
     try:
-        import google.colab
+        import google.colab as _
         return True
     except ImportError:
         return False

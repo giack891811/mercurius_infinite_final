@@ -5,7 +5,7 @@ Descrizione: Seleziona l'agente ottimale per un task usando CognitiveMap + TaskM
 """
 
 import re
-from typing import Dict, Any
+from typing import Dict
 
 from cognition.cognitive_map import CognitiveMap
 from cognition.task_memory import TaskMemory
