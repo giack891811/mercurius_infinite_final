@@ -10,7 +10,6 @@ import os
 import subprocess
 import platform
 import logging
-from datetime import datetime
 
 LOG_PATH = "logs/system_operations.log"
 os.makedirs("logs", exist_ok=True)

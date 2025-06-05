@@ -3,7 +3,6 @@
 Modulo: genesis_orchestrator.py
 Descrizione: Coordinamento neurale tra agenti cognitivi (ChatGPT-4, AZR, Ollama3, GPT-4o).
 """
-import logging
 from utils.logger import setup_logger
 logger = setup_logger("MercuriusGenesis")
 

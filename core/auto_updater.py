@@ -44,7 +44,7 @@ class AutoUpdater:
             self.log_update("✔️ Approvato", "\n".join(diff), path)
             return f"✅ Patch applicata a {path}."
         else:
-            return f"⚠️ Patch rifiutata: non migliorativa."
+            return "⚠️ Patch rifiutata: non migliorativa."
 
     def log_update(self, decision: str, diff: str, file_path: str):
         self.updates.append({

@@ -32,7 +32,7 @@ class CodeExecutor:
             return result.stdout.strip(), result.stderr.strip()
         except subprocess.TimeoutExpired:
             return "", f"[ERROR] Timeout di {self.timeout}s superato."
-        except Exception as e:
+        except Exception:
             return "", f"[EXCEPTION] {traceback.format_exc()}"
 
     def evaluate_output(self, output: str, expected_keywords: list) -> bool:

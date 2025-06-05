@@ -8,7 +8,6 @@ Supporta più lingue e trascrizione offline tramite modelli locali o OpenAI API.
 
 import os
 import tempfile
-import torch
 import whisper
 
 

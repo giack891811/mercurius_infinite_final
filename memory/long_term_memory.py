@@ -7,7 +7,6 @@ Offre due possibili backend di archiviazione:
 L’utente può scegliere quale backend attivare passando il parametro 'backend' al costruttore.
 """
 
-import os
 import sqlite3
 import json
 from pathlib import Path
