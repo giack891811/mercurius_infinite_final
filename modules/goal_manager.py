@@ -46,6 +46,23 @@ class GoalManager:
         """Restituisce la lista di goal attivi (status active e non done)."""
         return [g for g in self._goals if g.status == "active" and not g.done]
 
+    def pending_goals(self) -> List[Goal]:
+        """Ritorna i goal ancora in attesa di essere attivati."""
+        return [g for g in self._goals if g.status == "pending" and not g.done]
+
+    def all_goals(self) -> List[Dict[str, Any]]:
+        """Rappresentazione serializzabile di tutti i goal."""
+        return [
+            {
+                "name": g.name,
+                "priority": g.priority,
+                "context": g.context,
+                "status": g.status,
+                "done": g.done,
+            }
+            for g in self._goals
+        ]
+
 # Esempio di utilizzo
 if __name__ == "__main__":
     gm = GoalManager()

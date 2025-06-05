@@ -43,6 +43,10 @@ class AutonomyController:
                 if success
                 else "Apprendimento registrato: rinforzo negativo."
             ),
+            # riflessione di base sull'esito dell'azione
+            "reflection": (
+                "successo" if success else "fallimento"
+            ),
         }
         self.experience_log.append(experience)
         print(
