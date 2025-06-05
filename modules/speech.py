@@ -4,7 +4,10 @@ Responsabilità: Gestione input vocale (ASR) e output vocale (TTS)
 Autore: Mercurius∞ Engineer Mode
 """
 
-import pyttsx3
+try:
+    import pyttsx3
+except Exception:  # pragma: no cover - optional engine
+    pyttsx3 = None
 import speech_recognition as sr
 
 
@@ -13,10 +16,17 @@ class TextToSpeech:
     Sintesi vocale basata su pyttsx3.
     """
     def __init__(self, voice_id=None):
-        self.engine = pyttsx3.init()
-        self.set_voice(voice_id)
+        self.engine = None
+        if pyttsx3 is not None:
+            try:
+                self.engine = pyttsx3.init()
+                self.set_voice(voice_id)
+            except Exception:
+                self.engine = None
 
     def set_voice(self, voice_id):
+        if not self.engine:
+            return
         if voice_id is not None:
             self.engine.setProperty('voice', voice_id)
         else:
@@ -25,8 +35,11 @@ class TextToSpeech:
                 self.engine.setProperty('voice', voices[0].id)
 
     def speak(self, text: str):
-        self.engine.say(text)
-        self.engine.runAndWait()
+        if self.engine:
+            self.engine.say(text)
+            self.engine.runAndWait()
+        else:
+            print(f"[TTS] {text}")
 
 
 class SpeechToText:
