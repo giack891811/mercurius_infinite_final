@@ -38,3 +38,14 @@ python scripts/aion_boot.py
 ```
 
 Il comando abilita la rete di agenti (OpenAI, Ollama, AZR), la voce (Whisper + gTTS) e la visione YOLO tramite webcam IP.
+
+## 🛰 Mission Controller Evolutivo
+Il file `orchestrator/mission_controller.py` introduce un controller che gestisce un ciclo di self-questioning tra gli agenti (Reasoner, AZR e Codex). Ogni workspace contiene un prompt dedicato e il controller salva log e patch generate in automatico.
+
+Per una prova rapida è disponibile la GUI Streamlit:
+
+```bash
+streamlit run modules/dashboard/mission_gui.py
+```
+
+Da qui è possibile creare nuovi workspace, avviare il ciclo evolutivo e visualizzare i log della sandbox.
