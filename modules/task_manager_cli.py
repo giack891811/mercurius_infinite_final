@@ -1,7 +1,7 @@
 import argparse
 from modules.Neo.trainer_orchestrator import bootstrap_agents
-from modules.LocalAI.local_ai import LocalAI
-from modules.LeonAI.leon_ai import LeonAI
+from modules.Localai.local_ai import LocalAI
+from modules.Leonai.leon_ai import LeonAI
 
 class TaskManagerCLI:
     def __init__(self):
