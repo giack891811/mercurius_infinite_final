@@ -49,3 +49,32 @@ streamlit run modules/dashboard/mission_gui.py
 ```
 
 Da qui è possibile creare nuovi workspace, avviare il ciclo evolutivo e visualizzare i log della sandbox.
+
+## 🛠 Generazione automatica del prompt per GPT-Engineer
+
+Sono disponibili due script per creare i file di lavoro:
+
+1. `scripts/update_project_tree.py` aggiorna `project_tree.txt` con l'albero del repository e le prime 100 righe dei file di testo.
+2. `scripts/build_prompt.py` unisce `project_tree.txt` e `prompt_commands.txt` nel file finale `prompt.txt`.
+
+### Utilizzo manuale
+
+```bash
+python scripts/update_project_tree.py
+python scripts/build_prompt.py
+```
+
+### Integrazione con Git
+
+Per aggiornare automaticamente `project_tree.txt` ad ogni `git pull` o merge:
+
+```bash
+# abilita i githook personalizzati
+git config core.hooksPath githooks
+```
+
+I file `githooks/post-merge` (Linux/macOS) e `githooks/post-merge.bat` (Windows)
+invocano lo script di aggiornamento dopo ogni merge.
+
+In alternativa lo script può essere pianificato con `cron` o "Operazioni pianificate" su Windows.
+
