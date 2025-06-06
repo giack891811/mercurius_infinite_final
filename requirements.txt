@@ -214,3 +214,4 @@ zstandard==0.23.0
 scapy
 pybluez
 pywhatkit
+pika==1.3.2
