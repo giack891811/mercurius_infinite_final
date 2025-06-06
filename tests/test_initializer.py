@@ -1,4 +1,7 @@
 import os
+import pytest
+
+cv2 = pytest.importorskip('cv2', reason='cv2 non disponibile')
 from modules.start_fullmode.initializer import SystemInitializer
 
 def test_system_initializer():
