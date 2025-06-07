@@ -10,6 +10,9 @@ import json
 import uuid
 from datetime import datetime
 from sentence_transformers import SentenceTransformer, util
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 class InsightRAG:
     def __init__(self, db_path="logs/insight_memory.json"):
@@ -24,10 +27,12 @@ class InsightRAG:
             with open(self.db_path, "r") as f:
                 self.memory = json.load(f)
                 self.embeddings = [item["embedding"] for item in self.memory]
+            logger.debug("Memoria RAG caricata")
 
     def save_memory(self):
         with open(self.db_path, "w") as f:
             json.dump(self.memory, f, indent=2)
+        logger.debug("Memoria RAG salvata")
 
     def embed_insight(self, content: str):
         embedding = self.model.encode(content).tolist()
@@ -40,12 +45,15 @@ class InsightRAG:
         self.memory.append(entry)
         self.embeddings.append(embedding)
         self.save_memory()
+        logger.info(f"Insight aggiunto: {entry['id']}")
 
     def query_concepts(self, question: str, top_k=3) -> list:
         query_emb = self.model.encode(question)
         scores = util.cos_sim(query_emb, self.embeddings)[0]
         top_indices = scores.argsort(descending=True)[:top_k]
-        return [self.memory[idx] for idx in top_indices]
+        results = [self.memory[idx] for idx in top_indices]
+        logger.info(f"Query '{question}' -> {len(results)} risultati")
+        return results
 
     def rank_relevance(self):
         return sorted(self.memory, key=lambda x: x["timestamp"], reverse=True)[:10]

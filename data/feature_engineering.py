@@ -4,6 +4,11 @@ feature_engineering.py
 Trasformazione dei dati grezzi in feature ingegnerizzate per l’addestramento e la predizione.
 """
 
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
+
+
 class FeatureEngineer:
     def __init__(self, config):
         self.config = config
@@ -18,6 +23,7 @@ class FeatureEngineer:
                 "momentum": self._mock_momentum(row["symbol"]),
                 "volatility": row["volatility"]
             })
+        logger.info(f"Generati {len(features)} set di feature")
         return features
 
     def _safe_div(self, a, b):
@@ -33,6 +39,7 @@ class FeatureEngineer:
         for f in features:
             f["rsi"] = self._simulate_rsi(f["momentum"])
             f["macd"] = self._simulate_macd(f["momentum"])
+        logger.info("Indicatori tecnici aggiunti")
         return features
 
     def _simulate_rsi(self, momentum):

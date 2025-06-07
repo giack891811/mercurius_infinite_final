@@ -7,6 +7,9 @@ Utilizza analisi sintattica ed esecuzione controllata per determinare la validit
 import ast
 import traceback
 from typing import Any
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 class AZRReasoning:
     def __init__(self):
@@ -17,20 +20,25 @@ class AZRReasoning:
         Analizza il codice ricevuto e ne valuta la coerenza logica e l'eseguibilità.
         """
         self.log.append(f"🔍 Validating code:\n{code}")
+        logger.debug("AZR validation started")
         try:
             tree = ast.parse(code)
             self.log.append("✅ AST parsing succeeded.")
+            logger.debug("AZR AST ok")
         except SyntaxError as e:
             self.log.append(f"❌ Syntax Error: {e}")
+            logger.error(f"AZR syntax error: {e}")
             return False
         try:
             compiled = compile(tree, filename="<azr_check>", mode="exec")
             test_env: dict[str, Any] = {}
             exec(compiled, test_env)
             self.log.append("✅ Execution succeeded.")
+            logger.debug("AZR execution ok")
             return True
         except Exception as e:
             self.log.append(f"⚠️ Execution Error: {traceback.format_exc()}")
+            logger.error("AZR execution error")
             return False
 
     def last_validation_log(self) -> str:

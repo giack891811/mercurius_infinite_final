@@ -6,6 +6,9 @@ Modulo per lanciare test automatici sulle componenti chiave di Mercurius∞.
 
 from core.pipeline_controller import PipelineController
 from utils.config_loader import load_config
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 class AutoTester:
@@ -14,9 +17,9 @@ class AutoTester:
         self.pipeline = PipelineController(self.config)
 
     def run(self):
-        print("🔍 Test: Avvio 3 sessioni simulate")
+        logger.info("🔍 Test: Avvio 3 sessioni simulate")
         self.pipeline.simulate_multiple_sessions(3)
-        print("✅ Test automatico completato")
+        logger.info("✅ Test automatico completato")
 
     def test_signal_confidence(self):
         """Test di confidenza su segnali generati."""
@@ -27,11 +30,11 @@ class AutoTester:
 
         conf = [s["confidence"] for s in signals]
         assert all(0 <= c <= 1 for c in conf), "Errore: valori confidenza fuori range"
-        print("✅ Confidenza segnali OK")
+        logger.info("✅ Confidenza segnali OK")
 
     def test_adaptive_behavior(self):
         """Verifica che AZR modifichi la strategia nel tempo."""
         before = self.config["base_trade_qty"]
         self.run()
         after = self.pipeline.agent.config["base_trade_qty"]
-        print(f"📉 Base quantity: {before} → {after}")
+        logger.info(f"📉 Base quantity: {before} → {after}")
