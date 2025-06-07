@@ -1,3 +1,4 @@
 #!/bin/sh
 python update_project_tree.py
-git add project_tree
+python split_project_tree.py
+git add project_tree project_tree_part*.txt

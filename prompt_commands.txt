@@ -1,1 +1,3 @@
-# Aggiungi qui le istruzioni operative per GPT-Engineer
+# Dopo aver letto il file `prompt`, carica in sequenza `project_tree_part1.txt`,
+# `project_tree_part2.txt`, ... fino all'ultima parte presente. Procedi **solo**
+# dopo aver caricato tutte le parti. Ignora eventuali file extra.
