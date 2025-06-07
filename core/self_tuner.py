@@ -7,6 +7,9 @@ Descrizione: Autoanalisi e ottimizzazione autonoma del sistema Mercurius∞ dura
 
 import os
 from pathlib import Path
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 class SelfTuner:
     def __init__(self, project_root="."):
@@ -15,7 +18,7 @@ class SelfTuner:
         self.suggestions = []
 
     def scan_modules(self):
-        print("🧠 Scansione dei moduli in corso...")
+        logger.info("🧠 Scansione dei moduli in corso...")
         for py_file in self.project_root.rglob("*.py"):
             if "venv" in str(py_file): continue
             try:
@@ -27,7 +30,7 @@ class SelfTuner:
                 self.suggestions.append(f"❌ Errore lettura {py_file}: {e}")
 
     def optimize_links(self):
-        print("🔄 Ottimizzazione dei collegamenti interni...")
+        logger.info("🔄 Ottimizzazione dei collegamenti interni...")
         # Simulazione: può essere esteso con mappature reali
         self.suggestions.append("💡 Suggerimento: consolidare dashboard → orchestrator con feedback loop.")
 
@@ -36,7 +39,7 @@ class SelfTuner:
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(f"# 📘 Rapporto Auto-Adattamento – Mercurius∞\n\n{report}")
-        print(f"✅ Report salvato in: {output_path}")
+        logger.info(f"✅ Report salvato in: {output_path}")
 
     def run_autoanalysis(self):
         self.scan_modules()

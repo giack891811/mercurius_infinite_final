@@ -5,6 +5,9 @@ Training del modello neurale e interfaccia per predizioni.
 """
 
 from models.neural_network import NeuralNetwork
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 class ModelTrainer:
     def __init__(self, config):
@@ -22,6 +25,7 @@ class ModelTrainer:
             ]
             training_data.append(inputs)
         self.model.train(training_data)
+        logger.info(f"Modello addestrato su {len(training_data)} campioni")
         return self.model
 
     def predict(self, feature_row):
@@ -31,11 +35,13 @@ class ModelTrainer:
             feature_row["momentum"],
             feature_row["volatility"]
         ]
-        return self.model.forward(inputs)
+        pred = self.model.forward(inputs)
+        logger.debug(f"Predizione: {pred}")
+        return pred
 
     def retrain_on_error(self, features, performance_feedback):
         """Esegue un retraining se la performance scende sotto la soglia."""
         threshold = self.config.get("retrain_threshold", 0.65)
         if performance_feedback["accuracy"] < threshold:
-            print("Retraining attivato: accuracy bassa.")
+            logger.warning("Retraining attivato: accuracy bassa")
             self.train(features)

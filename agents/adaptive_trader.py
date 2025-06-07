@@ -7,6 +7,9 @@ dei segnali ricevuti, stato di memoria, e adattamento esperienziale (AZR).
 """
 from modules.experience.azr_analyzer import AZRAnalyzer
 from modules.experience.experience_memory import ExperienceMemory
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 class AdaptiveTrader:
     def __init__(self, config, memory_manager, model_trainer, strategy_executor):
@@ -44,7 +47,7 @@ class AdaptiveTrader:
             self.experience_memory.record_experience(signal, trade, result, feedback)
             self.memory.record_trade(trade)
             self.trade_log.append(trade)
-            print(f"Eseguito trade: {trade} → Profit: {result['profit']:.2f}")
+            logger.info(f"Eseguito trade: {trade} → Profit: {result['profit']:.2f}")
         # Dopo aver eseguito i trade, applica eventuali adattamenti (AZR)
         self._adaptive_adjustment()
 
@@ -74,7 +77,7 @@ class AdaptiveTrader:
         # L'adattamento AZR modifica la config in place; notifica eventuali cambiamenti rilevanti
         if result and result.get("decision", {}).get("action") == "decrease_risk":
             new_qty = result["decision"]["new_qty"]
-            print(f"🔄 Adattamento AZR: ridotta base_trade_qty a {new_qty}")
+            logger.info(f"🔄 Adattamento AZR: ridotta base_trade_qty a {new_qty}")
 
     def get_trade_history(self):
         """Restituisce lo storico delle operazioni eseguite."""
