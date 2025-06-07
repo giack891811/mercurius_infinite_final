@@ -1,0 +1,3 @@
+#!/bin/sh
+python update_project_tree.py
+git add project_tree
