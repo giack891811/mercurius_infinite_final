@@ -5,6 +5,9 @@ Modulo per l'acquisizione e il preprocessing iniziale dei dati di mercato.
 """
 
 import random
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 class MarketDataHandler:
     def __init__(self, config):
@@ -25,6 +28,7 @@ class MarketDataHandler:
                 "volume": volume,
                 "timestamp": "2025-05-30T12:00:00"
             })
+        logger.info(f"Recuperati {len(data)} record di mercato")
         return data
 
     def normalize_data(self, data):
@@ -34,8 +38,11 @@ class MarketDataHandler:
         for d in data:
             d["price_norm"] = d["price"] / max_price
             d["volatility_norm"] = d["volatility"] / max_volatility
+        logger.info("Dati normalizzati")
         return data
 
     def filter_by_volume(self, data, min_volume=1000):
         """Filtra i dati rimuovendo elementi sotto una certa soglia di volume."""
-        return [d for d in data if d["volume"] >= min_volume]
+        filtered = [d for d in data if d["volume"] >= min_volume]
+        logger.info(f"Filtrati {len(filtered)} record sopra volume {min_volume}")
+        return filtered

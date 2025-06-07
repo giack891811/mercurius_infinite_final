@@ -4,6 +4,10 @@ memory_manager.py
 Gestione della memoria storica delle operazioni, segnali e parametri per l'adattività dell'agente.
 """
 
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
+
 class MemoryManager:
     def __init__(self, config):
         self.config = config
@@ -15,10 +19,12 @@ class MemoryManager:
         """Registra un trade eseguito nella memoria storica."""
         self.trade_memory.append(trade)
         self._update_context(trade)
+        logger.debug(f"Trade registrato: {trade}")
 
     def record_signal(self, signal):
         """Registra un segnale ricevuto."""
         self.signal_memory.append(signal)
+        logger.debug(f"Segnale registrato: {signal}")
 
     def _update_context(self, trade):
         """Aggiorna il contesto operativo in base ai trade recenti."""
