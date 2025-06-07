@@ -6,6 +6,9 @@ Autore: Mercurius∞ AI Engineer
 
 import cv2
 import threading
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 class VideoPipeline:
     def __init__(self, source=0, use_placeholder=False):
@@ -20,14 +23,14 @@ class VideoPipeline:
 
     def _process_frame(self, frame):
         """Elabora il frame video (placeholder per elaborazioni future)."""
-        print("[VISION] Frame catturato.")
+        logger.debug("[VISION] Frame catturato.")
         return frame
 
     def _capture_loop(self):
         """Ciclo continuo di cattura video con OpenCV."""
         cap = cv2.VideoCapture(self.source)
         if not cap.isOpened():
-            print("[VISION] Impossibile aprire la sorgente video.")
+            logger.error("[VISION] Impossibile aprire la sorgente video.")
             return
 
         while self.active:
@@ -36,17 +39,17 @@ class VideoPipeline:
                 break
             self._process_frame(frame)
         cap.release()
-        print("[VISION] Video terminato.")
+        logger.info("[VISION] Video terminato.")
 
     def start(self):
         """Avvia la pipeline video (reale o placeholder)."""
         if self.active:
             return
-        print(f"[VISION] Avvio pipeline video su '{self.source}' " + 
-              ("(placeholder)" if self.use_placeholder else "(reale)"))
+        logger.info(f"[VISION] Avvio pipeline video su '{self.source}' " +
+                    ("(placeholder)" if self.use_placeholder else "(reale)"))
         self.active = True
         if self.use_placeholder:
-            print(f"📹 VideoPipeline avviata su '{self.source}' (placeholder)")
+            logger.info(f"📹 VideoPipeline avviata su '{self.source}' (placeholder)")
         else:
             self.capture_thread = threading.Thread(target=self._capture_loop)
             self.capture_thread.start()
@@ -58,7 +61,7 @@ class VideoPipeline:
         self.active = False
         if self.capture_thread:
             self.capture_thread.join()
-        print("🛑 Pipeline video fermata")
+        logger.info("🛑 Pipeline video fermata")
 
 # Esempio di esecuzione diretta
 if __name__ == "__main__":

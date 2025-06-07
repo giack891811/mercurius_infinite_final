@@ -5,6 +5,9 @@ Autore: Mercurius∞ AI Engineer
 """
 
 import os
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 class AudioInterface:
     def __init__(self):
@@ -13,7 +16,7 @@ class AudioInterface:
 
     def initialize(self):
         """Inizializza le risorse audio."""
-        print("[AUDIO] Inizializzazione microfono e TTS...")
+        logger.info("[AUDIO] Inizializzazione microfono e TTS...")
         self.microphone_ready = True
         self.tts_ready = True
 
@@ -21,14 +24,14 @@ class AudioInterface:
         """Simula acquisizione audio (STT)."""
         if not self.microphone_ready:
             return "[AUDIO] Microfono non inizializzato."
-        print("[AUDIO] Ascolto... (placeholder)")
+        logger.info("[AUDIO] Ascolto... (placeholder)")
         return "comando vocale simulato"
 
     def speak(self, text):
         """Simula output vocale (TTS)."""
         if not self.tts_ready:
             return "[AUDIO] TTS non inizializzato."
-        print(f"[AUDIO] Parla: {text}")
+        logger.info(f"[AUDIO] Parla: {text}")
 
 # Esecuzione diretta
 if __name__ == "__main__":
