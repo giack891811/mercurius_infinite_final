@@ -57,6 +57,7 @@ Sono disponibili tre script per creare i file di lavoro:
 1. `scripts/update_project_tree.py` aggiorna `project_tree.txt` con l'albero del repository e le prime 100 righe dei file di testo.
 2. `scripts/build_prompt.py` unisce `project_tree.txt` e `prompt_commands.txt` nel file finale `prompt.txt`.
 3. `update_project_tree.py` salva in `project_tree` tutti i file testuali del progetto con percorso e contenuto completo.
+4. `split_project_tree.py` divide `project_tree` in chunk sequenziali `project_tree_partN.txt` da massimo 17.000 righe.
 
 ### Utilizzo manuale
 
@@ -64,6 +65,8 @@ Sono disponibili tre script per creare i file di lavoro:
 python scripts/update_project_tree.py
 python scripts/build_prompt.py
 python update_project_tree.py
+python split_project_tree.py
+./update_tree_parts.sh  # esegue gli ultimi due comandi con un solo passo
 ```
 
 ### Integrazione con Git
@@ -73,8 +76,8 @@ python update_project_tree.py
 git config core.hooksPath githooks
 ```
 
-`githooks/post-merge` aggiorna `project_tree.txt` dopo ogni merge.
-`githooks/pre-commit` genera `project_tree` e lo aggiunge al commit.
+`githooks/post-merge` aggiorna `project_tree.txt` e ricrea `project_tree` con i relativi file `project_tree_partN.txt` dopo ogni merge.
+`githooks/pre-commit` genera `project_tree`, lo suddivide nei file `project_tree_partN.txt` e li aggiunge al commit.
 Attiva l'hook con:
 `git config core.hooksPath githooks && chmod +x githooks/pre-commit`
 (valido sia su Linux che su Windows con Git Bash).

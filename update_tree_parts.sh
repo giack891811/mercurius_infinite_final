@@ -1,4 +1,3 @@
 #!/bin/sh
-python scripts/update_project_tree.py
 python update_project_tree.py
 python split_project_tree.py
