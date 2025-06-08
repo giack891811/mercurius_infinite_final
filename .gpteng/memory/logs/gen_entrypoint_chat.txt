@@ -1,0 +1,747 @@
+
+2025-06-08T07:22:20.824533
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+File: split_project_tree.py
+1 import os
+2 from typing import List, Tuple
+3 
+4 # Import the token counting library
+5 import tiktoken
+6 
+7 class TokenCounter:
+8     def __init__(self):
+9         # Initialize the tokenizer
+10         self.tokenizer = tiktoken.get_encoding("gpt-3.5-turbo")
+11 
+12     def count_tokens(self, text: str) -> int:
+13         # Count the number of tokens in the text
+14         return len(self.tokenizer.encode(text))
+15 
+16 class ProjectTreeSplitter:
+17     def __init__(self, max_tokens: int = 7000):
+18         self.max_tokens = max_tokens
+19         self.token_counter = TokenCounter()
+20 
+21     def split_into_parts(self, content: str) -> List[str]:
+22         lines = content.splitlines()
+23         parts = []
+24         current_part = []
+25         current_token_count = 0
+26 
+27         for line in lines:
+28             line_token_count = self.token_counter.count_tokens(line)
+29             if current_token_count + line_token_count > self.max_tokens:
+30                 # Start a new part if the current part exceeds the max token limit
+31                 parts.append("\n".join(current_part))
+32                 current_part = []
+33                 current_token_count = 0
+34 
+35             current_part.append(line)
+36             current_token_count += line_token_count
+37 
+38         # Add the last part if it contains any lines
+39         if current_part:
+40             parts.append("\n".join(current_part))
+41 
+42         return parts
+43 
+44     def write_parts_to_files(self, parts: List[str]):
+45         for i, part in enumerate(parts, start=1):
+46             filename = f"project_tree_part{i}.txt"
+47             with open(filename, "w") as f:
+48                 f.write(f"Questa è la parte {i} di project_tree. Continua da quella precedente.\n")
+49                 f.write(part)
+50             print(f"Created file: {filename}")
+51 
+52 def split_project_tree(input_file: str):
+53     with open(input_file, "r") as f:
+54         content = f.read()
+55 
+56     splitter = ProjectTreeSplitter()
+57     parts = splitter.split_into_parts(content)
+58     splitter.write_parts_to_files(parts)
+59 
+60 def main():
+61     input_file = "project_tree"
+62     split_project_tree(input_file)
+63 
+64 if __name__ == "__main__":
+65     main()
+
+File: requirements.txt
+1 tiktoken
+
+```
+
+================================== Ai Message ==================================
+
+```bash
+# Create a script named run_code.sh
+echo '#!/bin/bash
+
+# a) Install dependencies
+pip install --no-cache-dir -r requirements.txt
+
+# b) Run the code
+python split_project_tree.py
+' > run_code.sh
+
+# Make the script executable
+chmod +x run_code.sh
+
+# Execute the script
+./run_code.sh
+```
+
+2025-06-08T08:09:27.114454
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+File: split_project_tree.py
+1 """
+2 split_project_tree.py
+3 
+4 This script splits the `project_tree` file into multiple parts, each containing a maximum of 7,000 tokens.
+5 It ensures that no functions or classes are split between files. The script also adds a note at the beginning
+6 of each part and documents the process according to the operational laws.
+7 
+8 Operational Laws:
+9 1. Continue working until your shift is over!
+10 2. If unsure about a file, OPEN IT and DO NOT HALLUCINATE!
+11 3. Plan carefully before each call and ALWAYS reflect on the result afterwards!
+12 """
+13 
+14 import os
+15 import re
+16 from typing import List
+17 
+18 def count_tokens(text: str) -> int:
+19     """Counts the number of tokens in a given text."""
+20     # Simple tokenization by splitting on whitespace
+21     return len(text.split())
+22 
+23 def split_text_into_parts(text: str, max_tokens: int) -> List[str]:
+24     """Splits the text into parts with a maximum number of tokens, ensuring no functions or classes are split."""
+25     parts = []
+26     current_part = []
+27     current_token_count = 0
+28 
+29     lines = text.splitlines()
+30     for line in lines:
+31         line_token_count = count_tokens(line)
+32         if current_token_count + line_token_count > max_tokens:
+33             parts.append("\n".join(current_part))
+34             current_part = []
+35             current_token_count = 0
+36 
+37         current_part.append(line)
+38         current_token_count += line_token_count
+39 
+40     if current_part:
+41         parts.append("\n".join(current_part))
+42 
+43     return parts
+44 
+45 def save_parts(parts: List[str], base_filename: str):
+46     """Saves each part to a separate file with a sequential name."""
+47     for i, part in enumerate(parts, start=1):
+48         filename = f"{base_filename}_part{i}.txt"
+49         with open(filename, 'w') as f:
+50             f.write(f"Questa è la parte {i} di project_tree. Continua da quella precedente.\n\n")
+51             f.write(part)
+52         print(f"Created: {filename}")
+53 
+54 def main():
+55     # Read the content of the project_tree file
+56     with open('project_tree', 'r') as f:
+57         content = f.read()
+58 
+59     # Split the content into parts
+60     max_tokens = 7000
+61     parts = split_text_into_parts(content, max_tokens)
+62 
+63     # Save the parts to separate files
+64     save_parts(parts, 'project_tree')
+65 
+66 if __name__ == "__main__":
+67     main()
+
+File: prompts/prompt_agent.txt
+1 # Prompt Agent
+2 # Operational Laws:
+3 # 1. Continue working until your shift is over!
+4 # 2. If unsure about a file, OPEN IT and DO NOT HALLUCINATE!
+5 # 3. Plan carefully before each call and ALWAYS reflect on the result afterwards!
+6 
+7 # This prompt is used for the agent's decision-making process.
+8 
+9 # Safety & Ethics:
+10 # - Ensure all actions comply with ethical guidelines.
+11 # - Maintain user privacy and data security.
+12 
+13 # Reasoning:
+14 # Explain every choice, think before acting, add comments.
+15 
+16 # Test/Fix:
+17 # Test every command before proceeding. If there's an error, fix it immediately.
+
+File: prompts/prompt_chat.txt
+1 # Prompt Chat
+2 # Operational Laws:
+3 # 1. Continue working until your shift is over!
+4 # 2. If unsure about a file, OPEN IT and DO NOT HALLUCINATE!
+5 # 3. Plan carefully before each call and ALWAYS reflect on the result afterwards!
+6 
+7 # This prompt is used for chat interactions.
+
+File: prompts/prompt_memory.txt
+1 # Prompt Memory
+2 # Operational Laws:
+3 # 1. Continue working until your shift is over!
+4 # 2. If unsure about a file, OPEN IT and DO NOT HALLUCINATE!
+5 # 3. Plan carefully before each call and ALWAYS reflect on the result afterwards!
+6 
+7 # This prompt is used for memory management.
+
+File: prompts/prompt_tools.txt
+1 # Prompt Tools
+2 # Operational Laws:
+3 # 1. Continue working until your shift is over!
+4 # 2. If unsure about a file, OPEN IT and DO NOT HALLUCINATE!
+5 # 3. Plan carefully before each call and ALWAYS reflect on the result afterwards!
+6 
+7 # This prompt is used for tool interactions.
+
+File: tools/tool.json
+1 {
+2     "tools": [
+3         {
+4             "name": "split_project_tree",
+5             "description": "Splits the project_tree file into parts with a maximum of 7,000 tokens."
+6         }
+7     ]
+8 }
+
+File: checklist_report.py
+1 """
+2 checklist_report.py
+3 
+4 This script generates a checklist and report after processing each batch of files.
+5 
+6 Operational Laws:
+7 1. Continue working until your shift is over!
+8 2. If unsure about a file, OPEN IT and DO NOT HALLUCINATE!
+9 3. Plan carefully before each call and ALWAYS reflect on the result afterwards!
+10 """
+11 
+12 def generate_report():
+13     report = {
+14         "Prompt separated": "YES",
+15         "tool.json generated": "YES",
+16         "Reasoning transparent": "YES",
+17         "Test/Fix cycle active": "YES",
+18         "Safety & Ethics present": "YES",
+19         "Three laws included everywhere": "YES"
+20     }
+21 
+22     print("Checklist & Report:")
+23     for key, value in report.items():
+24         print(f"- {key}? [{value}]")
+25 
+26 if __name__ == "__main__":
+27     generate_report()
+
+```
+
+================================== Ai Message ==================================
+
+```bash
+#!/bin/bash
+
+# a) Install dependencies
+pip install -r requirements.txt
+
+# b) Run all necessary parts of the codebase
+python split_project_tree.py &
+python checklist_report.py &
+wait
+```
+
+2025-06-08T08:31:29.721792
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+File: split_project_tree.py
+1 ## Tre Leggi operative di Signore
+2 
+3 1. Continua a lavorare finché non hai svolto il tuo turno!
+4 2. Se non sei sicuro di un file, APRILO e NON ALLUCINARE!
+5 3. Pianifica attentamente prima di ogni chiamata e rifletti SEMPRE sul risultato dopo!
+6 
+7 ## Dependencies
+8 
+9 Install dependencies using:
+
+File: requirements.txt
+1 This concludes a fully working implementation.
+
+File: README.md
+1 # Project Tree Splitter
+2 
+3 This script splits a large `project_tree` file into smaller parts, each containing a maximum of 7,000 tokens. It ensures that no functions or classes are split between files.
+4 
+5 ## Usage
+6 
+7 Run the script using Python:
+
+```
+
+================================== Ai Message ==================================
+
+```bash
+#!/bin/bash
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the script
+python split_project_tree.py
+```
+
+2025-06-08T08:37:23.466933
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+File: split_project_tree.py
+1 The script will generate files named `project_tree_partN.txt` and print the list of generated files.
+
+File: requirements.txt
+1 # No external packages required for this script
+
+File: README.md
+1 # Project Tree Splitter
+2 
+3 This script splits a given `project_tree` file into multiple parts, each containing a maximum of 7,000 tokens. It ensures that no functions or classes are split between files.
+4 
+5 ## Tre Leggi operative di Signore
+6 1. Continua a lavorare finché non hai svolto il tuo turno!
+7 2. Se non sei sicuro di un file, APRILO e NON ALLUCINARE!
+8 3. Pianifica attentamente prima di ogni chiamata e rifletti SEMPRE sul risultato dopo!
+9 
+10 ## Usage
+11 Run the script using Python to generate the split files.
+
+```
+
+================================== Ai Message ==================================
+
+```bash
+#!/bin/bash
+
+# a) Install dependencies
+pip install -r requirements.txt
+
+# b) Run the code
+python split_project_tree.py
+```
+
+2025-06-08T09:13:54.693727
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+File: src/split_project_tree.py
+1 import os
+2 import re
+3 
+4 # Tre Leggi Operative
+5 # 1. Continua a lavorare finché non hai svolto il tuo turno!
+6 # 2. Se non sei sicuro di un file, APRILO e NON ALLUCINARE!
+7 # 3. Pianifica attentamente prima di ogni chiamata e rifletti SEMPRE sul risultato dopo!
+8 
+9 def split_project_tree(file_path: str, max_tokens: int = 7000):
+10     """
+11     Splits the project_tree file into parts with a maximum of 7,000 tokens each.
+12     Ensures that no functions or classes are split between files.
+13     """
+14     with open(file_path, 'r', encoding='utf-8') as file:
+15         content = file.read()
+16 
+17     # Split content into parts without breaking functions or classes
+18     parts = []
+19     current_part = []
+20     current_tokens = 0
+21 
+22     # Use regex to identify function or class definitions
+23     lines = content.splitlines()
+24     for line in lines:
+25         tokens = len(line.split())
+26         if current_tokens + tokens > max_tokens:
+27             parts.append('\n'.join(current_part))
+28             current_part = []
+29             current_tokens = 0
+30 
+31         # Check if the line is a function or class definition
+32         if re.match(r'^\s*(def|class)\s+\w+', line):
+33             if current_part:
+34                 parts.append('\n'.join(current_part))
+35                 current_part = []
+36                 current_tokens = 0
+37 
+38         current_part.append(line)
+39         current_tokens += tokens
+40 
+41     if current_part:
+42         parts.append('\n'.join(current_part))
+43 
+44     # Write parts to separate files
+45     file_list = []
+46     for i, part in enumerate(parts):
+47         part_file_name = f'project_tree_part{i+1}.txt'
+48         with open(part_file_name, 'w', encoding='utf-8') as part_file:
+49             part_file.write(f"Questa è la parte {i+1} di project_tree. Continua da quella precedente.\n")
+50             part_file.write(part)
+51         file_list.append(part_file_name)
+52 
+53     print("Generated files:", file_list)
+54 
+55 if __name__ == "__main__":
+56     split_project_tree('project_tree')
+
+File: prompt_agent.txt
+1 # Tre Leggi Operative
+2 # 1. Continua a lavorare finché non hai svolto il tuo turno!
+3 # 2. Se non sei sicuro di un file, APRILO e NON ALLUCINARE!
+4 # 3. Pianifica attentamente prima di ogni chiamata e rifletti SEMPRE sul risultato dopo!
+5 
+6 # Prompt for the agent
+7 # This prompt is designed to guide the AI agent in its operations.
+8 
+9 # Safety & Ethics
+10 # Ensure all actions comply with ethical guidelines and respect user privacy.
+11 
+12 # Reasoning
+13 # Spiega ogni scelta, pensa prima di agire, aggiungi commenti.
+14 
+15 # Test/Fix
+16 # Testa ogni comando prima di proseguire. Se c’è errore, correggi subito.
+
+File: prompt_chat.txt
+1 # Tre Leggi Operative
+2 # 1. Continua a lavorare finché non hai svolto il tuo turno!
+3 # 2. Se non sei sicuro di un file, APRILO e NON ALLUCINARE!
+4 # 3. Pianifica attentamente prima di ogni chiamata e rifletti SEMPRE sul risultato dopo!
+5 
+6 # Prompt for chat interactions
+7 # This prompt is used to facilitate chat-based interactions.
+
+File: prompt_memory.txt
+1 # Tre Leggi Operative
+2 # 1. Continua a lavorare finché non hai svolto il tuo turno!
+3 # 2. Se non sei sicuro di un file, APRILO e NON ALLUCINARE!
+4 # 3. Pianifica attentamente prima di ogni chiamata e rifletti SEMPRE sul risultato dopo!
+5 
+6 # Prompt for memory management
+7 # This prompt helps manage the memory and state of the AI.
+
+File: prompt_tools.txt
+1 # Tre Leggi Operative
+2 # 1. Continua a lavorare finché non hai svolto il tuo turno!
+3 # 2. Se non sei sicuro di un file, APRILO e NON ALLUCINARE!
+4 # 3. Pianifica attentamente prima di ogni chiamata e rifletti SEMPRE sul risultato dopo!
+5 
+6 # Prompt for tools
+7 # This prompt provides guidance on using various tools.
+
+File: tool.json
+1 {
+2   "tools": [
+3     {
+4       "name": "split_project_tree",
+5       "description": "Splits the project_tree file into parts with a maximum of 7,000 tokens each."
+6     }
+7   ]
+8 }
+
+File: checklist_report.py
+1 def print_checklist():
+2     checklist = {
+3         "Prompt separati": "SI",
+4         "tool.json generato": "SI",
+5         "Reasoning trasparente": "SI",
+6         "Ciclo test/fix attivo": "SI",
+7         "Safety & Ethics presenti": "SI",
+8         "Tre leggi incluse ovunque": "SI"
+9     }
+10 
+11     print("Checklist riepilogativa:")
+12     for item, status in checklist.items():
+13         print(f"- {item}? [{status}]")
+14 
+15 if __name__ == "__main__":
+16     print_checklist()
+
+```
+
+================================== Ai Message ==================================
+
+```bash
+#!/bin/bash
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the split_project_tree script
+python3 src/split_project_tree.py &
+
+# Run the checklist_report script
+python3 checklist_report.py &
+```
+
+2025-06-08T09:44:51.779148
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+File: Batch
+1 Batch: project_tree_part1.txt – project_tree_part10.txt
+2 
+3 - Prompt separati? ✔️
+4 - tool.json generato? ✔️
+5 - Reasoning trasparente? ❌ (manca in prompt_tools.txt)
+6 - Ciclo test/fix attivo? ✔️
+7 - Safety & Ethics presenti? ✔️
+8 - Tre leggi incluse ovunque? ❌ (manca in project_tree_part4.txt)
+9 
+10 File da fixare: prompt_tools.txt (aggiungi reasoning), project_tree_part4.txt (inserisci Tre Leggi)
+11 
+12 Riepilogo batch:
+13 - File OK: 8
+14 - File con fix richiesti: 2
+15 
+16 [Prossimo batch...]
+
+File: audit_refactor.py
+1 import os
+2 import json
+3 
+4 # Constants for the Three Operational Laws
+5 THREE_LAWS = """
+6 1. Continua a lavorare finché non hai svolto il tuo turno!
+7 2. Se non sei sicuro di un file, APRILO e NON ALLUCINARE!
+8 3. Pianifica attentamente prima di ogni chiamata e rifletti SEMPRE sul risultato dopo!
+9 """
+10 
+11 def check_prompts(directory):
+12     """Check for the presence of separate prompt files."""
+13     required_prompts = ['prompt_agent.txt', 'prompt_chat.txt', 'prompt_memory.txt', 'prompt_tools.txt']
+14     return all(os.path.exists(os.path.join(directory, prompt)) for prompt in required_prompts)
+15 
+16 def check_tool_json(directory):
+17     """Check for the presence and structure of tool.json."""
+18     tool_json_path = os.path.join(directory, 'tool.json')
+19     if not os.path.exists(tool_json_path):
+20         return False
+21     try:
+22         with open(tool_json_path, 'r') as file:
+23             json.load(file)
+24         return True
+25     except json.JSONDecodeError:
+26         return False
+27 
+28 def check_reasoning(directory):
+29     """Ensure each prompt and module contains clear reasoning."""
+30     # This is a placeholder for actual reasoning check logic
+31     return True
+32 
+33 def check_test_fix_cycle(directory):
+34     """Confirm the existence of rules enforcing testing and error correction."""
+35     # This is a placeholder for actual test/fix cycle check logic
+36     return True
+37 
+38 def check_safety_ethics(directory):
+39     """Verify that each prompt/file includes a section on safety and privacy."""
+40     # This is a placeholder for actual safety/ethics check logic
+41     return True
+42 
+43 def check_three_laws(directory):
+44     """Ensure the inclusion of the Three Operational Laws in all main files."""
+45     # This is a placeholder for actual three laws check logic
+46     return True
+47 
+48 def process_file(file_path):
+49     """Process a single file and return the checklist results."""
+50     directory = os.path.dirname(file_path)
+51     results = {
+52         "Prompt separati": check_prompts(directory),
+53         "tool.json generato": check_tool_json(directory),
+54         "Reasoning trasparente": check_reasoning(directory),
+55         "Ciclo test/fix attivo": check_test_fix_cycle(directory),
+56         "Safety & Ethics presenti": check_safety_ethics(directory),
+57         "Tre leggi incluse ovunque": check_three_laws(directory)
+58     }
+59     return results
+60 
+61 def main():
+62     # Example processing logic for a batch of files
+63     batch_files = ['project_tree_part1.txt', 'project_tree_part2.txt']  # Placeholder for actual file list
+64     for file in batch_files:
+65         results = process_file(file)
+66         print(f"Results for {file}: {results}")
+67 
+68 if __name__ == "__main__":
+69     main()
+
+File: batch_summary.py
+1 def generate_summary(results):
+2     """Generate a summary of the checklist results for a batch."""
+3     ok_files = [file for file, result in results.items() if all(result.values())]
+4     files_to_fix = {file: result for file, result in results.items() if not all(result.values())}
+5     
+6     print("Riepilogo batch:")
+7     print(f"- File OK: {len(ok_files)}")
+8     print(f"- File con fix richiesti: {len(files_to_fix)}")
+9     for file, issues in files_to_fix.items():
+10         print(f"File da fixare: {file} (issues: {issues})")
+11 
+12 # Example usage
+13 results = {
+14     'project_tree_part1.txt': {
+15         "Prompt separati": True,
+16         "tool.json generato": True,
+17         "Reasoning trasparente": False,
+18         "Ciclo test/fix attivo": True,
+19         "Safety & Ethics presenti": True,
+20         "Tre leggi incluse ovunque": False
+21     },
+22     'project_tree_part2.txt': {
+23         "Prompt separati": True,
+24         "tool.json generato": True,
+25         "Reasoning trasparente": True,
+26         "Ciclo test/fix attivo": True,
+27         "Safety & Ethics presenti": True,
+28         "Tre leggi incluse ovunque": True
+29     }
+30 }
+31 
+32 generate_summary(results)
+
+```
+
+================================== Ai Message ==================================
+
+```bash
+#!/bin/bash
+
+# Step a: Install dependencies
+pip install -r requirements.txt
+
+# Step b: Run all necessary parts of the codebase
+python audit_refactor.py &
+python batch_summary.py &
+
+# Wait for all background processes to finish
+wait
+```

@@ -1,0 +1,947 @@
+Questa è la parte 33 di project_tree. Continua da quella precedente.
+
+        print("🖥️ Avvio dashboard...")
+        launch_dashboard()
+    except ImportError:
+        print("⚠️ Dashboard non trovata")
+
+    print("✅ AION operativo. In ascolto comandi.")
+
+if __name__ == "__main__":
+    main()
+
+## scripts/bootstrap_codex.py
+"""
+Script iniziale per ambiente Codex.
+Attiva Mercurius, esegue check e lancia missione di completamento.
+"""
+
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from core.orchestrator import Orchestrator
+
+def main():
+    print("🚀 Avvio di Mercurius∞...")
+
+    # Inizializza Orchestrator
+    orchestrator = Orchestrator()
+
+    # Esegue controllo e inizializzazione sistema
+    print("🔍 Analisi interna...")
+    orchestrator.run_self_check(path=".")
+
+    # Attiva missione automatica di completamento
+    print("🧠 Attivazione SELF_MISSION...")
+    orchestrator.execute_mission("#SELF_MISSION")
+
+if __name__ == "__main__":
+    main()
+
+## scripts/build_prompt.py
+#!/usr/bin/env python3
+"""Create prompt.txt combining project tree and user commands."""
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+OUTPUT_FILE = ROOT_DIR / 'prompt.txt'
+TREE_FILE = ROOT_DIR / 'project_tree.txt'
+COMMANDS_FILE = ROOT_DIR / 'prompt_commands.txt'
+
+
+def read_file(path: Path) -> str:
+    return path.read_text(encoding='utf-8') if path.exists() else ''
+
+
+def main():
+    with open(OUTPUT_FILE, 'w', encoding='utf-8') as out:
+        out.write('**STRUTTURA E FILE DEL PROGETTO:**\n')
+        out.write(read_file(TREE_FILE))
+        out.write('\n**ISTRUZIONI OPERATIVE:**\n')
+        out.write(read_file(COMMANDS_FILE))
+
+
+if __name__ == '__main__':
+    main()
+
+## scripts/mercurius_control.py
+import argparse
+import os
+import subprocess
+from pathlib import Path
+
+PID_FILE = Path("mercurius.pid")
+
+
+def start_system() -> None:
+    if PID_FILE.exists():
+        print("Mercurius∞ sembra già in esecuzione.")
+        return
+    process = subprocess.Popen(["python", "scripts/aion_boot.py"])
+    PID_FILE.write_text(str(process.pid))
+    print(f"Mercurius∞ avviato con PID {process.pid}")
+
+
+def stop_system() -> None:
+    if not PID_FILE.exists():
+        print("Mercurius∞ non risulta attivo.")
+        return
+    pid = int(PID_FILE.read_text())
+    try:
+        os.kill(pid, 9)
+        print("Mercurius∞ arrestato.")
+    except ProcessLookupError:
+        print("Processo non trovato.")
+    PID_FILE.unlink(missing_ok=True)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Gestione start/stop di Mercurius∞")
+    parser.add_argument("action", choices=["start", "stop"], help="Azione da eseguire")
+    args = parser.parse_args()
+    if args.action == "start":
+        start_system()
+    else:
+        stop_system()
+
+
+if __name__ == "__main__":
+    main()
+
+## scripts/prompt_panel.py
+import argparse
+from modules.reasoner_dispatcher import dispatch_to_reasoner
+
+
+def interactive_panel() -> None:
+    print("Mercurius Prompt Panel - digita 'exit' per uscire")
+    while True:
+        try:
+            prompt = input("Prompt> ").strip()
+            if prompt.lower() in {"exit", "quit"}:
+                break
+            if prompt:
+                response = dispatch_to_reasoner(prompt)
+                print(response)
+        except KeyboardInterrupt:
+            break
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Mercurius Prompt Panel")
+    parser.add_argument("--prompt", help="Prompt singolo da inviare", default=None)
+    args = parser.parse_args()
+    if args.prompt:
+        print(dispatch_to_reasoner(args.prompt))
+    else:
+        interactive_panel()
+
+
+if __name__ == "__main__":
+    main()
+
+## scripts/start_genesis.py
+"""
+🚀 scripts/start_genesis.py
+Script di avvio manuale per la modalità GENESIS – attiva il sistema AI Mercurius∞
+"""
+
+from core.orchestrator import Orchestrator
+from core.self_mission import genesis_directive
+
+def start():
+    genesis_directive()
+    orchestrator = Orchestrator()
+    orchestrator.activate_genesis()
+
+if __name__ == "__main__":
+    start()
+
+## scripts/update_project_tree.py
+#!/usr/bin/env python3
+"""Generate project_tree.txt with the repository tree and file previews."""
+import os
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+OUTPUT_FILE = ROOT_DIR / 'project_tree.txt'
+MAX_LINES = 100
+# File extensions considered text and included in preview
+TEXT_EXTENSIONS = {
+    '.py', '.json', '.md', '.txt', '.yml', '.yaml', '.ini', '.cfg', '.toml', '.js', '.ts'
+}
+
+
+def generate_tree():
+    tree_lines = []
+    text_files = []
+    for root, dirs, files in os.walk(ROOT_DIR):
+        if '.git' in dirs:
+            dirs.remove('.git')
+        dirs.sort()
+        files.sort()
+        level = Path(root).relative_to(ROOT_DIR).parts
+        indent = '    ' * len(level)
+        tree_lines.append(f"{indent}{Path(root).name}/")
+        for name in files:
+            tree_lines.append(f"{indent}    {name}")
+            ext = Path(name).suffix.lower()
+            if ext in TEXT_EXTENSIONS:
+                text_files.append(Path(root) / name)
+    return tree_lines, text_files
+
+
+def read_snippet(file_path: Path):
+    lines = []
+    truncated = False
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            for idx, line in enumerate(f):
+                if idx >= MAX_LINES:
+                    truncated = True
+                    break
+                lines.append(line.rstrip('\n'))
+    except Exception as exc:
+        lines.append(f"[Errore lettura: {exc}]")
+    return lines, truncated
+
+
+def main():
+    tree_lines, text_files = generate_tree()
+    with open(OUTPUT_FILE, 'w', encoding='utf-8') as out:
+        out.write('PROJECT TREE\n')
+        out.write('\n'.join(tree_lines))
+        out.write('\n\nFILE PREVIEW\n')
+        for file in text_files:
+            rel = file.relative_to(ROOT_DIR)
+            out.write(f"\n## {rel}\n")
+            lines, truncated = read_snippet(file)
+            for l in lines:
+                out.write(l + '\n')
+            if truncated:
+                out.write('[TRONCATO]\n')
+
+
+if __name__ == '__main__':
+    main()
+
+## security/code_signer.py
+# security/code_signer.py
+
+"""
+Modulo: code_signer.py
+Autore: Mercurius∞
+Descrizione: Sistema di firma digitale SHA256 per tutti i file generati, con registrazione in log e firma visibile in coda al file.
+"""
+
+import hashlib
+import json
+from datetime import datetime
+import os
+
+
+class CodeSigner:
+    def __init__(self, author="Mercurius∞", log_path="logs/code_signatures.json"):
+        self.author = author
+        self.log_path = log_path
+        self.signatures = self.load_signatures()
+
+    def load_signatures(self) -> dict:
+        if os.path.exists(self.log_path):
+            try:
+                with open(self.log_path, "r") as f:
+                    return json.load(f)
+            except json.JSONDecodeError:
+                return {}
+        return {}
+
+    def save_signatures(self):
+        with open(self.log_path, "w") as f:
+            json.dump(self.signatures, f, indent=2)
+
+    def generate_signature_block(self, content: str) -> str:
+        sha = hashlib.sha256(content.encode()).hexdigest()
+        timestamp = datetime.utcnow().isoformat()
+        return f"\n\n# --SIGNATURE--\n# SHA256: {sha}\n# SignedAt: {timestamp}\n# By: {self.author}\n"
+
+    def generate_hash(self, file_path: str) -> str:
+        sha256_hash = hashlib.sha256()
+        with open(file_path, "rb") as f:
+            for block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(block)
+        return sha256_hash.hexdigest()
+
+    def sign_file(self, file_path: str) -> str:
+        # Legge contenuto originale
+        with open(file_path, "r") as f:
+            content = f.read()
+
+        # Genera firma visibile
+        signature_block = self.generate_signature_block(content)
+
+        # Aggiunge firma al file
+        with open(file_path, "a") as f:
+            f.write(signature_block)
+
+        # Log firma in file JSON
+        file_hash = self.generate_hash(file_path)
+        self.signatures[file_path] = {
+            "file": file_path,
+            "hash": file_hash,
+            "timestamp": datetime.utcnow().isoformat(),
+            "author": self.author
+        }
+        self.save_signatures()
+        return f"✅ File firmato e registrato: {file_path}"
+
+    def verify_signature(self, file_path: str) -> bool:
+        if file_path not in self.signatures:
+            return False
+        current_hash = self.generate_hash(file_path)
+        stored_hash = self.signatures[file_path]["hash"]
+        return current_hash == stored_hash
+
+    def report_signature_status(self, file_path: str) -> str:
+        if self.verify_signature(file_path):
+            info = self.signatures[file_path]
+            return (f"🔐 Firma verificata:\n"
+                    f"🗂 File: {info['file']}\n"
+                    f"🕒 Timestamp: {info['timestamp']}\n"
+                    f"🧑‍💻 Autore: {info['author']}\n"
+                    f"🔑 SHA256: {info['hash']}")
+        return "❌ Firma non valida o assente."
+
+
+## security/code_verifier.py
+# security/code_verifier.py
+
+"""
+Modulo: code_verifier.py
+Descrizione: Verifica la firma SHA256 di un file generato per garantirne l'integrità.
+Estrae blocco firma e confronta l'hash del codice.
+"""
+
+import hashlib
+
+
+class CodeVerifier:
+    def verify_file(self, filepath: str) -> str:
+        with open(filepath, "r") as f:
+            lines = f.readlines()
+
+        try:
+            idx = lines.index("# --SIGNATURE--\n")
+            code = "".join(lines[:idx])
+            original_hash = [l for l in lines[idx:] if "SHA256" in l][0].split(":")[1].strip()
+            actual_hash = hashlib.sha256(code.encode()).hexdigest()
+
+            if actual_hash == original_hash:
+                return "✅ Firma valida – contenuto integro"
+            else:
+                return "❌ Firma NON valida – file modificato"
+        except Exception:
+            return "⚠️ Firma non trovata o incompleta"
+
+## security/gpg_support.py
+# security/gpg_support.py
+
+"""
+Modulo: gpg_support.py
+Descrizione: Firma/verifica file tramite GPG. Richiede GnuPG installato.
+"""
+
+import subprocess
+
+
+class GPGSupport:
+    def gpg_sign_file(self, path: str, key_id: str) -> str:
+        cmd = f"gpg --default-key {key_id} --output {path}.sig --detach-sig {path}"
+        try:
+            subprocess.run(cmd, shell=True, check=True)
+            return f"✅ File firmato con GPG: {path}.sig"
+        except Exception as e:
+            return f"❌ Errore GPG: {e}"
+
+    def gpg_verify(self, path: str) -> str:
+        cmd = f"gpg --verify {path}.sig {path}"
+        try:
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            return result.stdout + result.stderr
+        except Exception as e:
+            return f"❌ Verifica fallita: {e}"
+
+## security/pairing_manager.py
+# security/pairing_manager.py
+
+"""
+Modulo: pairing_manager.py
+Descrizione: Gestione pairing sicuro con utente tramite QR code o password vocale.
+"""
+
+import qrcode
+from voice.stt import transcribe_audio
+
+
+def generate_qr_pairing_link(link: str, filename: str = "pairing_qr.png") -> None:
+    """
+    Genera un QR code da un link e lo salva come immagine.
+    """
+    img = qrcode.make(link)
+    img.save(filename)
+    print(f"✅ QR generato: {filename}")
+
+
+def pair_with_user(method: str = "qr") -> bool:
+    """
+    Esegue il pairing con l'utente. Metodo supportato: 'qr', 'voice'
+    """
+    if method == "qr":
+        generate_qr_pairing_link("https://mercurius.local/pair")
+        return True
+
+    elif method == "voice":
+        print("🔒 Pronuncia la password vocale:")
+        spoken = transcribe_audio().lower()
+        return "mercurius autorizza" in spoken
+
+    return False
+
+## sensors/environment_analyzer.py
+# sensors/environment_analyzer.py
+
+"""
+Modulo: environment_analyzer.py
+Descrizione: Analizza il livello di rumore ambientale e cambiamenti visivi dalla webcam.
+Serve per attivare modalità silenziosa, reattiva o sicurezza.
+"""
+
+import cv2
+import numpy as np
+import sounddevice as sd
+
+
+class EnvironmentAnalyzer:
+    def __init__(self, camera_index=0):
+        self.cam = cv2.VideoCapture(camera_index)
+
+    def get_audio_level(self, duration=1) -> float:
+        recording = sd.rec(int(duration * 16000), samplerate=16000, channels=1)
+        sd.wait()
+        return float(np.abs(recording).mean())
+
+    def detect_motion(self) -> str:
+        ret, frame1 = self.cam.read()
+        ret, frame2 = self.cam.read()
+        if not ret:
+            return "no_camera"
+
+        diff = cv2.absdiff(frame1, frame2)
+        gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+        _, thresh = cv2.threshold(gray, 25, 255, cv2.THRESH_BINARY)
+        motion = np.sum(thresh) / 255
+        if motion > 1000:
+            return "movimento sospetto"
+        return "nessun movimento"
+
+## sensors/sensor_hub.py
+"""sensor_hub.py
+Cattura schermo e microfono con semplice hotword detection.
+Espone stream FastAPI per integrazione multisensoriale.
+"""
+
+from __future__ import annotations
+
+import io
+from typing import Generator
+from fastapi import FastAPI, Response
+import uvicorn
+from mss import mss
+from PIL import Image
+import speech_recognition as sr
+
+app = FastAPI(title="Sensor Hub")
+
+
+def _grab_screen() -> bytes:
+    with mss() as sct:
+        shot = sct.grab(sct.monitors[0])
+        img = Image.frombytes("RGB", shot.size, shot.rgb)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        return buf.getvalue()
+
+
+def capture_screen_stream() -> bytes:
+    """Restituisce un frame dello schermo in JPEG."""
+    return _grab_screen()
+
+
+@app.get("/vision")
+def vision() -> Response:
+    frame = _grab_screen()
+    return Response(content=frame, media_type="image/jpeg")
+
+
+def _recognize_speech(duration: int = 3) -> str:
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        audio = recognizer.record(source, duration=duration)
+    try:
+        return recognizer.recognize_google(audio, language="it-IT")
+    except Exception:
+        return ""
+
+
+def listen_microphone(duration: int = 3) -> str:
+    """Ritorna testo dal microfono."""
+    return _recognize_speech(duration)
+
+
+@app.get("/audio")
+def audio() -> dict:
+    text = _recognize_speech()
+    return {"text": text}
+
+
+def detect_hotword(hotword: str = "hey mercurius", duration: int = 3) -> bool:
+    text = _recognize_speech(duration).lower()
+    return hotword.lower() in text
+
+
+@app.get("/hotword")
+def hotword() -> dict:
+    return {"detected": detect_hotword()}
+
+
+def start_sensor_server(host: str = "0.0.0.0", port: int = 5124) -> None:
+    """Avvia il server dei sensori."""
+    uvicorn.run(app, host=host, port=port)
+
+## strategies/strategy_executor.py
+"""
+strategy_executor.py
+====================
+Genera segnali operativi basati su output del modello predittivo.
+"""
+
+class StrategyExecutor:
+    def __init__(self, config):
+        self.config = config
+
+    def generate_signals(self, model, features):
+        """Genera segnali di trading basandosi sull'output del modello."""
+        signals = []
+        for f in features:
+            pred = model.forward([
+                f["price_volatility_ratio"],
+                f["momentum"],
+                f["volatility"]
+            ])[0]
+            action = "BUY" if pred > 0.5 else "SELL"
+            signals.append({
+                "symbol": f["symbol"],
+                "action": action,
+                "confidence": pred,
+                "volatility": f["volatility"],
+                "timestamp": "2025-05-30T12:00:00"
+            })
+        return signals
+
+    def filter_signals(self, signals, min_confidence=0.6):
+        """Filtra i segnali con bassa confidenza."""
+        return [s for s in signals if s["confidence"] >= min_confidence]
+
+    def summary_stats(self, signals):
+        """Statistiche dei segnali generati."""
+        summary = {"BUY": 0, "SELL": 0}
+        for s in signals:
+            summary[s["action"]] += 1
+        return summary
+
+## tests/conftest.py
+import sys
+import pathlib
+import types
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+# Stub external dependencies
+_dummy_openai = types.SimpleNamespace(
+    ChatCompletion=types.SimpleNamespace(create=lambda **_: {"choices": [{"message": {"content": "ok"}}]})
+)
+_dummy = types.SimpleNamespace()
+for name, mod in {
+    "openai": _dummy_openai,
+    "torch": _dummy,
+    "speech_recognition": _dummy,
+    "fitz": _dummy,
+    "yaml": _dummy,
+    "psutil": _dummy,
+    "requests": _dummy,
+}.items():
+    if name not in sys.modules:
+        sys.modules[name] = mod
+
+## tests/run_simulation.py
+"""
+Simulazione: Avvio sistema Mercurius∞ in modalità autonoma.
+Scopo: Verifica operatività integrata dei moduli principali.
+"""
+
+from modules.start_fullmode.initializer import SystemInitializer
+
+def run_simulation():
+    print("🔁 Simulazione in corso...")
+
+    # Inizializzazione e avvio
+    system = SystemInitializer()
+    system.initialize_environment()
+    system.start_components()
+
+    # Interazione simulata
+    audio_input = system.audio.listen()
+    system.agent.perceive(audio_input)
+    decision = system.agent.reason()
+    system.agent.act(decision)
+    system.audio.speak(f"Ho elaborato: {decision}")
+
+    # Arresto video per sicurezza
+    system.vision.stop()
+    print("✅ Simulazione completata.")
+
+if __name__ == "__main__":
+    run_simulation()
+
+## tests/test_agent_core.py
+from modules.ai_kernel.agent_core import AgentCore
+
+
+class DummyReasoner:
+    def think(self, query: str) -> str:
+        return "dummy decision"
+
+
+def test_agent_boot(monkeypatch):
+    monkeypatch.setattr(
+        "modules.ai_kernel.agent_core.LangReasoner", lambda: DummyReasoner()
+    )
+    agent = AgentCore("TestAgent")
+    agent.boot()
+    assert agent.status == "ready"
+
+## tests/test_audio_interface.py
+from modules.voice_bridge.audio_interface import AudioInterface
+
+def test_audio_initialization():
+    audio = AudioInterface()
+    audio.initialize()
+    assert audio.microphone_ready
+    assert audio.tts_ready
+
+def test_audio_listen_and_speak():
+    audio = AudioInterface()
+    audio.initialize()
+    spoken = audio.listen()
+    assert isinstance(spoken, str)
+    assert "simulato" in spoken
+    response = audio.speak("Messaggio di test")
+    assert response is None  # La funzione speak stampa ma non ritorna nulla
+
+## tests/test_autonomia_cognitiva.py
+"""
+Test: test_autonomia_cognitiva.py
+Responsabilità: Verifica dei moduli self_reflection.py e learning.py
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+import os
+
+from core.self_reflection import SelfReflection
+from core.learning import ContinuousLearner
+
+class TestAutonomiaCognitiva(unittest.TestCase):
+    def setUp(self):
+        self.test_reflection_path = "data/test_reflection_log.json"
+        self.test_learning_path = "data/test_knowledge_base.json"
+
+        if os.path.exists(self.test_reflection_path):
+            os.remove(self.test_reflection_path)
+        if os.path.exists(self.test_learning_path):
+            os.remove(self.test_learning_path)
+
+        self.reflection = SelfReflection(log_path=self.test_reflection_path)
+        self.learner = ContinuousLearner(knowledge_path=self.test_learning_path)
+
+    def test_reflection_logging(self):
+        context = {"error": "Timeout"}
+        result = self.reflection.evaluate_action("Scan Area", "No response", False, context)
+        self.assertIn("insight", result)
+        self.assertFalse(result["success"])
+
+        log = self.reflection.logger.load_log()
+        self.assertEqual(len(log), 1)
+        self.assertEqual(log[0]["action"], "Scan Area")
+
+    def test_reflection_summary(self):
+        self.reflection.evaluate_action("Init Sequence", "OK", True, {})
+        self.reflection.evaluate_action("Connect API", "403 Forbidden", False, {"error": "Auth failed"})
+        summary = self.reflection.summarize_reflections()
+        self.assertEqual(summary["total"], 2)
+        self.assertEqual(summary["successes"], 1)
+        self.assertEqual(summary["failures"], 1)
+
+    def test_learning_mechanism(self):
+        context = {"sensor": "IR"}
+        insight = self.learner.learn_from_experience("Move Forward", "Success", True, context)
+        self.assertTrue("Esperienza positiva" in insight["insight"])
+
+        data = self.learner.kb.load()
+        self.assertEqual(len(data), 1)
+
+    def test_learning_statistics(self):
+        self.learner.learn_from_experience("Pick Object", "Failed", False, {"error": "gripper jam"})
+        self.learner.learn_from_experience("Drop Object", "OK", True, {})
+        stats = self.learner.stats()
+        self.assertEqual(stats["total"], 2)
+        self.assertEqual(stats["successes"], 1)
+        self.assertEqual(stats["failures"], 1)
+
+    def tearDown(self):
+        if os.path.exists(self.test_reflection_path):
+            os.remove(self.test_reflection_path)
+        if os.path.exists(self.test_learning_path):
+            os.remove(self.test_learning_path)
+
+if __name__ == "__main__":
+    unittest.main()
+
+## tests/test_end2end.py
+"""
+Test: test_end2end.py
+Responsabilità: Simulazione di un flusso intero da input a pianificazione e log
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+import pytest
+
+pytest.skip("Test End-to-End richiede dipendenze audio/video", allow_module_level=True)
+
+from orchestrator.multimodal_controller import MultimodalController
+from modules.supervisor import Supervisor
+
+
+class TestEndToEnd(unittest.TestCase):
+
+    def setUp(self):
+        self.controller = MultimodalController()
+        self.supervisor = Supervisor()
+
+    def test_complete_workflow(self):
+        """
+        Simula ciclo completo da voce a comportamento e supervisione.
+        """
+        self.controller.run_full_cycle(input_text="parla con me")
+        self.controller.run_full_cycle(input_text="analizza l'ambiente")
+        self.controller.run_full_cycle(gesture="saluto")
+
+        summary = self.controller.autonomy.summarize_autonomy()
+        self.assertGreaterEqual(summary["reflection_summary"]["successes"], 2)
+
+    def test_supervised_actions(self):
+        """
+        Simula log supervisionato indipendente.
+        """
+        self.supervisor.observe("auto-test", "OK", True, {"canale": "debug"})
+        report = self.supervisor.performance_report()
+        self.assertEqual(report["successes"], 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+## tests/test_initializer.py
+import os
+import pytest
+
+cv2 = pytest.importorskip('cv2', reason='cv2 non disponibile')
+from modules.start_fullmode.initializer import SystemInitializer
+
+def test_system_initializer():
+    system = SystemInitializer()
+    assert system.agent is not None
+    assert system.audio is not None
+    assert system.vision is not None
+
+def test_environment_setup(monkeypatch):
+    monkeypatch.setenv("MERCURIUS_MODE", "")
+    system = SystemInitializer()
+    system.initialize_environment()
+    assert "MERCURIUS_MODE" in os.environ
+    assert os.environ["MERCURIUS_MODE"] == "full"
+
+## tests/test_josch_bridge.py
+from integrations.bridge_josch import send_command_to_pc
+
+def test_send_command_format():
+    resp = send_command_to_pc("echo test")
+    assert isinstance(resp, dict)
+
+## tests/test_logger.py
+from utils.logger import setup_logger
+
+
+def test_setup_logger():
+    logger = setup_logger("test_logger")
+    logger.info("log message")
+    assert logger.name == "test_logger"
+
+## tests/test_memory.py
+# tests/test_memory.py
+import os
+import tempfile
+from memory.long_term_memory import LongTermMemory
+
+def test_save_and_load():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        json_path = os.path.join(tmpdir, "test_exp.json")
+        mem = LongTermMemory(json_path)
+        mem.save_experience({"tags": ["unit"], "result": "ok"})
+        data = mem.get_all()
+        assert data and "tags" in data[-1]
+
+## tests/test_messaging.py
+from modules.messaging.rabbitmq_messenger import publish_message
+
+def test_publish_message_no_server():
+    ok = publish_message('test_queue', 'hello')
+    assert ok in (True, False)
+
+## tests/test_modular_end2end.py
+# tests/test_modular_end2end.py
+
+"""
+Test End-to-End per Mercurius∞
+Simula i flussi completi: video -> trascrizione -> generazione codice -> sandbox -> auto-fix -> comando -> log.
+Autore: Mercurius∞ AI Engineer
+"""
+
+import os
+import sys
+import pytest
+
+# Importa i moduli core di Mercurius∞
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+pytest.skip("Dipendenze pesanti non disponibili", allow_module_level=True)
+
+from learning.video_learner import VideoLearner
+from core.sandbox_executor import SandboxExecutor
+from modules.local.localai_adapter import LocalAI
+from modules.local.leon_ai_bridge import LeonAI
+
+import datetime
+
+RESULT_LOG = "end2end_test_results.log"
+
+def log_result(test_name, result, details=""):
+    timestamp = datetime.datetime.now().isoformat()
+    with open(RESULT_LOG, "a", encoding="utf-8") as logf:
+        logf.write(f"[{timestamp}] {test_name} — {'SUCCESS' if result else 'FAIL'}\n{details}\n\n")
+    print(f"{test_name}: {'✅' if result else '❌'}")
+
+# Test 1: Video locale → Trascrizione
+def test_video_to_text():
+    print("\n--- Test 1: Video locale → Trascrizione ---")
+    video_path = "tests/sample.mp3"  # Puoi sostituire con un file audio/video locale reale
+    vl = VideoLearner()
+    if not os.path.exists(video_path):
+        log_result("test_video_to_text", False, "File video/audio di test non trovato.")
+        return False
+    transcript = vl.extract_insights_from_video(video_path)
+    passed = isinstance(transcript, str) and len(transcript.strip()) > 0 and not transcript.startswith("[❌")
+    log_result("test_video_to_text", passed, transcript)
+    return passed
+
+# Test 2: Prompt a LocalAI → Risposta testuale
+def test_localai_text_generation():
+    print("\n--- Test 2: Prompt a LocalAI ---")
+    ai = LocalAI()
+    prompt = "Scrivi una poesia sull'intelligenza artificiale."
+    response = ai.execute_task(prompt)
+    passed = isinstance(response, str) and len(response.strip()) > 10
+    log_result("test_localai_text_generation", passed, response)
+    return passed
+
+# Test 3: Codice errato → Sandbox → Auto-fix
+def test_sandbox_autofix():
+    print("\n--- Test 3: Codice errato → Sandbox → Auto-fix ---")
+    code_with_bug = "for i in range(5)\n    print(i)"  # Manca i due punti!
+    sandbox = SandboxExecutor(timeout_seconds=3)
+    static_ok = sandbox.static_analysis(code_with_bug)
+    # static_analysis dovrebbe fallire, quindi tentiamo subito autofix
+    if not static_ok:
+        fix = sandbox.autofix_with_llm(code_with_bug, "SyntaxError: expected ':'")
+        # Ora testiamo il fix se esiste
+        result = sandbox.run_sandboxed(fix)
+        passed = result.get("success", False)
+        log_result("test_sandbox_autofix", passed, result.get("output", fix))
+        return passed
+    else:
+        log_result("test_sandbox_autofix", False, "Il codice errato è stato accettato erroneamente.")
+        return False
+
+# Test 4: Comando locale via LeonAI
+def test_leonai_command():
+    print("\n--- Test 4: LeonAI comando locale ---")
+    leon = LeonAI()
+    command = "echo Mercurius è operativo!"
+    output = leon.run_command(command)
+    passed = "Mercurius" in output
+    log_result("test_leonai_command", passed, output)
+    return passed
+
+# Test 5: Pipeline completa — Video → Trascrizione → Generazione codice → Sandbox
+def test_full_pipeline():
+    print("\n--- Test 5: Pipeline completa ---")
+    ai = LocalAI()
+    sandbox = SandboxExecutor(timeout_seconds=3)
+    video_path = "tests/sample.mp3"  # Sostituisci con un tuo file di test
+
+    # Step 1: Trascrizione
+    vl = VideoLearner()
+    if not os.path.exists(video_path):
+        log_result("test_full_pipeline", False, "File video/audio di test non trovato.")
+        return False
+    transcript = vl.extract_insights_from_video(video_path)
+
+    # Step 2: Generazione codice dalla trascrizione
+    prompt = f"Genera un semplice script Python che stampa la frase:\n{transcript.strip().split('.')[0]}"
+    code = ai.execute_task(prompt)
+[TRONCATO]
+
+## tests/test_multimodal.py
+"""
+Test: test_multimodal.py
+Responsabilità: Verifica il flusso integrato multimodale del sistema
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+import pytest
+
+pytest.skip("Test multimodale richiede dipendenze audio/video", allow_module_level=True)
+
+from orchestrator.multimodal_controller import MultimodalController
+
+
+class TestMultimodalInteraction(unittest.TestCase):
+
+    def setUp(self):
+        self.controller = MultimodalController()
+
+    def test_text_input_simulation(self):
+        """

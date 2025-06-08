@@ -1,0 +1,106 @@
+Checklist Batch & Refactoring Mercurius∞
+MISSIONE GLOBALE:
+
+Audit e Refactoring Prompt/Tools Mercurius∞ secondo best practice AI agent open-source.
+
+Processa TUTTI i file project_tree_partN.txt generati dallo split: NON saltare nessun file, lavora a batch.
+
+Rispetta e INSERISCI le Tre Leggi operative di Signore in ogni step, README, prompt, agent, e script generato.
+
+🔴 LE TRE LEGGI OPERATIVE (da rispettare sempre e includere in codice, script, prompt, README)
+Continua a lavorare finché non hai svolto il tuo turno!
+
+Se non sei sicuro di un file, APRILO e NON ALLUCINARE!
+
+Pianifica attentamente prima di ogni chiamata e rifletti SEMPRE sul risultato dopo!
+
+Inseriscile in ogni README, in cima ai prompt e come commento nei principali script generati.
+
+🟢 OPERATIVITÀ SEQUENZIALE (BATCH/FILE AUDIT)
+Per ogni batch di massimo 5.000 file (o tutti se meno):
+
+Processa ogni project_tree_partN.txt senza saltare nessuno.
+
+Alla fine di ogni batch, esegui push/pull request, poi prosegui dal file successivo (mai duplicare).
+
+CHECKLIST OBBLIGATORIA per ogni file/batch
+Verifica e spunt (✔️/❌) per ciascun punto:
+
+Prompt separati?
+
+Devono essere presenti i prompt prompt_agent.txt, prompt_chat.txt, prompt_memory.txt, prompt_tools.txt (plug&play e commentati).
+
+tool.json generato?
+
+Controlla che tool.json sia presente e ben strutturato.
+
+Reasoning trasparente?
+
+Ogni prompt e modulo deve spiegare le scelte operative e contenere commenti autoesplicativi.
+
+Ciclo test/fix attivo?
+
+Devono esserci regole e/o doc che impongano test e correzione immediata errori.
+
+Safety & Ethics presenti?
+
+Ogni prompt/file deve contenere una sezione per limiti, sicurezza e privacy.
+
+Tre leggi incluse ovunque?
+
+Le Tre Leggi Operative di Signore devono essere in TUTTI i file principali.
+
+REGOLE FERREE
+NON allucinare, mai!
+
+NON saltare nessun file della lista!
+
+Segnala, per ogni punto, dove trovi errori o mancanze e suggerisci patch puntuale (ma non inventare).
+
+Alla fine del batch:
+
+Lista file OK
+
+Lista file da fixare + patch consigliata
+
+Riepilogo checklist batch (SI/NO per ogni punto)
+
+OPERATIVITÀ FILE/PROMPT/TOOL
+In ogni batch/file, inserisci o verifica la presenza delle tre leggi operative in testa.
+
+Per ciascun batch di 5.000 file modificati, esegui push/pull request prima di procedere.
+
+OUTPUT ATTESO
+Per ogni batch stampa:
+
+Checklist dettagliata per ciascun file (SI/NO, ✔️/❌)
+
+Riepilogo finale batch:
+
+File OK
+
+File con errori + patch da applicare
+
+Avviso “Batch completato. Procedere con il prossimo batch.”
+
+ESEMPIO OUTPUT:
+diff
+Copia
+Modifica
+Batch: project_tree_part1.txt – project_tree_part10.txt
+
+- Prompt separati? ✔️
+- tool.json generato? ✔️
+- Reasoning trasparente? ❌ (manca in prompt_tools.txt)
+- Ciclo test/fix attivo? ✔️
+- Safety & Ethics presenti? ✔️
+- Tre leggi incluse ovunque? ❌ (manca in project_tree_part4.txt)
+
+File da fixare: prompt_tools.txt (aggiungi reasoning), project_tree_part4.txt (inserisci Tre Leggi)
+
+Riepilogo batch:
+- File OK: 8
+- File con fix richiesti: 2
+
+[Prossimo batch...]
+Esegui ora la pipeline di audit e refactoring su TUTTI i project_tree_partN.txt, checklist batch-by-batch, segnalando con precisione ogni punto. Fermati e conferma ogni 5.000 file/step, poi prosegui fino a completamento.

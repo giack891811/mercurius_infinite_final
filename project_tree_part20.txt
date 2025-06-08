@@ -1,189 +1,11 @@
-Questa è la parte 2 di project_tree. Continua da quella precedente.
+Questa è la parte 20 di project_tree. Continua da quella precedente.
 
-    def suggest_best(self, candidates: List[str]) -> str:
-        """Ritorna l’agente col punteggio più alto tra i candidati."""
-        return max(candidates, key=self.agent_score)
-
-### --- communications/__init__.py --- ###
-
-
-### --- communications/email_assistant.py --- ###
-# communications/email_assistant.py
-"""
-Modulo: email_assistant.py
-Descrizione: Lettura e invio email via IMAP/SMTP con conferma SafetyGuard.
-"""
-
-import os
-import smtplib
-import imaplib
-import email
-from email.mime.text import MIMEText
-from safety.safety_guard import SafetyGuard
-
-IMAP_HOST = os.getenv("EMAIL_IMAP")
-SMTP_HOST = os.getenv("EMAIL_SMTP")
-EMAIL_USER = os.getenv("EMAIL_USER")
-EMAIL_PASS = os.getenv("EMAIL_PASS")
-
-class EmailAssistant:
-    def __init__(self):
-        self.guard = SafetyGuard(interactive=True)
-
-    def read_latest(self, n=5):
-        with imaplib.IMAP4_SSL(IMAP_HOST) as imap:
-            imap.login(EMAIL_USER, EMAIL_PASS)
-            imap.select("INBOX")
-            typ, data = imap.search(None, "ALL")
-            ids = data[0].split()[-n:]
-            messages = []
-            for num in ids[::-1]:
-                typ, msg_data = imap.fetch(num, "(RFC822)")
-                msg = email.message_from_bytes(msg_data[0][1])
-                messages.append({"from": msg["From"], "subject": msg["Subject"]})
-            return messages
-
-    def send_email(self, to_addr: str, subject: str, body: str):
-        safe_body = self.guard.filter_text(body)
-        if safe_body is None:
-            return False
-        msg = MIMEText(safe_body)
-        msg["Subject"] = subject
-        msg["From"] = EMAIL_USER
-        msg["To"] = to_addr
-        with smtplib.SMTP_SSL(SMTP_HOST) as smtp:
-            smtp.login(EMAIL_USER, EMAIL_PASS)
-            smtp.send_message(msg)
-        return True
-
-### --- config/config.yaml --- ###
-agents:
-  enabled: ["OPENAI", "OLLAMA", "AZR"]
-
-communication:
-  feedback_loop: true
-  max_retries: 3
-  retry_delay: 2
-  update_cycle_seconds: 60  # <--- questa riga mancava!
-
-mission_defaults:
-  run_mode: dialogic-autonomous
-  tasks:
-    - "#SELF_MISSION"
-    - "#RUN_SELF_CHECK"
-
-paths:
-  transcripts: "memory/transcripts/"
-  logs: "logs/"
-
-### --- config/config_schema.py --- ###
-# config_schema.py
-CONFIG_SCHEMA = {
-    "symbols": {"type": "list", "schema": {"type": "string"}},
-    "base_trade_qty": {"type": "integer", "min": 1},
-    "min_confidence": {"type": "float", "min": 0, "max": 1},
-    "retrain_threshold": {"type": "float", "min": 0, "max": 1},
-    "azr_profit_floor": {"type": "float", "min": 0}
-}
-
-### --- config/config_validator.py --- ###
-# config_validator.py
-import yaml
-from cerberus import Validator
-from config.config_schema import CONFIG_SCHEMA
-
-def load_and_validate_config(path="config/config.yaml"):
-    with open(path) as f:
-        config = yaml.safe_load(f)
-    v = Validator(CONFIG_SCHEMA)
-    if not v.validate(config):
-        raise ValueError(v.errors)
-    return config
-
-### --- config/genesis_config.yaml --- ###
-# ⚙️ Configurazione Centrale – GENESIS_MODE
-# Questo file controlla l'attivazione e la connessione tra i moduli AI di Mercurius∞
-
-genesis_mode:
-  activation_command: "#GENESIS_MODE"
-  voice_trigger: "Hey Mercurius, attiva GENESIS"
-  orchestrator_module: "core.orchestrator"
-  mission_module: "core.self_mission"
-
-agents:
-  cognitive_core:
-    - ChatGPT4
-    - AZR
-    - Ollama3
-    - GPT4o
-  evolution_engine:
-    - GPTEngineer
-    - MetaGPT
-    - AutoGPT
-    - AI2UI
-  trading_stack:
-    - FinRL
-    - FinGPT
-    - Qlib
-    - OpenBB
-    - Freqtrade
-  creative_organizers:
-    - SuperAGI
-    - MicrosoftAutogen
-    - CrewAI
-  hardware_integration:
-    - LocalAI
-    - LeonAI
-    - n8n
-    - HuggingFaceAgents
-  voice_system:
-    - NariDia
-    - ElevenLabs
-    - Whisper
-    - Vosk
-
-communication:
-  agent_protocol: "neural-messaging"
-  update_cycle_seconds: 10
-  feedback_loop: true
-
-# Abilita il thinking loop
-thinking_enabled: true
-
-### --- config/prod_settings.yaml --- ###
-# config/prod_settings.yaml
----
-logging_level: INFO
-agents:
-  cognitive:
-    - ChatGPTAgent
-    - Ollama3Agent
-    - AZRAgent
-    - GPT4oAgent
-  trading:
-    - AdaptiveTrader
-  evolution:
-    - MetaTeamAgent
-communication:
-  feedback_loop: true
-  update_cycle_seconds: 30
-sleep_threshold: 300
-
-### --- config/self_profile.yaml --- ###
-# config/self_profile.yaml
-name: Mercurius∞
-version: "1.0"
-values:
-  - curiosity
-  - transparency
-  - service
 purpose: Evolvere, assistere l’utilizzatore e creare valore etico.
 created: "2025-06-01T00:00:00"
 
-### --- consciousness/__init__.py --- ###
+## consciousness/__init__.py
 
-
-### --- consciousness/core_self.py --- ###
+## consciousness/core_self.py
 # consciousness/core_self.py
 """
 Modulo: core_self.py
@@ -232,7 +54,7 @@ class CoreSelf:
     def save(self):
         yaml.safe_dump(self.profile, PROFILE_FILE.open("w", encoding="utf-8"))
 
-### --- consciousness/intention_manager.py --- ###
+## consciousness/intention_manager.py
 # consciousness/intention_manager.py
 """
 Modulo: intention_manager.py
@@ -256,7 +78,7 @@ class IntentionManager:
         self.intentions = [i for i in self.intentions if i["expires"] > now]
         return [i["desc"] for i in self.intentions]
 
-### --- consciousness/reflection_loop.py --- ###
+## consciousness/reflection_loop.py
 # consciousness/reflection_loop.py
 """
 Modulo: reflection_loop.py
@@ -298,10 +120,9 @@ class ReflectionLoop:
         file.write_text(content, encoding="utf-8")
         print(f"📝 Reflection saved → {file}")
 
-### --- core/__init__.py --- ###
+## core/__init__.py
 
-
-### --- core/auto_tester.py --- ###
+## core/auto_tester.py
 """
 auto_tester.py
 ==============
@@ -340,7 +161,7 @@ class AutoTester:
         after = self.pipeline.agent.config["base_trade_qty"]
         print(f"📉 Base quantity: {before} → {after}")
 
-### --- core/auto_updater.py --- ###
+## core/auto_updater.py
 # core/auto_updater.py
 
 """
@@ -398,7 +219,7 @@ class AutoUpdater:
         })
         self.save_log()
 
-### --- core/context_adapter.py --- ###
+## core/context_adapter.py
 # core/context_adapter.py
 
 """
@@ -433,7 +254,7 @@ class ContextAdapter:
 
         return f"{prefix} {message}"
 
-### --- core/deploy_trigger.py --- ###
+## core/deploy_trigger.py
 # core/deploy_trigger.py
 """
 Modulo: deploy_trigger.py
@@ -461,7 +282,7 @@ if __name__ == "__main__":
     health = validator.check_health()
     print("✅ Deploy OK" if tests_ok and health["status"] else "❌ Deploy issues", health)
 
-### --- core/dialogue_manager.py --- ###
+## core/dialogue_manager.py
 # core/dialog_manager.py
 
 """
@@ -559,7 +380,7 @@ class DialogManager:
         self.track_dialog_context(message, reply)
         return reply
 
-### --- core/emotion_analyzer.py --- ###
+## core/emotion_analyzer.py
 # core/emotion_analyzer.py
 
 """
@@ -617,7 +438,7 @@ class EmotionAnalyzer:
                 return emotion
         return "neutro"
 
-### --- core/executor.py --- ###
+## core/executor.py
 """
 Modulo: executor.py
 Responsabilità: Esecuzione sicura e tracciata del codice generato o modificato
@@ -661,7 +482,7 @@ class CodeExecutor:
         """
         return all(keyword.lower() in output.lower() for keyword in expected_keywords)
 
-### --- core/genesis_trigger.py --- ###
+## core/genesis_trigger.py
 # genesis_launcher.py
 
 """
@@ -734,7 +555,7 @@ if __name__ == "__main__":
         # Registra audit: comando utente e risposta data
         audit("user_command", {"input": user_input, "response": response})
 
-### --- core/learning.py --- ###
+## core/learning.py
 """
 Modulo: learning.py
 Responsabilità: Fornire capacità di apprendimento continuo al sistema Mercurius∞
@@ -827,7 +648,7 @@ class ContinuousLearner:
             "failures": sum(1 for d in data if not d["success"])
         }
 
-### --- core/orchestrator.py --- ###
+## core/orchestrator.py
 """
 🧠 core/orchestrator.py
 Modulo centrale di orchestrazione – Mercurius∞ Neural AI System
@@ -913,3 +734,166 @@ class Orchestrator:
         print("🔌 Caricamento agenti dalla configurazione...")
         agent_groups = self.config.get("agents", {})
         for group, agent_list in agent_groups.items():
+            self.agents[group] = []
+            for agent_name in agent_list:
+                try:
+                    module_path = f"agents.{agent_name.lower()}"
+                    agent_module = importlib.import_module(module_path)
+                    agent = getattr(agent_module, agent_name)()
+                    self.agents[group].append(agent)
+                    print(f"🧠 Caricato agente: {agent_name} in {group}")
+                except Exception as e:
+                    print(f"⚠️ Errore caricamento {agent_name}: {e}")
+
+    def start_feedback_loop(self):
+        if self.config["communication"]["feedback_loop"]:
+            print("🔁 Avvio feedback loop neurale...")
+            threading.Thread(target=self.feedback_cycle, daemon=True).start()
+[TRONCATO]
+
+## core/pipeline_controller.py
+"""
+pipeline_controller.py
+=======================
+Orchestratore principale delle componenti del sistema Mercurius∞.
+Permette di avviare cicli completi di analisi, apprendimento e trading
+in modalità batch, streaming o simulata.
+"""
+
+from utils.logger import setup_logger
+from data.market_data_handler import MarketDataHandler
+from data.feature_engineering import FeatureEngineer
+from models.model_trainer import ModelTrainer
+from strategies.strategy_executor import StrategyExecutor
+from agents.adaptive_trader import AdaptiveTrader
+from agents.memory_manager import MemoryManager
+
+
+class PipelineController:
+    def __init__(self, config):
+        self.logger = setup_logger("PipelineController")
+        self.config = config
+
+        self.memory = MemoryManager(config)
+        self.data_handler = MarketDataHandler(config)
+        self.feature_engineer = FeatureEngineer(config)
+        self.model_trainer = ModelTrainer(config)
+        self.strategy = StrategyExecutor(config)
+        self.agent = AdaptiveTrader(
+            config,
+            memory_manager=self.memory,
+            model_trainer=self.model_trainer,
+            strategy_executor=self.strategy,
+        )
+
+    def run_batch_session(self):
+        """Esegue un'intera sessione di ciclo batch."""
+        self.logger.info("🚀 Avvio sessione di pipeline Mercurius∞")
+
+        raw_data = self.data_handler.fetch_market_data()
+        features = self.feature_engineer.transform(raw_data)
+        model = self.model_trainer.train(features)
+        signals = self.strategy.generate_signals(model, features)
+        self.agent.execute_trades(signals)
+
+        self.logger.info("✅ Sessione pipeline completata")
+
+    def simulate_multiple_sessions(self, n=3):
+        """Esegue n sessioni simulate consecutive."""
+        for i in range(n):
+            self.logger.info(f"▶️ Esecuzione sessione simulata {i + 1}/{n}")
+            self.run_batch_session()
+
+## core/sandbox_executor.py
+"""
+Modulo: sandbox_executor.py
+Descrizione: Esecuzione sicura, isolata e autoregolata di codice Python generato da Mercurius∞.
+Include analisi statica, sandboxing con timeout, cattura stdout, e correzione automatica con AZR e LLM.
+Autore: Mercurius∞ AI Engineer
+"""
+
+import traceback
+import contextlib
+import io
+import multiprocessing
+import os
+
+from modules.llm.azr_reasoner import validate_with_azr 
+
+
+
+
+
+# ─── Correzione automatica con LLM esterno (opzionale) ────────────────────────
+try:
+    import openai
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", None)
+    OPENAI_READY = bool(OPENAI_API_KEY)
+except ImportError:
+    openai = None
+    OPENAI_READY = False
+
+
+class SandboxExecutor:
+    def __init__(self, timeout_seconds: int = 5):
+        self.timeout = timeout_seconds
+        self.last_output = ""
+        self.last_error = ""
+
+    def static_analysis(self, code: str) -> bool:
+        """
+        Verifica se il codice è sintatticamente valido.
+        """
+        try:
+            compile(code, "<sandbox_analysis>", "exec")
+            return True
+        except SyntaxError:
+            return False
+
+    def _execute_code(self, code: str, return_dict):
+        """
+        Funzione interna per eseguire codice in un processo separato.
+        """
+        buffer = io.StringIO()
+        local_vars = {}
+        try:
+            with contextlib.redirect_stdout(buffer):
+                exec(code, {}, local_vars)
+            return_dict["success"] = True
+            return_dict["output"] = buffer.getvalue()
+        except Exception:
+            return_dict["success"] = False
+            return_dict["output"] = traceback.format_exc()
+
+    def run_sandboxed(self, code: str) -> dict:
+        """
+        Esegue codice in un ambiente isolato con timeout.
+        """
+        manager = multiprocessing.Manager()
+        return_dict = manager.dict()
+
+        process = multiprocessing.Process(target=self._execute_code, args=(code, return_dict))
+        process.start()
+        process.join(self.timeout)
+
+        if process.is_alive():
+            process.terminate()
+            self.last_error = "❌ Timeout: codice troppo lento o bloccato."
+            return {"success": False, "output": self.last_error}
+
+        result = return_dict.copy()
+        self.last_output = result.get("output", "")
+        if not result.get("success"):
+            self.last_error = self.last_output
+            return {
+                "success": False,
+                "output": self.last_output,
+                "suggested_fix": self.autofix_with_llm(code, self.last_output)
+            }
+        return result
+
+    def autofix_with_llm(self, code: str, error_msg: str) -> str:
+        """
+        Prova a correggere il codice errato usando:
+        1. AZR Reasoner per correzioni ragionate.
+        2. Se disponibile, LLM esterno (es. GPT-4 via OpenAI API).

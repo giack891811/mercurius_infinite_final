@@ -1,0 +1,871 @@
+Questa è la parte 50 di project_tree. Continua da quella precedente.
+
+    def __init__(self):
+        # lista di dizionari esperienza
+        self.experience_log: List[Dict[str, Any]] = []
+
+    # ------------------------------------------------------------------ #
+    #                       REGISTRAZIONE ESPERIENZA                     #
+    # ------------------------------------------------------------------ #
+    def process_experience(
+        self,
+        action: str,
+        outcome: str,
+        success: bool,
+        context: dict | None = None,
+    ) -> Dict[str, Any]:
+        """
+        Registra un’esperienza di Mercurius∞.
+
+        Ritorna il dizionario esperienza, che ora include la chiave
+        “learning” richiesta dai test.
+        """
+        experience = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "action": action,
+            "outcome": outcome,
+            "success": success,
+            "context": context or {},
+            # feedback di apprendimento elementare
+            "learning": (
+                "Apprendimento registrato: rinforzo positivo."
+                if success
+                else "Apprendimento registrato: rinforzo negativo."
+            ),
+            # riflessione di base sull'esito dell'azione
+            "reflection": (
+                "successo" if success else "fallimento"
+            ),
+        }
+        self.experience_log.append(experience)
+        print(
+            f"📒 Esperienza registrata → {action} | Successo: {success} | "
+            f"Extra: {context or {}}"
+        )
+        return experience
+
+    # ------------------------------------------------------------------ #
+    #                              UTILITÀ                               #
+    # ------------------------------------------------------------------ #
+    def get_history(self, limit: int = 5) -> List[Dict[str, Any]]:
+        """Restituisce le ultime *limit* esperienze."""
+        return self.experience_log[-limit:]
+
+    def reset_memory(self) -> None:
+        """Svuota la memoria esperienziale."""
+        self.experience_log = []
+        print("♻️ Memoria esperienziale resettata.")
+
+    def summary(self) -> None:
+        """Stampa a video un breve riassunto delle ultime esperienze."""
+        print("🧠 Riassunto Esperienze Recenti:")
+        for exp in self.get_history(5):
+            print(f"→ [{exp['timestamp']}] {exp['action']} ⇒ {exp['outcome']}")
+
+    # ------------------------------------------------------------------ #
+    #                        RIEPILOGO STATISTICO                         #
+    # ------------------------------------------------------------------ #
+    def summarize_autonomy(self) -> dict:
+        """
+        Ritorna un riepilogo statistico con la chiave “reflection_summary”
+        richiesta dai test end-to-end.
+        """
+        total = len(self.experience_log)
+        successes = sum(e["success"] for e in self.experience_log)
+        failures = total - successes
+        most_common = Counter(e["action"] for e in self.experience_log).most_common(1)
+
+        return {
+            "total": total,
+            "success_rate": successes / total if total else 0.0,
+            "top_action": most_common[0][0] if most_common else None,
+            "reflection_summary": {
+                "successes": successes,
+                "failures": failures,
+            },
+        }
+
+    # ------------------------------------------------------------------ #
+    #                        INSIGHT GLOBALI (NUOVO)                    #
+[TRONCATO]
+
+## orchestrator/genesis_orchestrator.py
+"""
+Modulo: genesis_orchestrator.py
+Descrizione: Coordinamento neurale tra agenti cognitivi (ChatGPT-4, AZR, Ollama3, GPT-4o).
+"""
+
+from utils.logger import setup_logger
+logger = setup_logger("MercuriusGenesis")
+
+# Agenti cognitivi integrati
+from modules.llm.chatgpt_interface import ChatGPTAgent
+from modules.llm.ollama3_interface import Ollama3Agent
+from modules.llm.azr_reasoner import AZRAgent
+from modules.llm.gpt4o_validator import GPT4oAgent
+
+class GenesisOrchestrator:
+    def __init__(self):
+        self.agents = {
+            "chatgpt4": ChatGPTAgent(),
+            "ollama3": Ollama3Agent(),
+            "azr": AZRAgent(),
+            "gpt4o": GPT4oAgent()
+        }
+
+    def route_task(self, task: str, context: dict = None) -> dict:
+        """
+        Analizza il task e lo instrada all'agente più adatto, restituendo il risultato.
+        """
+        logger.info(f"[GENESIS] Routing del task: {task}")
+        if "debug" in task or "logica" in task:
+            return self.agents["azr"].analyze(task, context or {})
+        elif "sintesi" in task or "finalizza" in task:
+            return self.agents["gpt4o"].validate(task, context or {})
+        elif "crea codice" in task or "script" in task:
+            return self.agents["ollama3"].generate(task, context or {})
+        else:
+            return self.agents["chatgpt4"].elaborate(task, context or {})
+
+    def coordinated_response(self, task: str) -> dict:
+        """
+        Ogni agente contribuisce con un parere per un task comune; 
+        il sistema seleziona la risposta più coerente tra quelle fornite.
+        Se nessuna risposta è valida, attiva fallback evolutivo su AZR.
+        """
+        logger.info(f"[GENESIS] Task condiviso per risposta congiunta: {task}")
+        responses = {
+            "chatgpt4": self.agents["chatgpt4"].elaborate(task),
+            "ollama3": self.agents["ollama3"].generate(task),
+            "azr": self.agents["azr"].analyze(task),
+            "gpt4o": self.agents["gpt4o"].validate(task)
+        }
+
+        # Valutazione semplice basata su priorità predefinita (in futuro: ponderazione dinamica)
+        priority = ["azr", "gpt4o", "chatgpt4", "ollama3"]
+        for agent_key in priority:
+            resp = str(responses.get(agent_key, "")).lower()
+            if responses[agent_key] and "error" not in resp and "errore" not in resp:
+                return {"source": agent_key, "response": responses[agent_key]}
+
+        # 🧠 Fallback evolutivo AZR – auto-ragionamento
+        logger.warning("⚠️ Nessuna risposta valida disponibile. Attivazione fallback AZR Reasoner...")
+        azr_retry = self.agents["azr"].solve(task)  # Metodo custom evolutivo
+        if azr_retry and isinstance(azr_retry, dict):
+            return {"source": "azr-fallback", "response": azr_retry}
+        return {"source": "none", "response": "Nessuna risposta utile nemmeno da fallback AZR."}
+
+
+if __name__ == "__main__":
+    orchestrator = GenesisOrchestrator()
+    sample_task = "crea codice per gestire input vocale e risposta testuale"
+    result = orchestrator.coordinated_response(sample_task)
+    print(f"🎯 Risposta selezionata ({result['source']}):\n{result['response']}")
+
+## orchestrator/mission_controller.py
+"""mission_controller.py
+Mission Controller per ciclo evolutivo multi-agente.
+"""
+
+from __future__ import annotations
+
+import os
+import json
+from pathlib import Path
+from typing import Dict, Any
+
+from orchestrator.genesis_orchestrator import GenesisOrchestrator
+from orchestrator.autonomy_controller import AutonomyController
+from modules.llm.azr_reasoner import AZRAgent
+from modules.gpt_engineer_wrapper import GPTEngineerWrapper
+from modules.sandbox_executor.secure_executor import SecureExecutor
+
+
+class MissionController:
+    """Gestisce il ciclo di self-questioning e auto-evoluzione."""
+
+    def __init__(self, base_dir: str = "workspaces") -> None:
+        self.base_dir = Path(base_dir)
+        self.base_dir.mkdir(exist_ok=True)
+        self.genesis = GenesisOrchestrator()
+        self.autonomy = AutonomyController()
+        self.azr = AZRAgent()
+        self.codex = GPTEngineerWrapper(project_path=str(self.base_dir))
+        self.executor = SecureExecutor(timeout=5)
+        self.workspaces: Dict[str, Dict[str, Any]] = {}
+        self.log_file = Path("logs/mission_log.jsonl")
+        self.log_file.parent.mkdir(exist_ok=True)
+
+    # ------------------------------------------------------------------ #
+    def create_workspace(self, name: str, prompt: str) -> Path:
+        """Crea una cartella dedicata e salva il prompt."""
+        path = self.base_dir / name
+        path.mkdir(exist_ok=True)
+        (path / "prompt.txt").write_text(prompt, encoding="utf-8")
+        self.workspaces[name] = {"prompt": prompt, "path": path}
+        self._log("workspace_created", {"name": name})
+        return path
+
+    # ------------------------------------------------------------------ #
+    def _log(self, event: str, details: Dict[str, Any]) -> None:
+        entry = {"event": event, "details": details}
+        with self.log_file.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(entry) + "\n")
+
+    # ------------------------------------------------------------------ #
+    def run_cycle(self, name: str) -> None:
+        """Esegue un ciclo evolutivo sul workspace indicato."""
+        ws = self.workspaces.get(name)
+        if not ws:
+            return
+        prompt = ws["prompt"]
+        # 1. Reasoner: suggerimenti
+        question = f"Come migliorare questo progetto? {prompt}"
+        reason_resp = self.genesis.route_task(question)
+        self.autonomy.process_experience("reason", "ok", True, {"workspace": name})
+
+        # 2. AZR analizza la risposta
+        analysis = self.azr.analyze(reason_resp.get("response", question))
+        self.autonomy.process_experience("azr", analysis, True, {"workspace": name})
+
+        # 3. Se AZR suggerisce problemi, genera patch con Codex
+        if analysis.startswith("❌"):
+            patch = self.codex.generate_project(prompt)
+            (ws["path"] / "patch.log").write_text(patch, encoding="utf-8")
+            self.autonomy.process_experience("codex_patch", patch, True, {"workspace": name})
+            result = self.executor.execute(patch)
+            (ws["path"] / "sandbox.log").write_text(str(result), encoding="utf-8")
+        self._log("cycle_completed", {"workspace": name})
+
+
+if __name__ == "__main__":
+    mc = MissionController()
+    ws = mc.create_workspace("demo", "Genera uno script di esempio")
+    mc.run_cycle("demo")
+
+## orchestrator/multimodal_controller.py
+# orchestrator/multimodal_controller.py
+"""
+Modulo: multimodal_controller.py
+Responsabilità: Gestione integrata di input multimodali (voce, gesti) e pianificazione strategica.
+"""
+from modules.speech import SpeechToText, TextToSpeech
+from modules.gesture import GestureRecognizer
+from modules.planner import ActionPlanner
+from models.goal_manager import GoalManager
+from orchestrator.autonomy_controller import AutonomyController
+from modules.ai_kernel.command_interpreter import CommandInterpreter
+from typing import Optional
+
+class MultimodalController:
+    """
+    Orchestratore intelligente per input vocali, gesti e pianificazione autonoma.
+    """
+    def __init__(self):
+        self.speech_in = SpeechToText()
+        self.speech_out = TextToSpeech()
+        # Inizializza sempre l'interprete comandi
+        self.interpreter = CommandInterpreter()
+        self.gesture = GestureRecognizer()
+        self.planner = ActionPlanner()
+        self.goal_mgr = GoalManager()
+        self.autonomy = AutonomyController()
+
+    def listen_and_interpret(self, simulate_input: Optional[str] = None) -> dict:
+        """
+        Ascolta input vocale (o usa una stringa simulata) e lo converte in un comando strutturato.
+        """
+        if simulate_input:
+            text = simulate_input
+        else:
+            text = self.speech_in.listen()
+        self.speech_out.speak(f"Hai detto: {text}")
+        return self.interpreter.interpret(text) if self.interpreter else {"action": "ignora"}
+
+    def receive_gesture(self, gesture_name: Optional[str] = None) -> dict:
+        """
+        Interpreta un gesto manuale (o simulato) in un comando.
+        """
+        if gesture_name:
+            return self.gesture.interpret_gesture(gesture_name)
+        else:
+            return self.gesture.recognize(None)
+
+    def plan_and_act(self, command: dict):
+        """
+        Registra un obiettivo, pianifica le azioni e attiva il ciclo cognitivo per eseguirle.
+        """
+        action = command["action"]
+        context = command.get("context", {})
+        # Aggiunge l'obiettivo corrente alla lista
+        self.goal_mgr.add_goal(action, priority=1, context=context)
+        goal = self.goal_mgr.get_next_goal()
+        if goal:
+            plan = self.planner.generate_plan(goal.name, goal.context)
+            # Descrive verbalmente il piano generato
+            self.speech_out.speak(self.planner.describe_plan(plan))
+            # Esegue ogni step del piano simulando l'azione e registrando l'esperienza
+            for step in plan:
+                output = f"Eseguo: {step['action']}"
+                print(output)
+                self.autonomy.process_experience(step["action"], "eseguito", True, step.get("params", {}))
+            self.goal_mgr.complete_goal(goal.name)
+        else:
+            self.speech_out.speak("Nessun obiettivo disponibile.")
+
+    def run_full_cycle(self, input_text: Optional[str] = None, gesture: Optional[str] = None):
+        """
+        Esegue un ciclo completo multimodale (voce+gesti) dall'input fino all'azione.
+        """
+        if input_text:
+            cmd = self.listen_and_interpret(simulate_input=input_text)
+        elif gesture:
+            cmd = self.receive_gesture(gesture)
+        else:
+            self.speech_out.speak("Nessun input fornito.")
+            return
+        if cmd.get("action") != "ignora":
+            self.plan_and_act(cmd)
+        else:
+            self.speech_out.speak("Non ho capito cosa fare.")
+
+## orchestrator/patch_scheduler.py
+# orchestrator/patch_scheduler.py
+"""
+Modulo: patch_scheduler.py
+Descrizione: Avvia periodicamente il SelfPatchEngine per evoluzione autonoma.
+"""
+
+import time
+import threading
+from analytics.self_patch_engine import SelfPatchEngine
+
+class PatchScheduler:
+    def __init__(self, interval_hours: int = 24):
+        self.engine = SelfPatchEngine()
+        self.interval = interval_hours * 3600
+        threading.Thread(target=self._loop, daemon=True).start()
+
+    def _loop(self):
+        while True:
+            try:
+                self.engine.apply_patch()
+            except Exception as e:
+                print(f"⚠️ PatchScheduler error: {e}")
+            time.sleep(self.interval)
+
+## orchestrator/real_life_controller.py
+# orchestrator/real_life_controller.py
+"""
+Modulo: real_life_controller.py
+Descrizione: Router comandi voce per vita reale (agenda, smart-home, finanze, email)
+"""
+
+from integrations.agenda.agenda_manager import AgendaManager
+from integrations.smart_home.home_assistant_bridge import HomeAssistantBridge
+from personal_finance.finance_tracker import FinanceTracker
+from communications.email_assistant import EmailAssistant
+from modules.ai_kernel.command_interpreter import CommandInterpreter
+from modules.voice_bridge.pyttsx3_tts import Pyttsx3TTS
+
+agenda = AgendaManager()
+home = HomeAssistantBridge()
+fin = FinanceTracker()
+mail = EmailAssistant()
+tts = Pyttsx3TTS()
+interp = CommandInterpreter()
+
+def execute(command: str):
+    cmd = interp.interpret(command)
+    act = cmd.get("action")
+    ctx = cmd.get("context", {})
+    if act == "saluta":
+        tts.speak("Ciao! Come posso aiutarti?")
+    elif act == "apri_app":
+        app = ctx.get("app")
+        tts.speak(f"Apro {app}")
+    elif act == "mostra_dati":
+        month = fin.monthly_summary()
+        tts.speak(f"Spese del mese: {month}")
+    else:
+        tts.speak("Comando non riconosciuto.")
+
+if __name__ == "__main__":
+    while True:
+        txt = input("🗣️> ")
+        execute(txt)
+
+## orchestrator/router_integration.py
+# orchestrator/router_integration.py
+"""
+Modulo: router_integration.py
+Descrizione: Integrazione del nuovo AgentRouter nel GenesisOrchestrator.
+"""
+
+from cognition.cognitive_map import CognitiveMap
+from cognition.task_memory import TaskMemory
+from cognition.agent_router import AgentRouter
+from orchestrator.genesis_orchestrator import GenesisOrchestrator
+
+# Crea mappa e memory globali
+c_map = CognitiveMap()
+t_memory = TaskMemory()
+
+# Registra gli agenti cognitivi principali
+for name, typ in [
+    ("ChatGPTAgent", "cognitive"),
+    ("Ollama3Agent", "cognitive"),
+    ("AZRAgent", "cognitive"),
+    ("GPT4oAgent", "cognitive"),
+    ("AdaptiveTrader", "trading"),
+]:
+    c_map.add_agent(name, typ)
+
+router = AgentRouter(c_map, t_memory)
+core = GenesisOrchestrator()
+
+
+def run_task(task: str):
+    agent_name = router.choose_agent(task)
+    print(f"🔀 Router seleziona: {agent_name} per → {task}")
+    response = core.route_task(task)
+    success = "errore" not in str(response).lower()
+    router.record_result(agent_name, task, success)
+    return response
+
+
+if __name__ == "__main__":
+    while True:
+        txt = input("Task> ")
+        print(run_task(txt))
+
+## orchestrator/sentient_mode.py
+# orchestrator/sentient_mode.py
+"""
+Modulo: sentient_mode.py
+Descrizione: Integrazione della modalità consapevole dentro Mercurius∞.
+Avvia ReflectionLoop e gestisce IntentionManager in background.
+"""
+
+import threading
+import time
+from consciousness.reflection_loop import ReflectionLoop
+from consciousness.intention_manager import IntentionManager
+
+class SentientMode:
+    def __init__(self, reflection_hour: int = 23):
+        self.reflection = ReflectionLoop()
+        self.intentions = IntentionManager()
+        self.reflection_hour = reflection_hour
+        # thread giornaliero
+        threading.Thread(target=self._daily_routine, daemon=True).start()
+
+    def _daily_routine(self):
+        while True:
+            now = time.gmtime()
+            if now.tm_hour == self.reflection_hour and now.tm_min == 0:
+                self.reflection.write_daily()
+                time.sleep(60)  # evita doppio trigger
+            time.sleep(30)
+
+    # API esterna
+    def add_intention(self, desc: str):
+        self.intentions.add_intention(desc)
+
+    def list_intentions(self):
+        return self.intentions.active_intentions()
+
+
+if __name__ == "__main__":
+    sm = SentientMode()
+    sm.add_intention("Migliorare la precisione del modulo trading del 5%")
+    while True:
+        time.sleep(3600)
+
+## personal_finance/__init__.py
+
+## personal_finance/finance_tracker.py
+# personal_finance/finance_tracker.py
+"""
+Modulo: finance_tracker.py
+Descrizione: Traccia spese personali da CSV/JSON e genera report mensile.
+"""
+
+import pandas as pd
+from pathlib import Path
+from datetime import datetime
+
+DATA_FILE = Path("personal_finance/expenses.csv")
+DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+class FinanceTracker:
+    def __init__(self):
+        if DATA_FILE.exists():
+            self.df = pd.read_csv(DATA_FILE)
+        else:
+            self.df = pd.DataFrame(columns=["date", "category", "amount", "note"])
+
+    def add_expense(self, amount: float, category: str, note: str = ""):
+        new = {"date": datetime.utcnow().date(), "category": category, "amount": amount, "note": note}
+        self.df = self.df.append(new, ignore_index=True)
+        self.df.to_csv(DATA_FILE, index=False)
+
+    def monthly_summary(self, month: str | None = None):
+        month = month or datetime.utcnow().strftime("%Y-%m")
+        df_month = self.df[self.df["date"].astype(str).str.startswith(month)]
+        return df_month.groupby("category")["amount"].sum().to_dict()
+
+## rag/insight_rag.py
+# rag/insight_rag.py
+
+"""
+Modulo: insight_rag.py
+Descrizione: Sistema di archiviazione e recupero semantico (RAG) per concetti estratti da fonti multimodali.
+"""
+
+import os
+import json
+import uuid
+from datetime import datetime
+from sentence_transformers import SentenceTransformer, util
+
+class InsightRAG:
+    def __init__(self, db_path="logs/insight_memory.json"):
+        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.db_path = db_path
+        self.embeddings = []
+        self.memory = []
+        self.load_memory()
+
+    def load_memory(self):
+        if os.path.exists(self.db_path):
+            with open(self.db_path, "r") as f:
+                self.memory = json.load(f)
+                self.embeddings = [item["embedding"] for item in self.memory]
+
+    def save_memory(self):
+        with open(self.db_path, "w") as f:
+            json.dump(self.memory, f, indent=2)
+
+    def embed_insight(self, content: str):
+        embedding = self.model.encode(content).tolist()
+        entry = {
+            "id": str(uuid.uuid4()),
+            "timestamp": datetime.now().isoformat(),
+            "text": content,
+            "embedding": embedding
+        }
+        self.memory.append(entry)
+        self.embeddings.append(embedding)
+        self.save_memory()
+
+    def query_concepts(self, question: str, top_k=3) -> list:
+        query_emb = self.model.encode(question)
+        scores = util.cos_sim(query_emb, self.embeddings)[0]
+        top_indices = scores.argsort(descending=True)[:top_k]
+        return [self.memory[idx] for idx in top_indices]
+
+    def rank_relevance(self):
+        return sorted(self.memory, key=lambda x: x["timestamp"], reverse=True)[:10]
+
+## safety/__init__.py
+
+## safety/audit_logger.py
+# safety/audit_logger.py
+"""
+Modulo: audit_logger
+Descrizione: Log di audit immutabile per registrare azioni, decisioni e override.
+"""
+
+from pathlib import Path
+from datetime import datetime
+import json
+
+AUDIT_FILE = Path("logs/audit_log.jsonl")
+AUDIT_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+
+def audit(event_type: str, details: dict):
+    entry = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "type": event_type,
+        "details": details,
+    }
+    with open(AUDIT_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry) + "\n")
+
+## safety/human_override.py
+# safety/human_override.py
+"""
+Modulo: human_override
+Descrizione: Consente all'operatore umano di confermare/bloccare azioni critiche.
+"""
+
+from typing import Callable, Any
+
+class HumanOverride:
+    def __init__(self, interactive: bool = True):
+        self.interactive = interactive
+
+    def confirm(self, message: str) -> bool:
+        """
+        Chiede conferma all'utente per procedere con un'azione sensibile.
+        In modalità non interattiva ritorna sempre False (azione bloccata).
+        """
+        if not self.interactive:
+            print(f"⛔ Override: azione '{message}' bloccata (non-interactive).")
+            return False
+        reply = input(f"⚠️ Confermi azione critica? '{message}' (y/n): ").strip().lower()
+        return reply in {"y", "yes"}
+
+    def guard(self, message: str) -> Callable:
+        """
+        Decoratore per funzioni che necessitano approvazione umana.
+        """
+
+        def decorator(func: Callable) -> Callable:
+            def wrapper(*args, **kwargs) -> Any:
+                if self.confirm(message):
+                    return func(*args, **kwargs)
+                else:
+                    print("🚫 Azione annullata dall'operatore.")
+                    return None
+
+            return wrapper
+
+        return decorator
+
+## safety/policies.yaml
+- action: block
+  name: no_secrets
+  rule: password=
+- action: block
+  name: no_secrets
+  rule: password=
+
+## safety/policy_manager.py
+# safety/policy_manager.py
+"""
+Modulo: policy_manager
+Descrizione: Gestisce le policy etiche, di sicurezza e privacy per Mercurius∞.
+Le policy sono definite in YAML ed estendibili in runtime.
+"""
+
+import yaml
+from pathlib import Path
+from typing import Dict, Any, List
+
+POLICY_FILE = Path("safety/policies.yaml")
+
+
+class PolicyManager:
+    def __init__(self):
+        self.policies: List[Dict[str, Any]] = []
+        self.load_policies()
+
+    # ---------- Public API ----------
+    def load_policies(self) -> None:
+        if POLICY_FILE.exists():
+            self.policies = yaml.safe_load(POLICY_FILE.read_text(encoding="utf-8")) or []
+        else:
+            self.policies = []
+
+    def add_policy(self, name: str, rule: str, action: str = "block") -> None:
+        self.policies.append({"name": name, "rule": rule, "action": action})
+        self._save()
+
+    def check(self, text: str) -> Dict[str, Any] | None:
+        """
+        Ritorna la policy violata se text ne infrange una.
+        """
+        for pol in self.policies:
+            if pol["rule"].lower() in text.lower():
+                return pol
+        return None
+
+    # ---------- Private ----------
+    def _save(self):
+        POLICY_FILE.parent.mkdir(exist_ok=True, parents=True)
+        yaml.safe_dump(self.policies, POLICY_FILE.open("w", encoding="utf-8"))
+
+## safety/safety_guard.py
+# safety/safety_guard.py
+"""
+Modulo: safety_guard
+Descrizione: Punto di ingresso globale per controlli policy + human override + audit.
+"""
+
+from safety.policy_manager import PolicyManager
+from safety.human_override import HumanOverride
+from safety.audit_logger import audit
+
+
+class SafetyGuard:
+    def __init__(self, interactive=True):
+        self.policy_mgr = PolicyManager()
+        self.override = HumanOverride(interactive=interactive)
+
+    def filter_text(self, text: str) -> str | None:
+        """
+        Applica policy. Se violazione -> chiede override umano.
+        Ritorna testo se permesso, None se bloccato.
+        """
+        violation = self.policy_mgr.check(text)
+        if violation:
+            audit("policy_violation", {"rule": violation["name"], "text": text})
+            allowed = self.override.confirm(
+                f"Violazione '{violation['name']}'. Consentire comunque?"
+            )
+            if not allowed:
+                print("⛔ Bloccato da SafetyGuard.")
+                return None
+        return text
+
+## scheduler/auto_scheduler.py
+"""
+auto_scheduler.py
+=================
+Modulo per programmazione automatica di esecuzioni trading e test.
+
+Basato su threading + pianificazione in tempo reale:
+- task ciclici
+- esecuzioni ritardate
+- notifiche pianificate
+"""
+
+import threading
+import time
+from datetime import datetime, timedelta
+
+
+class AutoScheduler:
+    def __init__(self):
+        self.tasks = []
+
+    def schedule_task(self, task_func, delay_sec=5, repeat=False, interval_sec=60, name=None):
+        """Programma un task con delay e ripetizione opzionale."""
+        task = {
+            "name": name or task_func.__name__,
+            "function": task_func,
+            "delay": delay_sec,
+            "repeat": repeat,
+            "interval": interval_sec,
+            "next_run": datetime.now() + timedelta(seconds=delay_sec)
+        }
+        self.tasks.append(task)
+
+    def run(self):
+        """Avvia il ciclo continuo di pianificazione."""
+        def loop():
+            while True:
+                now = datetime.now()
+                for task in self.tasks:
+                    if now >= task["next_run"]:
+                        try:
+                            print(f"🕒 Esecuzione task: {task['name']}")
+                            task["function"]()
+                        except Exception as e:
+                            print(f"❌ Errore nel task {task['name']}: {e}")
+                        if task["repeat"]:
+                            task["next_run"] = now + timedelta(seconds=task["interval"])
+                        else:
+                            self.tasks.remove(task)
+                time.sleep(1)
+
+        threading.Thread(target=loop, daemon=True).start()
+
+    def list_tasks(self):
+        """Lista dei task programmati."""
+        return [(t["name"], t["next_run"]) for t in self.tasks]
+
+    def clear(self):
+        self.tasks.clear()
+
+## scheduler/task_registry.py
+"""
+task_registry.py
+================
+Raccolta di task Mercurius∞ registrabili nello scheduler:
+- simulazioni
+- test
+- azioni periodiche
+"""
+
+from core.pipeline_controller import PipelineController
+from utils.config_loader import load_config
+
+class TaskRegistry:
+    def __init__(self):
+        self.config = load_config("config/config.yaml")
+        self.pipeline = PipelineController(self.config)
+
+    def simulate_trading_session(self):
+        """Task: esegue una sessione completa simulata."""
+        print("▶️ Simulazione trading session")
+        self.pipeline.run_batch_session()
+
+    def multiple_sessions(self, count=3):
+        """Task: n simulazioni."""
+        print(f"▶️ Avvio {count} sessioni simulate")
+        self.pipeline.simulate_multiple_sessions(n=count)
+
+    def health_check(self):
+        """Task diagnostico semplificato."""
+        print("✅ Mercurius∞ pronto. Config:", self.config.get("symbols", []))
+
+## scripts/activate_hud_mobile.py
+"""Script per avviare l'interfaccia mobile HUD."""
+from modules.mobile.note_interface import start_mobile_hud
+
+
+def main():
+    start_mobile_hud()
+
+
+if __name__ == "__main__":  # pragma: no cover
+    main()
+
+
+## scripts/aion_boot.py
+import os
+import sys
+
+# Aggiunge la root del progetto al path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from core.orchestrator import Orchestrator
+from utils.environment import Environment
+
+
+def main():
+    print("🧬 Avvio AION – Modalità: dialogic-autonomous")
+
+    env = Environment()
+    os.environ["RUN_MODE"] = "dialogic-autonomous"
+    print(f"🌐 AION_RUN_MODE = {env.get('RUN_MODE')}")
+
+    orchestrator = Orchestrator()
+
+    print("🔍 Eseguo self-check...")
+    orchestrator.run_self_check(path=".")
+
+    print("🧠 Eseguo missione #SELF_MISSION...")
+    orchestrator.execute_mission("#SELF_MISSION")
+
+    try:
+        from deployment.aion_api import start_api
+        import threading
+        threading.Thread(target=start_api, daemon=True).start()
+        print("🌐 Aion API server avviato sulla porta 8000")
+    except Exception as exc:
+        print(f"⚠️ Avvio Aion API fallito: {exc}")
+
+    try:
+        from modules.voice_bridge.voice_loop import start_listening
+        print("🎙️ Voice recognition attiva...")
+        start_listening()
+    except ImportError:
+        print("⚠️ Voice module non disponibile")
+
+    try:
+        from modules.dashboard import launch_dashboard

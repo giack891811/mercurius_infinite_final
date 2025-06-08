@@ -1,0 +1,968 @@
+Questa è la parte 34 di project_tree. Continua da quella precedente.
+
+        Simula input vocale tramite testo e verifica esecuzione logica.
+        """
+        result = self.controller.listen_and_interpret(simulate_input="analizza l'ambiente")
+        self.assertEqual(result["action"], "analizza_ambiente")
+
+    def test_gesture_input_simulation(self):
+        """
+        Simula interpretazione di gesto riconosciuto.
+        """
+        result = self.controller.receive_gesture("saluto")
+        self.assertEqual(result["action"], "interagisci_utente")
+
+    def test_full_cycle_text_command(self):
+        """
+        Testa un ciclo completo da comando a pianificazione + esecuzione.
+        """
+        self.controller.run_full_cycle(input_text="vai alla base")
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+## tests/test_neuro_learning.py
+"""Test base per motore di apprendimento visivo.""" 
+
+from modules.Neo.neuro_learning_engine import parse_video_and_generate_knowledge
+
+def test_video_learning():
+    result = parse_video_and_generate_knowledge("Plasticità sinaptica")
+    assert "concept" in result
+    print("✅ Test neuro-learning passed")
+
+## tests/test_orchestrator.py
+"""
+Test: test_orchestrator.py
+Responsabilità: Validazione AutonomyController e processi decisionali
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+from orchestrator.autonomy_controller import AutonomyController
+
+
+class TestAutonomyController(unittest.TestCase):
+
+    def setUp(self):
+        self.controller = AutonomyController()
+
+    def test_process_experience(self):
+        """
+        Valida la riflessione e l'apprendimento su azione positiva.
+        """
+        feedback = self.controller.process_experience(
+            action="test_comando",
+            outcome="Eseguito correttamente",
+            success=True,
+            context={"livello": "base"}
+        )
+        self.assertIn("Apprendimento", feedback["learning"])
+        self.assertIn("successo", feedback["reflection"])
+
+    def test_summarize_autonomy(self):
+        """
+        Verifica il report cognitivo riepilogativo.
+        """
+        self.controller.process_experience("cmd", "done", True, {})
+        summary = self.controller.summarize_autonomy()
+        self.assertIn("successes", summary["reflection_summary"])
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+## tests/test_planner.py
+"""
+Test: test_planner.py
+Responsabilità: Verifica per ActionPlanner e GoalManager
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+from modules.planner import ActionPlanner
+from modules.goal_manager import GoalManager
+
+
+class TestActionPlanner(unittest.TestCase):
+
+    def setUp(self):
+        self.planner = ActionPlanner()
+
+    def test_generate_plan_for_known_goal(self):
+        plan = self.planner.generate_plan("analizza_ambiente", {})
+        self.assertGreater(len(plan), 0)
+        self.assertTrue(all("action" in step for step in plan))
+
+    def test_validate_plan(self):
+        plan = self.planner.generate_plan("interagisci_utente", {})
+        self.assertTrue(self.planner.validate_plan(plan))
+
+    def test_describe_plan(self):
+        plan = self.planner.generate_plan("raggiungi_destinazione", {"destinazione": "Base"})
+        description = self.planner.describe_plan(plan)
+        self.assertIn("calcola_percorso", description)
+        self.assertIn("Base", description)
+
+    def test_plan_summary(self):
+        self.planner.generate_plan("analizza_ambiente", {})
+        summary = self.planner.plan_summary()
+        self.assertIn("step_count", summary)
+        self.assertGreater(summary["step_count"], 0)
+
+
+class TestGoalManager(unittest.TestCase):
+
+    def setUp(self):
+        self.manager = GoalManager()
+
+    def test_add_and_sort_goals(self):
+        self.manager.add_goal("goal1", priority=2)
+        self.manager.add_goal("goal2", priority=5)
+        top = self.manager.get_next_goal()
+        self.assertEqual(top.name, "goal2")
+
+    def test_goal_status_transition(self):
+        self.manager.add_goal("goalX")
+        g = self.manager.get_next_goal()
+        self.assertEqual(g.status, "active")
+        self.manager.complete_goal("goalX")
+        all_goals = self.manager.all_goals()
+        self.assertEqual(all_goals[0]["status"], "completed")
+
+    def test_active_and_pending_filter(self):
+        self.manager.add_goal("goalY", priority=1)
+        self.manager.add_goal("goalZ", priority=2)
+        self.manager.get_next_goal()
+        active = self.manager.active_goals()
+        pending = self.manager.pending_goals()
+        self.assertEqual(len(active), 1)
+        self.assertEqual(len(pending), 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+## tests/test_policy.py
+# tests/test_policy.py
+import pytest
+
+pytest.skip("PolicyManager richiede dipendenze yaml", allow_module_level=True)
+
+from safety.policy_manager import PolicyManager
+
+def test_policy_block():
+    mgr = PolicyManager()
+    mgr.add_policy("no_secrets", "password=", "block")
+    assert mgr.check("here is password=123")["name"] == "no_secrets"
+
+## tests/test_reasoner_dispatcher.py
+from modules.reasoner_dispatcher import ReasonerDispatcher
+
+
+class DummyAgent:
+    def __init__(self, resp: str):
+        self.resp = resp
+
+    def elaborate(self, prompt):
+        return self.resp
+
+    def generate(self, prompt):
+        return self.resp
+
+    def analyze(self, prompt):
+        return self.resp
+
+    def validate(self, prompt):
+        return self.resp
+
+
+def test_dispatcher_combines_responses():
+    dispatcher = ReasonerDispatcher()
+    dispatcher.reasoners = {
+        "chatgpt4": DummyAgent("a"),
+        "ollama3": DummyAgent("b"),
+        "azr": DummyAgent("c"),
+        "gpt4o": DummyAgent("final"),
+    }
+    result = dispatcher.dispatch("ciao")
+    assert result == "final"
+
+## tests/test_secure_executor.py
+from modules.sandbox_executor.secure_executor import SecureExecutor
+
+def test_successful_execution():
+    executor = SecureExecutor(timeout=2)
+    result = executor.execute("x = 1 + 1\nprint(x)")
+    assert "2" in result["output"]
+    assert result["error"] == ""
+    assert result["stderr"] == ""
+
+def test_timeout_execution():
+    executor = SecureExecutor(timeout=1)
+    result = executor.execute("while True: pass")
+    assert result["error"] == "Execution timed out."
+
+def test_error_handling():
+    executor = SecureExecutor()
+    result = executor.execute("raise ValueError('Errore di test')")
+    assert "ValueError" in result["error"]
+
+## tests/test_supervisione.py
+"""
+Test: test_supervisione.py
+Responsabilità: Verifica comportamento dei moduli di supervisione e telemetria
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+import pytest
+
+pytest.skip("Tests di supervisione richiedono psutil", allow_module_level=True)
+
+from modules.supervisor import Supervisor
+from utils.telemetry import Telemetry
+
+
+class TestSupervisor(unittest.TestCase):
+
+    def setUp(self):
+        self.supervisor = Supervisor()
+
+    def test_observe_and_report(self):
+        self.supervisor.observe("scan", "ok", True, {"sensor": "lidar"})
+        self.supervisor.observe("move", "collision", False, {"speed": "fast"})
+
+        report = self.supervisor.performance_report()
+        self.assertEqual(report["actions_total"], 2)
+        self.assertEqual(report["successes"], 1)
+        self.assertEqual(report["failures"], 1)
+        self.assertGreaterEqual(report["success_rate"], 0.0)
+
+    def test_last_actions(self):
+        self.supervisor.observe("test1", "done", True, {})
+        self.supervisor.observe("test2", "done", True, {})
+        last = self.supervisor.last_actions(1)
+        self.assertEqual(len(last), 1)
+        self.assertEqual(last[0]["action"], "test2")
+
+
+class TestTelemetry(unittest.TestCase):
+
+    def test_system_info_keys(self):
+        info = Telemetry.system_info()
+        self.assertIn("platform", info)
+        self.assertIn("memory_total_MB", info)
+
+    def test_current_usage_structure(self):
+        usage = Telemetry.current_usage()
+        self.assertIn("cpu_percent", usage)
+        self.assertIn("memory_used_MB", usage)
+
+    def test_process_info(self):
+        process = Telemetry.process_info()
+        self.assertIn("pid", process)
+        self.assertGreaterEqual(process["memory_MB"], 0)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+## tests/test_task_manager_cli.py
+import sys
+import types
+
+# crea moduli Localai.local_ai e Leonai.leon_ai fittizi prima dell'import
+localai_stub = types.SimpleNamespace(LocalAI=lambda: None)
+leonai_stub = types.SimpleNamespace(LeonAI=lambda: None)
+sys.modules.setdefault('modules.Localai.local_ai', localai_stub)
+sys.modules.setdefault('modules.Leonai.leon_ai', leonai_stub)
+
+import importlib
+modules_cli = importlib.import_module('modules.task_manager_cli')
+
+
+def test_create_agent(monkeypatch):
+    called = {}
+
+    def fake_bootstrap():
+        called['ok'] = True
+
+    monkeypatch.setattr(modules_cli, 'bootstrap_agents', fake_bootstrap)
+    modules_cli.create_agent('AgentX')
+    assert called.get('ok')
+
+## tests/test_video_pipeline.py
+
+## tools/conflict_inspector.py
+"""Basic project conflict analyzer."""
+from __future__ import annotations
+
+import pkgutil
+from collections import defaultdict
+
+
+def scan_conflicts() -> None:
+    packages = defaultdict(list)
+    for module in pkgutil.iter_modules():
+        root = module.name.split('.')[0].lower()
+        packages[root].append(module.name)
+    conflicts = {k: v for k, v in packages.items() if len(v) > 1}
+    if not conflicts:
+        print("No obvious module name conflicts found.")
+        return
+    print("Potential conflicts detected:")
+    for base, mods in conflicts.items():
+        joined = ', '.join(mods)
+        print(f" - {base}: {joined}")
+
+
+if __name__ == "__main__":
+    scan_conflicts()
+
+## tools/console.py
+"""
+console.py
+==========
+Console interattiva CLI per lanciare operazioni Mercurius∞.
+Permette esecuzioni batch, test, AZR e analisi performance.
+"""
+
+from core.pipeline_controller import PipelineController
+from core.auto_tester import AutoTester
+from utils.config_loader import load_config
+from modules.experience.experience_memory import ExperienceMemory
+from modules.metrics.performance_metrics import PerformanceMetrics
+
+def main():
+    config = load_config("config.yaml")
+    pipeline = PipelineController(config)
+    tester = AutoTester()
+    memory = ExperienceMemory(config)
+
+    print("=== Mercurius∞ CLI ===")
+    print("1. Esegui una sessione")
+    print("2. Simula 3 sessioni")
+    print("3. Avvia test automatici")
+    print("4. Mostra metriche esperienziali")
+    print("5. Esci")
+
+    choice = input("Scelta: ")
+
+    if choice == "1":
+        pipeline.run_batch_session()
+    elif choice == "2":
+        pipeline.simulate_multiple_sessions(3)
+    elif choice == "3":
+        tester.run()
+        tester.test_signal_confidence()
+        tester.test_adaptive_behavior()
+    elif choice == "4":
+        summary = PerformanceMetrics(memory.get_recent_experiences()).summary()
+        print("📊 Metriche Esperienziali:")
+        for k, v in summary.items():
+            print(f"- {k}: {v}")
+    else:
+        print("Uscita...")
+
+if __name__ == "__main__":
+    main()
+
+## tools/feedback_collector.py
+"""
+feedback_collector.py
+=====================
+Modulo per raccolta di feedback operativi su performance in tempo reale.
+"""
+
+class FeedbackCollector:
+    def __init__(self):
+        self.log = []
+
+    def record(self, symbol, action, result, confidence, feedback):
+        """Registra un feedback strutturato su ogni azione."""
+        entry = {
+            "symbol": symbol,
+            "action": action,
+            "profit": result.get("profit", 0),
+            "confidence": confidence,
+            "feedback": feedback
+        }
+        self.log.append(entry)
+
+    def summary(self):
+        """Statistiche rapide del feedback operativo."""
+        if not self.log:
+            return {}
+        total = len(self.log)
+        avg_profit = sum(f["profit"] for f in self.log) / total
+        avg_conf = sum(f["confidence"] for f in self.log) / total
+        return {
+            "total": total,
+            "avg_profit": avg_profit,
+            "avg_confidence": avg_conf
+        }
+
+    def clear(self):
+        self.log.clear()
+
+## tools/live_logger.py
+"""
+live_logger.py
+==============
+Modulo per stream di log interattivi su terminale o file. Usato per monitoraggio real-time.
+"""
+
+import logging
+import sys
+
+def setup_stream_logger(name="MercuriusLive", level=logging.INFO):
+    logger = logging.getLogger(name)
+    if not logger.hasHandlers():
+        logger.setLevel(level)
+        handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    return logger
+
+def redirect_logs_to_file(name="MercuriusFile", filename="output.log"):
+    logger = logging.getLogger(name)
+    if not logger.hasHandlers():
+        logger.setLevel(logging.DEBUG)
+        file_handler = logging.FileHandler(filename)
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    return logger
+
+## trading/fin_gpt.py
+class FinGPTAgent:
+    def __init__(self):
+        self.name = "FinGPT"
+
+    def execute_task(self, market_context: str, parameters: dict = {}) -> str:
+        return f"[{self.name}] Analisi sentiment su: {market_context}"
+
+## trading/finrl_agent.py
+class FinRLAgent:
+    def __init__(self):
+        self.name = "FinRL"
+
+    def train(self, dataset_path: str, environment: str = "stocks") -> str:
+        return f"[{self.name}] Addestramento RL su dataset: {dataset_path} in env: {environment}"
+
+    def simulate(self, steps: int = 500) -> str:
+        return f"[{self.name}] Simulazione completata per {steps} step RL"
+
+    def deploy(self, model_name: str) -> str:
+        return f"[{self.name}] Strategia RL deployata: {model_name}"
+
+## trading/freqtrade_agent.py
+class FreqtradeAgent:
+    def __init__(self):
+        self.name = "Freqtrade"
+
+    def execute_task(self, strategy_name: str, action: str = "backtest") -> str:
+        return f"[{self.name}] Strategia '{strategy_name}' eseguita in modalità {action}."
+
+## trading/openbb_wrapper.py
+class OpenBBWrapper:
+    def __init__(self):
+        self.name = "OpenBB"
+
+    def execute_task(self, command: str, options: dict = {}) -> str:
+        return f"[{self.name}] Comando OpenBB eseguito: {command}"
+
+## trading/qlib_adapter.py
+class QlibAdapter:
+    def __init__(self):
+        self.name = "Qlib"
+
+    def execute_task(self, symbol: str, timeframe: str, mode: str = "forecast") -> str:
+        return f"[{self.name}] {mode.upper()} per {symbol} su {timeframe} eseguita."
+
+## trading/trading_core.py
+# trading/trading_core.py
+
+"""
+Modulo: trading_core.py
+Descrizione: Integrazione centralizzata per operazioni di trading con TradingView, MetaTrader5 e Interactive Brokers.
+Gestisce segnali, esecuzione ordini e monitoraggio stato.
+Supporta import opzionali e fallback dinamici.
+"""
+
+import logging
+from abc import ABC, abstractmethod
+
+# ─── Import dinamici ─────────────────────────────────────────────────────────
+try:
+    import MetaTrader5 as mt5
+except ImportError:
+    mt5 = None
+
+try:
+    from ib_insync import IB, Stock
+except ImportError:
+    IB = None
+    Stock = None
+
+# ─── Logging Base ────────────────────────────────────────────────────────────
+logging.basicConfig(level=logging.INFO)
+
+# ─── Interfaccia Trading Generale ─────────────────────────────────────────────
+class TradingInterface(ABC):
+    @abstractmethod
+    def connect(self): pass
+
+    @abstractmethod
+    def execute_order(self, symbol: str, action: str, quantity: float): pass
+
+    @abstractmethod
+    def get_status(self) -> str: pass
+
+# ─── TradingView ──────────────────────────────────────────────────────────────
+class TradingViewInterface(TradingInterface):
+    def connect(self):
+        logging.info("✅ TradingView: Nessuna connessione richiesta (webhook o scraping).")
+
+    def execute_order(self, symbol: str, action: str, quantity: float):
+        logging.info(f"📡 Segnale da TradingView: {action.upper()} {quantity} {symbol}")
+
+    def get_status(self) -> str:
+        return "✔️ TradingView operativo (webhook)"
+
+# ─── MetaTrader5 ──────────────────────────────────────────────────────────────
+class MetaTraderInterface(TradingInterface):
+    def connect(self):
+        if mt5 and mt5.initialize():
+            logging.info("✅ Connessione MT5 avviata.")
+        else:
+            logging.warning("⚠️ MT5 non disponibile o inizializzazione fallita.")
+
+    def execute_order(self, symbol: str, action: str, quantity: float):
+        if not mt5:
+            return logging.error("❌ MT5 non disponibile.")
+        try:
+            type_order = mt5.ORDER_TYPE_BUY if action.lower() == "buy" else mt5.ORDER_TYPE_SELL
+            request = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": symbol,
+                "volume": quantity,
+                "type": type_order,
+                "price": mt5.symbol_info_tick(symbol).ask,
+                "deviation": 10,
+                "magic": 234000,
+                "comment": "Mercurius∞ Order",
+                "type_time": mt5.ORDER_TIME_GTC,
+                "type_filling": mt5.ORDER_FILLING_IOC,
+            }
+            result = mt5.order_send(request)
+            logging.info(f"📈 Ordine MT5 eseguito: {result}")
+        except Exception as e:
+            logging.error(f"❌ Errore invio ordine MT5: {e}")
+
+    def get_status(self) -> str:
+        return "🔗 MT5: connesso" if mt5 and mt5.initialize() else "🚫 MT5: non connesso"
+
+# ─── Interactive Brokers (IBKR) ───────────────────────────────────────────────
+class IBKRInterface(TradingInterface):
+    def __init__(self):
+        self.ib = IB() if IB else None
+
+    def connect(self):
+        if self.ib:
+            try:
+                self.ib.connect("127.0.0.1", 7497, clientId=1)
+                logging.info("✅ Connessione IBKR attiva.")
+            except Exception as e:
+                logging.error(f"❌ Errore IBKR: {e}")
+        else:
+            logging.warning("⚠️ IB_insync non disponibile.")
+
+    def execute_order(self, symbol: str, action: str, quantity: float):
+        if not self.ib:
+            return logging.error("❌ IB non inizializzato.")
+[TRONCATO]
+
+## trainer/self_trainer.py
+# trainer/self_trainer.py
+"""
+Modulo: self_trainer.py
+Descrizione: Addestramento self-supervised a partire dalle esperienze accumulate.
+"""
+
+from memory.long_term_memory import LongTermMemory
+import openai
+import os
+from pathlib import Path
+
+class SelfTrainer:
+    def __init__(self, model_name="gpt-3.5-turbo"):
+        self.memory = LongTermMemory()
+        self.model = model_name
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+
+    def build_prompt(self, experiences):
+        prompt = "Sei un assistente AI che migliora le proprie strategie di trading.\n"
+        prompt += "Ecco le ultime esperienze:\n"
+        for exp in experiences[-10:]:
+            prompt += f"- Profit: {exp['result']['profit']}, Qty: {exp['trade']['quantity']}\n"
+        prompt += "\nSuggerisci tre modi per migliorare la strategia."
+        return prompt
+
+    def train_once(self, save_to: Path | None = None):
+        data = self.memory.get_all()
+        if not data:
+            return "Nessuna esperienza."
+        prompt = self.build_prompt(data)
+        try:
+            resp = openai.ChatCompletion.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=300,
+                temperature=0.3,
+            )
+            advice = resp["choices"][0]["message"]["content"]
+            if save_to:
+                save_to.write_text(advice, encoding="utf-8")
+            return advice
+        except Exception as e:
+            return f"⚠️ Training error: {e}"
+
+## trainer/trainer_trigger.py
+# trainer/trainer_trigger.py
+"""
+Modulo: trainer_trigger.py
+Descrizione: Innesca SelfTrainer quando ci sono suff. nuove esperienze o in orario schedulato.
+"""
+
+import time
+import threading
+from pathlib import Path
+from modules.experience.experience_memory import ExperienceMemory
+from trainer.self_trainer import SelfTrainer
+
+class TrainerTrigger:
+    def __init__(self, exp_memory: ExperienceMemory, check_interval=600, min_new_exp=25):
+        self.exp_memory = exp_memory
+        self.check_interval = check_interval
+        self.min_new_exp = min_new_exp
+        self.trainer = SelfTrainer()
+        self._last_count = 0
+        threading.Thread(target=self._loop, daemon=True).start()
+
+    def _loop(self):
+        while True:
+            current_count = len(self.exp_memory.store.get_all())
+            if current_count - self._last_count >= self.min_new_exp:
+                print("🛠️ TrainerTrigger: Nuove esperienze sufficienti, avvio training...")
+                advice = self.trainer.train_once(save_to=Path("logs/latest_strategy_advice.md"))
+                print(f"📚 Suggerimenti strategici:\n{advice}\n")
+                self._last_count = current_count
+            time.sleep(self.check_interval)
+
+## updater/__init__.py
+
+## updater/auto_updater.py
+# updater/auto_updater.py
+"""
+Modulo: auto_updater.py
+Descrizione: Aggiorna Mercurius∞ da remoto (GitHub) o da pacchetto tar/zip.
+• Scarica la nuova versione
+• Esegue migrazioni (requirements, db)
+• Riavvia il processo principale
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+from typing import Literal, Optional
+from analytics.behavior_logger import BehaviorLogger
+
+logger = BehaviorLogger()
+
+
+class AutoUpdater:
+    def __init__(self, repo_url: str, branch: str = "main"):
+        self.repo_url = repo_url
+        self.branch = branch
+        self.repo_dir = Path(".").resolve()
+
+    # ---------- public ----------
+    def update(self, source: Literal["git", "package"] = "git", pkg_file: Optional[str] = None):
+        if source == "git":
+            return self._pull_git()
+        if source == "package" and pkg_file:
+            return self._extract_package(pkg_file)
+        raise ValueError("Sorgente update non valida.")
+
+    # ---------- internal ----------
+    def _pull_git(self):
+        cmd = ["git", "pull", self.repo_url, self.branch]
+        res = subprocess.run(cmd, cwd=self.repo_dir, text=True, capture_output=True)
+        logger.log("auto_update", {"method": "git", "stdout": res.stdout, "stderr": res.stderr})
+        if res.returncode == 0:
+            self._post_update()
+            return "✅ Update da Git completato."
+        return f"❌ Git pull error: {res.stderr}"
+
+    def _extract_package(self, pkg_file: str):
+        import tarfile, zipfile, shutil, tempfile
+
+        tmp = Path(tempfile.mkdtemp())
+        if pkg_file.endswith(".tar.gz"):
+            with tarfile.open(pkg_file) as tar:
+                tar.extractall(tmp)
+        elif pkg_file.endswith(".zip"):
+            with zipfile.ZipFile(pkg_file) as zf:
+                zf.extractall(tmp)
+        else:
+            return "Formato pacchetto non supportato."
+
+        # Copia sopra il codice
+        for item in tmp.iterdir():
+            target = self.repo_dir / item.name
+            if target.exists():
+                shutil.rmtree(target, ignore_errors=True)
+            shutil.move(item, target)
+        logger.log("auto_update", {"method": "package", "file": pkg_file})
+        self._post_update()
+        return "✅ Update da package completato."
+
+    def _post_update(self):
+        subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt", "-q"])
+        logger.log("auto_update", {"action": "deps_installed"})
+
+## utils/config_loader.py
+"""
+config_loader.py
+================
+Carica la configurazione da file YAML (mock per ora).
+"""
+
+def load_config(path):
+    """
+    Mock del caricamento configurazione.
+    In un sistema reale, caricherebbe da YAML/JSON.
+    """
+    return {
+        "symbols": ["AAPL", "TSLA", "GOOG"],
+        "base_trade_qty": 100,
+        "min_confidence": 0.55,
+        "retrain_threshold": 0.65
+    }
+
+## utils/environment.py
+"""
+Modulo: environment.py
+Responsabilità: Caricare e gestire le variabili di ambiente per Mercurius∞
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import os
+from dotenv import load_dotenv
+
+class Environment:
+    """
+    Carica il file .env e fornisce accesso centralizzato alle variabili di ambiente.
+    """
+
+    def __init__(self, dotenv_path: str = ".env"):
+        self.loaded = False
+        self.dotenv_path = dotenv_path
+        self.load_environment()
+
+    def load_environment(self):
+        """
+        Carica le variabili da .env nel sistema.
+        """
+        if os.path.exists(self.dotenv_path):
+            load_dotenv(dotenv_path=self.dotenv_path)
+            self.loaded = True
+        else:
+            raise FileNotFoundError(f"File .env non trovato in {self.dotenv_path}")
+
+    def get(self, key: str, default=None):
+        """
+        Recupera una variabile d'ambiente.
+        """
+        return os.getenv(key, default)
+
+    def get_openai_config(self) -> dict:
+        return {
+            "use_openai": self.get("USE_OPENAI") == "1",
+            "api_key": self.get("OPENAI_API_KEY"),
+            "chat_model": self.get("OPENAI_CHAT_MODEL"),
+            "embed_model": self.get("OPENAI_EMBED_MODEL")
+        }
+
+    def get_web_monitor_credentials(self) -> dict:
+        return {
+            "user": self.get("WM_USER"),
+            "password": self.get("WM_PASS")
+        }
+
+    def get_mcp_config(self) -> dict:
+        return {
+            "token": self.get("MCP_TOKEN"),
+            "introspect_url": self.get("MCP_INTROSPECT_URL")
+        }
+
+    def get_mercurius_api_key(self) -> str:
+        return self.get("MERCURIUS_API_KEY")
+
+    def get_run_mode(self) -> str:
+        """Restituisce la modalità operativa di AION."""
+        return self.get("AION_RUN_MODE", "dialogic-autonomous")
+
+## utils/logger.py
+"""
+logger.py
+=========
+Configurazione logging per il sistema Mercurius∞.
+"""
+
+import logging
+
+def setup_logger(name="MercuriusLogger"):
+    logger = logging.getLogger(name)
+    if not logger.hasHandlers():
+        logger.setLevel(logging.DEBUG)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+    return logger
+
+def get_file_logger(name="MercuriusFileLogger", filename="mercurius.log"):
+    logger = logging.getLogger(name)
+    if not logger.hasHandlers():
+        logger.setLevel(logging.INFO)
+        fh = logging.FileHandler(filename)
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(message)s')
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+    return logger
+
+## utils/telemetry.py
+"""
+Modulo: telemetry.py
+Responsabilità: Raccolta telemetria interna (risorse, moduli, stato sistema)
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import psutil
+import platform
+import os
+import time
+from typing import Dict
+
+
+class Telemetry:
+    """
+    Fornisce dati interni sullo stato del sistema e delle risorse.
+    """
+
+    @staticmethod
+    def system_info() -> Dict:
+        return {
+            "platform": platform.system(),
+            "platform_version": platform.version(),
+            "architecture": platform.machine(),
+            "cpu_count": psutil.cpu_count(),
+            "memory_total_MB": round(psutil.virtual_memory().total / (1024 ** 2), 2),
+        }
+
+    @staticmethod
+    def current_usage() -> Dict:
+        mem = psutil.virtual_memory()
+        return {
+            "cpu_percent": psutil.cpu_percent(interval=0.5),
+            "memory_used_MB": round(mem.used / (1024 ** 2), 2),
+            "memory_percent": mem.percent,
+            "active_processes": len(psutil.pids()),
+            "uptime_sec": int(time.time() - psutil.boot_time())
+        }
+
+    @staticmethod
+    def process_info(pid: int = os.getpid()) -> Dict:
+        p = psutil.Process(pid)
+        return {
+            "pid": pid,
+            "name": p.name(),
+            "status": p.status(),
+            "cpu_percent": p.cpu_percent(interval=0.5),
+            "memory_MB": round(p.memory_info().rss / (1024 ** 2), 2),
+            "threads": p.num_threads()
+        }
+
+## vision/__init__.py
+from .ocr_module import extract_text_from_image
+
+__all__ = ["extract_text_from_image"]
+
+## vision/capture.py
+# vision/capture.py
+
+"""
+Modulo: capture.py
+Descrizione: Acquisizione video da IP Webcam per Mercurius∞. Utilizza OpenCV per estrarre frame in tempo reale.
+"""
+
+import cv2
+import numpy as np
+from typing import Optional
+
+
+def get_frame_from_ip(ip_url: str) -> Optional[np.ndarray]:
+    """
+    Recupera un frame dall'indirizzo IP di una webcam.
+    """
+    cap = cv2.VideoCapture(ip_url)
+    if not cap.isOpened():
+        print("❌ Impossibile connettersi alla webcam IP.")
+        return None
+
+    ret, frame = cap.read()
+    cap.release()
+
+    if not ret:
+        print("⚠️ Nessun frame catturato.")
+        return None
+
+    return frame
+
+## vision/image_vision.py
+# vision/image_vision.py
+
+"""
+Modulo: image_vision.py
+Descrizione: Analisi di immagini statiche con OCR per l'estrazione di testo e concetti visuali.
+Usa pytesseract per lettura OCR e OpenCV per preprocessing.
+"""
+
+import pytesseract
+import cv2
+from typing import List
+
+
+class ImageVision:
+    def __init__(self):
+        pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"  # Aggiorna se necessario
+
+    def read_text_from_image(self, image_path: str) -> str:
+        """
+        Estrae il testo da un'immagine tramite OCR.
+        """
+        try:
+            image = cv2.imread(image_path)
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            text = pytesseract.image_to_string(gray)
+            return text.strip()
+        except Exception as e:
+            return f"[ERRORE OCR]: {e}"
+
+    def extract_labels(self, image_path: str) -> List[str]:

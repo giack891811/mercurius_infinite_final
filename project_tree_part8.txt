@@ -1,0 +1,836 @@
+Questa è la parte 8 di project_tree. Continua da quella precedente.
+
+| Analisi ambientale                    | ✅ Completato via `environment_analyzer.py` |
+
+---
+
+## 3. 🔐 Firma Crittografica Codice
+
+| Funzione                              | Stato |
+|---------------------------------------|--------|
+| SHA256 + timestamp                    | ✅ Completato via `code_signer.py` |
+| Verifica integrità                    | ✅ Completato via `code_verifier.py` |
+| Firma/verifica GPG opzionale          | ✅ Completato via `gpg_support.py` |
+
+---
+
+## ✅ Stato Finale: Mercurius∞ è ora completo
+
+Mercurius∞ è in grado di:
+- Auto-apprendere, evolversi, parlare e osservare
+- Firmare e verificare il proprio codice
+- Lavorare in background su sistemi locali e remoti
+- Interagire in modo adattivo con il contesto
+
+🧠 Pronto per produzione. Tutte le funzionalità principali sono operative e testate.
+
+### --- main.py --- ###
+"""
+main.py
+========
+Punto di ingresso principale per l'esecuzione del sistema Mercurius∞.
+
+Funzionalità:
+- Caricamento ambiente e configurazioni
+- Inizializzazione pipeline: dati, features, modello
+- Esecuzione strategia di trading adattiva
+- Simulazione esperienza cognitiva (AI Evolutiva)
+"""
+
+import logging
+from utils.logger import setup_logger
+from utils.config_loader import load_config
+from utils.environment import Environment
+from data.market_data_handler import MarketDataHandler
+from data.feature_engineering import FeatureEngineer
+from models.model_trainer import ModelTrainer
+from strategies.strategy_executor import StrategyExecutor
+from agents.adaptive_trader import AdaptiveTrader
+from agents.memory_manager import MemoryManager
+from orchestrator.autonomy_controller import AutonomyController
+
+
+def load_env():
+    """Carica variabili d’ambiente e mostra lo stato di Mercurius∞."""
+    env = Environment()
+    print("🔐 Ambiente Mercurius∞ caricato:")
+    print(" - OpenAI Model:", env.get("OPENAI_CHAT_MODEL"))
+    print(" - WM_USER:", env.get("WM_USER"))
+    print(" - MCP_URL:", env.get("MCP_INTROSPECT_URL"))
+    return env
+
+
+def initialize_system():
+    """Inizializza il sistema con tutte le componenti core."""
+    config = load_config("config.yaml")
+    logger = setup_logger(name="MercuriusMain")
+
+    logger.info("📦 Caricamento configurazione completato.")
+    logger.debug(f"Configurazione caricata: {config}")
+
+    memory = MemoryManager(config)
+    data_handler = MarketDataHandler(config)
+    feature_engineer = FeatureEngineer(config)
+    model_trainer = ModelTrainer(config)
+    strategy = StrategyExecutor(config)
+    agent = AdaptiveTrader(config, memory, model_trainer, strategy)
+
+    logger.info("🔧 Sistema inizializzato correttamente.")
+    return {
+        "config": config,
+        "logger": logger,
+        "memory": memory,
+        "data_handler": data_handler,
+        "feature_engineer": feature_engineer,
+        "model_trainer": model_trainer,
+        "strategy": strategy,
+        "agent": agent
+    }
+
+
+def run_pipeline(components: dict):
+    """Esegue il ciclo completo di analisi, apprendimento e trading."""
+    logger = components["logger"]
+    data_handler = components["data_handler"]
+    feature_engineer = components["feature_engineer"]
+    model_trainer = components["model_trainer"]
+    strategy = components["strategy"]
+    agent = components["agent"]
+
+    logger.info("🚀 Avvio pipeline operativa Mercurius∞...")
+
+    raw_data = data_handler.fetch_market_data()
+    logger.info(f"📊 Dati di mercato ricevuti: {len(raw_data)} records")
+
+    features = feature_engineer.transform(raw_data)
+    logger.info("🧠 Feature engineering completato.")
+
+    model = model_trainer.train(features)
+    logger.info("🤖 Modello addestrato con successo.")
+
+    signals = strategy.generate_signals(model, features)
+    logger.info(f"📈 Segnali generati: {len(signals)}")
+
+    agent.execute_trades(signals)
+    logger.info("✅ Trade eseguiti con successo.")
+
+
+def simulate_experience():
+    """Simula esperienze per il controller cognitivo autonomo."""
+    print("\n🧠 Avvio simulazione esperienze cognitive...\n")
+    auto = AutonomyController()
+
+    experiences = [
+        {"action": "Avvia scansione", "outcome": "Area rilevata", "success": True, "context": {}},
+        {"action": "Connessione API", "outcome": "Errore 500", "success": False, "context": {"error": "Internal Server Error"}},
+        {"action": "Naviga percorso", "outcome": "Riuscito", "success": True, "context": {"speed": "3.2m/s"}},
+    ]
+
+    for exp in experiences:
+        output = auto.process_experience(
+            action=exp["action"],
+            outcome=exp["outcome"],
+            success=exp["success"],
+            context=exp["context"]
+        )
+        print("\n🧪 Esperienza:")
+        print(f" - Riflesso: {output.get('reflection', 'N/D')}")
+        print(f" - Apprendimento: {output.get('learning', 'N/D')}")
+
+    print("\n📊 Riepilogo Cognitivo:")
+    print(auto.summarize_autonomy())
+
+    print("\n📘 Insight Globali:")
+    print(auto.report_insights())
+
+
+if __name__ == "__main__":
+    env = load_env()
+    components = initialize_system()
+    run_pipeline(components)
+    simulate_experience()
+
+### --- memory/__init__.py --- ###
+
+
+### --- memory/dialog_style_profile.json --- ###
+{}
+
+### --- memory/episodic_memory.py --- ###
+# memory/episodic_memory.py
+
+"""
+Modulo: episodic_memory.py
+Descrizione: Gestione della memoria episodica per Mercurius∞. Salva e recupera eventi specifici
+con dettagli temporali, contesto e risposta.
+"""
+
+import json
+import os
+from datetime import datetime
+from typing import Dict, List
+
+EPISODES_PATH = "data/memory/episodic_memory.json"
+
+
+class EpisodicMemory:
+    def __init__(self):
+        os.makedirs(os.path.dirname(EPISODES_PATH), exist_ok=True)
+        if not os.path.exists(EPISODES_PATH):
+            with open(EPISODES_PATH, "w") as f:
+                json.dump([], f)
+        self._load_memory()
+
+    def _load_memory(self):
+        with open(EPISODES_PATH, "r") as f:
+            self.episodes = json.load(f)
+
+    def _save_memory(self):
+        with open(EPISODES_PATH, "w") as f:
+            json.dump(self.episodes, f, indent=2)
+
+    def record_episode(self, context: str, user_input: str, ai_response: str):
+        episode = {
+            "timestamp": datetime.now().isoformat(),
+            "context": context,
+            "user_input": user_input,
+            "ai_response": ai_response
+        }
+        self.episodes.append(episode)
+        self._save_memory()
+
+    def get_recent_episodes(self, limit: int = 10) -> List[Dict]:
+        return self.episodes[-limit:]
+
+    def search_episodes(self, keyword: str) -> List[Dict]:
+        return [ep for ep in self.episodes if keyword.lower() in ep["user_input"].lower() or keyword.lower() in ep["ai_response"].lower()]
+
+### --- memory/genesis_memory.py --- ###
+class GenesisMemory:
+    def __init__(self):
+        self.short_term = {}
+        self.long_term = {}
+
+    def save_context(self, key: str, value: str, long: bool = False):
+        if long:
+            self.long_term[key] = value
+        else:
+            self.short_term[key] = value
+
+    def recall(self, key: str) -> str:
+        return self.short_term.get(key) or self.long_term.get(key, "∅")
+
+    def forget(self, key: str):
+        self.short_term.pop(key, None)
+        self.long_term.pop(key, None)
+
+### --- memory/long_term_memory.py --- ###
+"""
+Modulo: long_term_memory.py
+Descrizione: Gestisce la memoria a lungo termine per Mercurius∞.
+Offre due possibili backend di archiviazione:
+  - SQLite (database locale)
+  - JSON/YAML (file locale)
+L’utente può scegliere quale backend attivare passando il parametro 'backend' al costruttore.
+"""
+
+import sqlite3
+import json
+from pathlib import Path
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+# ----------------------------------------------------------------------
+# CONFIGURAZIONE DEI PATH
+# ----------------------------------------------------------------------
+
+# Percorso del database SQLite
+DB_PATH = Path("data/memory/long_term_memory.db")
+
+# Cartella e file per il backend JSON
+JSON_DIR  = Path("memory/long_term_data")
+JSON_DIR.mkdir(parents=True, exist_ok=True)
+JSON_DEFAULT_FILE = JSON_DIR / "experiences.json"
+
+# ----------------------------------------------------------------------
+# CLASSE: _SQLiteMemory
+# ----------------------------------------------------------------------
+
+class _SQLiteMemory:
+    """
+    Backend SQLite per la memoria a lungo termine.
+    Crea una tabella 'memories' con i campi:
+      - id (INTEGER PRIMARY KEY AUTOINCREMENT)
+      - timestamp (TEXT)
+      - category  (TEXT)
+      - content   (TEXT)
+    """
+
+    def __init__(self, db_path: Union[str, Path] = DB_PATH):
+        db_path = Path(db_path)
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.conn = sqlite3.connect(str(db_path))
+        self._create_table()
+
+    def _create_table(self) -> None:
+        with self.conn:
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS memories (
+                    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT,
+                    category  TEXT,
+                    content   TEXT
+                )
+            """)
+
+    def store_memory(self, content: str, category: str = "general") -> None:
+        timestamp = datetime.utcnow().isoformat()
+        with self.conn:
+            self.conn.execute("""
+                INSERT INTO memories (timestamp, category, content)
+                VALUES (?, ?, ?)
+            """, (timestamp, category, content))
+
+    def retrieve_memories(self, category: Optional[str] = None, limit: int = 50) -> List[Tuple[str, str, str]]:
+        cursor = self.conn.cursor()
+        if category:
+            cursor.execute("""
+                SELECT timestamp, category, content FROM memories
+                WHERE category = ?
+                ORDER BY timestamp DESC
+                LIMIT ?
+            """, (category, limit))
+        else:
+            cursor.execute("""
+                SELECT timestamp, category, content FROM memories
+                ORDER BY timestamp DESC
+                LIMIT ?
+            """, (limit,))
+        return cursor.fetchall()
+
+    def search_memory(self, keyword: str, limit: int = 20) -> List[Tuple[str, str, str]]:
+        cursor = self.conn.cursor()
+        query = """
+            SELECT timestamp, category, content FROM memories
+            WHERE content LIKE ?
+            ORDER BY timestamp DESC
+            LIMIT ?
+        """
+        cursor.execute(query, (f"%{keyword}%", limit))
+        return cursor.fetchall()
+
+    def close(self) -> None:
+        self.conn.close()
+
+# ----------------------------------------------------------------------
+# CLASSE: _JSONMemory
+# ----------------------------------------------------------------------
+
+class _JSONMemory:
+    """
+    Backend JSON per la memoria a lungo termine.
+    Gestisce un file JSON contenente una lista di dizionari,
+    ognuno con chiavi almeno: 'timestamp', 'content', eventualmente altre informazioni.
+    """
+
+    def __init__(self, filename: Union[str, Path] = JSON_DEFAULT_FILE):
+        self.filepath = Path(filename)
+        if not self.filepath.exists():
+            self._write_json([])
+
+    def save_experience(self, experience: Dict[str, Any]) -> None:
+        experience["timestamp"] = datetime.utcnow().isoformat()
+        data = self._read_json()
+        data.append(experience)
+        self._write_json(data)
+
+    def get_all(self) -> List[Dict[str, Any]]:
+        return self._read_json()
+
+    def find_by_tag(self, tag: str) -> List[Dict[str, Any]]:
+        return [exp for exp in self._read_json() if tag in exp.get("tags", [])]
+
+    def _read_json(self) -> List[Dict[str, Any]]:
+        with open(self.filepath, "r", encoding="utf-8") as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return []
+
+    def _write_json(self, data: List[Dict[str, Any]]) -> None:
+        with open(self.filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+# ----------------------------------------------------------------------
+# CLASSE PRINCIPALE: LongTermMemory
+# ----------------------------------------------------------------------
+
+class LongTermMemory:
+    def __init__(
+        self,
+        backend: str = "sqlite",
+        sqlite_path: Union[str, Path] = DB_PATH,
+        json_filename: Union[str, Path] = JSON_DEFAULT_FILE
+    ):
+        backend = backend.lower()
+        if backend not in ("sqlite", "json"):
+            # Se backend è un file json, usa backend json
+            if isinstance(backend, str) and backend.endswith(".json"):
+                backend, json_filename = "json", Path(backend)
+            else:
+                raise ValueError("Il parametro 'backend' deve essere 'sqlite' o 'json'.")
+        self.backend = backend
+
+        if self.backend == "sqlite":
+            self._db = _SQLiteMemory(db_path=sqlite_path)
+        else:
+            self._db = _JSONMemory(filename=json_filename)
+
+    def store_memory(self, content: str, category: str = "general") -> None:
+        if self.backend != "sqlite":
+            raise RuntimeError("store_memory() disponibile solo con backend='sqlite'. Usa save_experience() per JSON.")
+        self._db.store_memory(content, category)
+
+    def retrieve_memories(self, category: Optional[str] = None, limit: int = 50) -> List[Tuple[str, str, str]]:
+        if self.backend != "sqlite":
+            raise RuntimeError("retrieve_memories() disponibile solo con backend='sqlite'.")
+        return self._db.retrieve_memories(category=category, limit=limit)
+
+    def search_memory(self, keyword: str, limit: int = 20) -> List[Tuple[str, str, str]]:
+        if self.backend != "sqlite":
+            raise RuntimeError("search_memory() disponibile solo con backend='sqlite'.")
+        return self._db.search_memory(keyword, limit)
+
+    def save_experience(self, experience: Dict[str, Any]) -> None:
+        if self.backend != "json":
+            raise RuntimeError("save_experience() disponibile solo con backend='json'. Usa store_memory() per SQLite.")
+        self._db.save_experience(experience)
+
+    def get_all(self) -> List[Dict[str, Any]]:
+        if self.backend != "json":
+            raise RuntimeError("get_all() disponibile solo con backend='json'.")
+        return self._db.get_all()
+
+    def find_by_tag(self, tag: str) -> List[Dict[str, Any]]:
+        if self.backend != "json":
+            raise RuntimeError("find_by_tag() disponibile solo con backend='json'.")
+        return self._db.find_by_tag(tag)
+
+    def close(self) -> None:
+        if self.backend == "sqlite":
+            self._db.close()
+
+# ======================================================================
+# ESEMPIO DI UTILIZZO
+# ======================================================================
+if __name__ == "__main__":
+    lm_sql = LongTermMemory(backend="sqlite")
+    lm_sql.store_memory("Prima memoria di test", category="test")
+    ricordi = lm_sql.retrieve_memories(limit=5)
+    print("Ricordi da SQLite:", ricordi)
+    lm_sql.close()
+
+    lm_js = LongTermMemory(backend="json", json_filename=JSON_DIR / "test_experiences.json")
+    lm_js.save_experience({"content": "Esperienza di prova", "category": "debug", "tags": ["test", "example"]})
+    tutte = lm_js.get_all()
+    print("Esperienze da JSON:", tutte)
+
+### --- memory/memory_core.py --- ###
+# memory/memory_core.py
+
+"""
+Modulo: memory_core.py
+Descrizione: Gestione unificata della memoria cognitiva (a lungo termine, episodica e log sinaptico)
+per Mercurius∞. Punto centrale di accesso e coordinamento dei moduli mnemonici.
+"""
+
+from memory.long_term_memory import LongTermMemory
+from memory.episodic_memory import EpisodicMemory
+from memory.synaptic_log import SynapticLog
+
+
+class MemoryCore:
+    def __init__(self):
+        self.long_term = LongTermMemory()
+        self.episodic = EpisodicMemory()
+        self.synaptic_log = SynapticLog()
+        self.synaptic_log.log_event("MemoryCore", "initialized")
+
+    def store_fact(self, content: str, category: str = "general"):
+        self.long_term.store_memory(content, category)
+        self.synaptic_log.log_event("LongTermMemory", "store_fact", f"Category: {category}")
+
+    def recall_facts(self, category: str = None, limit: int = 10):
+        facts = self.long_term.retrieve_memories(category, limit)
+        self.synaptic_log.log_event("LongTermMemory", "recall_facts", f"Category: {category}")
+        return facts
+
+    def record_interaction(self, context: str, user_input: str, ai_response: str):
+        self.episodic.record_episode(context, user_input, ai_response)
+        self.synaptic_log.log_event("EpisodicMemory", "record_interaction", f"Input: {user_input[:30]}...")
+
+    def review_recent_episodes(self, limit: int = 5):
+        episodes = self.episodic.get_recent_episodes(limit)
+        self.synaptic_log.log_event("EpisodicMemory", "review_recent_episodes")
+        return episodes
+
+    def search_knowledge(self, keyword: str):
+        facts = self.long_term.search_memory(keyword)
+        episodes = self.episodic.search_episodes(keyword)
+        self.synaptic_log.log_event("MemoryCore", "search_knowledge", f"Keyword: {keyword}")
+        return {"facts": facts, "episodes": episodes}
+
+### --- memory/neural_plasticity.py --- ###
+# memory/neural_plasticity.py
+
+"""
+Estensione: Plasticità neurale dinamica di Mercurius∞
+Descrizione: Mappa adattiva della frequenza di utilizzo dei moduli e suggerimenti di rinforzo o disattivazione.
+"""
+
+import json
+import os
+from datetime import datetime
+
+class NeuralPlasticity:
+    def __init__(self, map_path="memory/plasticity_map.json"):
+        self.map_path = map_path
+        self.map = self.load_map()
+
+    def load_map(self):
+        if os.path.exists(self.map_path):
+            with open(self.map_path, "r") as f:
+                return json.load(f)
+        return {}
+
+    def save_map(self):
+        with open(self.map_path, "w") as f:
+            json.dump(self.map, f, indent=2)
+
+    def track_usage(self, module_name: str):
+        if module_name not in self.map:
+            self.map[module_name] = {"count": 0, "last_used": None}
+        self.map[module_name]["count"] += 1
+        self.map[module_name]["last_used"] = datetime.now().isoformat()
+        self.save_map()
+
+    def recommend_adaptation(self) -> list:
+        sorted_usage = sorted(self.map.items(), key=lambda x: x[1]["count"], reverse=True)
+        return [f"{mod[0]} → {mod[1]['count']} utilizzi" for mod in sorted_usage[:5]]
+
+    def strengthen_pathways(self):
+        adaptations = self.recommend_adaptation()
+        print("🔧 Rinforzo neurale per i moduli più utilizzati:")
+        for line in adaptations:
+            print(f"  ⚡ {line}")
+        return adaptations
+
+### --- memory/synaptic_log.py --- ###
+# memory/synaptic_log.py
+
+"""
+Modulo: synaptic_log.py
+Descrizione: Registro cronologico delle interazioni e modifiche sinaptiche della memoria cognitiva.
+Utile per analisi, debug e tracciamento evolutivo del comportamento AI.
+"""
+
+import os
+from datetime import datetime
+from typing import Optional
+
+LOG_PATH = "data/memory/synaptic_log.txt"
+
+
+class SynapticLog:
+    def __init__(self):
+        os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+        if not os.path.exists(LOG_PATH):
+            with open(LOG_PATH, "w") as f:
+                f.write("=== Synaptic Log Initialized ===\n")
+
+    def log_event(self, module: str, action: str, detail: Optional[str] = ""):
+        timestamp = datetime.now().isoformat()
+        log_entry = f"[{timestamp}] [{module}] {action}"
+        if detail:
+            log_entry += f" - {detail}"
+        with open(LOG_PATH, "a") as f:
+            f.write(log_entry + "\n")
+
+    def get_log_tail(self, lines: int = 20) -> str:
+        with open(LOG_PATH, "r") as f:
+            return "\n".join(f.readlines()[-lines:])
+
+### --- mercurius_infinite.egg-info/SOURCES.txt --- ###
+README.md
+pyproject.toml
+setup.py
+generated_agents/__init__.py
+mercurius_infinite.egg-info/PKG-INFO
+mercurius_infinite.egg-info/SOURCES.txt
+mercurius_infinite.egg-info/dependency_links.txt
+mercurius_infinite.egg-info/entry_points.txt
+mercurius_infinite.egg-info/top_level.txt
+tests/test_autonomia_cognitiva.py
+tests/test_end2end.py
+tests/test_multimodal.py
+tests/test_neuro_learning.py
+tests/test_orchestrator.py
+tests/test_planner.py
+tests/test_supervisione.py
+
+### --- mercurius_infinite.egg-info/dependency_links.txt --- ###
+
+
+### --- mercurius_infinite.egg-info/entry_points.txt --- ###
+[console_scripts]
+merc-start = start_fullmode:main
+
+### --- mercurius_infinite.egg-info/top_level.txt --- ###
+generated_agents
+
+### --- mobile_jarvis_ui/README.md --- ###
+# Mobile Jarvis UI
+
+Flutter-based HUD interface for Mercurius∞. The app offers voice interaction using
+`speech_to_text` and `flutter_tts`, with simple hotword detection ("Hey Mercurius"
+or "Aion attivati"). Requests are sent to the local Aion API (`/ask`) which in
+turn forwards them to the orchestrator.
+
+Build and run using the Flutter SDK on an Android device:
+
+```bash
+flutter run -d android
+```
+
+### --- mobile_jarvis_ui/analysis_options.yaml --- ###
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+#
+# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
+# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
+# invoked from the command line by running `flutter analyze`.
+
+# The following line activates a set of recommended lints for Flutter apps,
+# packages, and plugins designed to encourage good coding practices.
+include: package:flutter_lints/flutter.yaml
+
+
+linter:
+  # The lint rules applied to this project can be customized in the
+  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
+  # included above or to enable additional rules. A list of all available lints
+  # and their documentation is published at https://dart.dev/lints.
+  #
+  # Instead of disabling a lint rule for the entire project in the
+  # section below, it can also be suppressed for a single line of code
+  # or a specific dart file by using the `// ignore: name_of_lint` and
+  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
+  # producing the lint.
+  rules:
+    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
+    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options
+
+### --- mobile_jarvis_ui/assets/placeholder.txt --- ###
+placeholder
+
+### --- mobile_jarvis_ui/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json --- ###
+{
+  "images" : [
+    {
+      "size" : "20x20",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-20x20@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-20x20@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-40x40@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-40x40@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "60x60",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-60x60@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "60x60",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-60x60@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-20x20@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-20x20@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-29x29@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-29x29@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-40x40@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-40x40@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "76x76",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-76x76@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "76x76",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-76x76@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "83.5x83.5",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-83.5x83.5@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "1024x1024",
+      "idiom" : "ios-marketing",
+      "filename" : "Icon-App-1024x1024@1x.png",
+      "scale" : "1x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
+
+### --- mobile_jarvis_ui/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json --- ###
+{
+  "images" : [
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage.png",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage@3x.png",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
+
+### --- mobile_jarvis_ui/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md --- ###
+# Launch Screen Assets
+
+You can customize the launch screen with your own desired assets by replacing the image files in this directory.
+
+You can also do it by opening your Flutter project's Xcode project with `open ios/Runner.xcworkspace`, selecting `Runner/Assets.xcassets` in the Project Navigator and dropping in the desired images.
+
+### --- mobile_jarvis_ui/linux/CMakeLists.txt --- ###
+# Project-level configuration.
+cmake_minimum_required(VERSION 3.13)
+project(runner LANGUAGES CXX)
+
+# The name of the executable created for the application. Change this to change
+# the on-disk name of your application.
+set(BINARY_NAME "mobile_jarvis_ui")
+# The unique GTK application identifier for this application. See:
+# https://wiki.gnome.org/HowDoI/ChooseApplicationID
+set(APPLICATION_ID "com.example.mobile_jarvis_ui")
+
+# Explicitly opt in to modern CMake behaviors to avoid warnings with recent
+# versions of CMake.
+cmake_policy(SET CMP0063 NEW)
+
+# Load bundled libraries from the lib/ directory relative to the binary.
+set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
+
+# Root filesystem for cross-building.
+if(FLUTTER_TARGET_PLATFORM_SYSROOT)
+  set(CMAKE_SYSROOT ${FLUTTER_TARGET_PLATFORM_SYSROOT})
+  set(CMAKE_FIND_ROOT_PATH ${CMAKE_SYSROOT})
+  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+  set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+endif()
+
+# Define build configuration options.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE "Debug" CACHE
+    STRING "Flutter build mode" FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Profile" "Release")
+endif()
+
+# Compilation settings that should be applied to most targets.
+#
+# Be cautious about adding new options here, as plugins use this function by
+# default. In most cases, you should add new options to specific targets instead
+# of modifying this function.

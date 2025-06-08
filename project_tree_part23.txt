@@ -1,0 +1,876 @@
+Questa è la parte 23 di project_tree. Continua da quella precedente.
+
+            st.session_state["result"] = f"Errore: {e}"
+            st.session_state["kpi"]["File Status"] = "❌ Errore"
+
+# ─── Tab 2: Output ─────────────────────────────────────────────────────────────
+with tab2:
+    st.subheader("📖 Risultati Apprendimento")
+    st.code(st.session_state.get("result", "⏳ Nessun contenuto ancora elaborato."), language="markdown")
+
+# ─── Stub CLI (Fallback o uso parallelo) ───────────────────────────────────────
+class DashboardStub:
+    def __init__(self):
+        self.kpi = {}
+
+    def update(self, name, value):
+        self.kpi[name] = value
+
+    def show(self):
+        print("=== MERCURIUS∞ CLI DASHBOARD ===")
+        for k, v in self.kpi.items():
+[TRONCATO]
+
+## interface/genesis_bridge.py
+class GenesisBridge:
+    def __init__(self):
+        self.hotword = "Hey Mercurius, attiva GENESIS"
+
+    def activate_from_voice(self, phrase: str) -> bool:
+        return phrase.strip().lower() == self.hotword.lower()
+
+    def activate_from_command(self, cmd: str) -> bool:
+        return cmd.strip().lower() == "#genesis_mode"
+
+    def trigger_activation(self, method: str = "auto"):
+        print("🚀 Attivazione GENESIS in corso via:", method)
+        return True
+
+## interop/colab_bridge.py
+"""
+Modulo: colab_bridge.py
+Descrizione: Rilevamento ed estensione delle capacità di esecuzione su Google Colab.
+"""
+
+def is_colab():
+    try:
+        import google.colab as _
+        return True
+    except ImportError:
+        return False
+
+def setup_drive():
+    if is_colab():
+        from google.colab import drive
+        drive.mount('/content/drive')
+        print("✅ Google Drive montato.")
+    else:
+        print("⚠️ Non in ambiente Colab: salto montaggio Drive.")
+
+if __name__ == "__main__":
+    setup_drive()
+
+## interop/github_handler.py
+# interop/github_handler.py
+
+"""
+Modulo: github_handler.py
+Descrizione: Gestione automatica della sincronizzazione con GitHub.
+"""
+
+from git import Repo, GitCommandError
+
+class GitHubHandler:
+    def __init__(self, repo_path: str = ".", remote_name: str = "origin"):
+        self.repo = Repo(repo_path)
+        self.remote = self.repo.remote(name=remote_name)
+
+    def pull_latest(self):
+        try:
+            self.remote.pull()
+            print("✅ Pull completato da GitHub.")
+        except GitCommandError as e:
+            print(f"❌ Errore durante il pull: {e}")
+
+    def push_changes(self, commit_message: str = "🔄 Update automatico da Mercurius"):
+        try:
+            self.repo.git.add(A=True)
+            self.repo.index.commit(commit_message)
+            self.remote.push()
+            print("🚀 Push effettuato con successo.")
+        except GitCommandError as e:
+            print(f"❌ Errore durante il push: {e}")
+
+## interop/local_controller.py
+# interop/local_controller.py
+
+"""
+Modulo: local_controller.py
+Descrizione: Controllo di comandi, cartelle e file del PC locale.
+"""
+
+import os
+import subprocess
+
+class LocalController:
+    def list_dir(self, path="."):
+        return os.listdir(path)
+
+    def open_file(self, filepath):
+        if os.path.exists(filepath):
+            if os.name == "nt":  # Windows
+                os.startfile(filepath)
+            elif os.name == "posix":
+                subprocess.call(["open" if "darwin" in os.sys.platform else "xdg-open", filepath])
+            return True
+        return False
+
+    def run_script(self, script_path):
+        try:
+            subprocess.run(["python", script_path])
+            return True
+        except Exception as e:
+            print(f"❌ Errore nell'esecuzione: {e}")
+            return False
+
+## learning/__init__.py
+from .video_learner import extract_insights_from_video
+from .document_parser import parse_document
+
+__all__ = ["extract_insights_from_video", "parse_document"]
+
+## learning/document_parser.py
+# learning/document_parser.py
+
+"""
+Modulo: document_parser.py
+Descrizione: Parsing e analisi semantica di contenuti testuali provenienti da PDF e URL per Mercurius∞.
+Estrae testi, titoli e concetti chiave.
+"""
+
+import fitz  # PyMuPDF
+import requests
+from bs4 import BeautifulSoup
+from typing import List
+
+
+class DocumentParser:
+    def extract_text_from_pdf(self, pdf_path: str) -> str:
+        """
+        Estrae il testo da un file PDF.
+        """
+        text = ""
+        try:
+            doc = fitz.open(pdf_path)
+            for page in doc:
+                text += page.get_text()
+            doc.close()
+        except Exception as e:
+            text = f"[ERRORE PDF]: {e}"
+        return text
+
+    def extract_text_from_url(self, url: str) -> str:
+        """
+        Estrae contenuti leggibili da una pagina web.
+        """
+        try:
+            response = requests.get(url, timeout=10)
+            soup = BeautifulSoup(response.text, "html.parser")
+            paragraphs = soup.find_all("p")
+            return "\n".join(p.get_text() for p in paragraphs)
+        except Exception as e:
+            return f"[ERRORE URL]: {e}"
+
+    def extract_keywords(self, content: str, top_n: int = 10) -> List[str]:
+        """
+        Estrae parole chiave semplici dal contenuto.
+        """
+        import re
+        from collections import Counter
+
+        words = re.findall(r"\b\w{5,}\b", content.lower())
+        common = Counter(words).most_common(top_n)
+        return [word for word, _ in common]
+
+
+def parse_document(source: str) -> dict:
+    """High level helper to parse a PDF file or URL."""
+    parser = DocumentParser()
+    if source.lower().startswith("http"):
+        text = parser.extract_text_from_url(source)
+    else:
+        text = parser.extract_text_from_pdf(source)
+    keywords = parser.extract_keywords(text)
+    return {"text": text, "keywords": keywords}
+
+## learning/video_learner.py
+"""
+Modulo: video_learner.py
+Descrizione: Apprendimento da contenuti video e audio (YouTube, file locali).
+Estrae audio → trascrive con Whisper → restituisce sintesi concettuale.
+Supporta fallback se i moduli non sono disponibili.
+Autore: Mercurius∞ AI Engineer
+"""
+
+import os
+import tempfile
+
+# ─── Import Condizionali ──────────────────────────────────────────────
+try:
+    from pytube import YouTube
+    import whisper
+    MODULES_AVAILABLE = True
+except ImportError:
+    YouTube = None
+    whisper = None
+    MODULES_AVAILABLE = False
+
+class VideoLearner:
+    def __init__(self, model_name="large-v3"):
+        if MODULES_AVAILABLE and whisper:
+            self.model = whisper.load_model(model_name)
+        else:
+            self.model = None
+
+    def download_audio(self, url: str) -> str:
+        """
+        Scarica solo l'audio da un video YouTube in formato MP4.
+        """
+        if not MODULES_AVAILABLE or YouTube is None:
+            return "[❌ pytube non disponibile]"
+        try:
+            yt = YouTube(url)
+            stream = yt.streams.filter(only_audio=True).first()
+            out_path = tempfile.mktemp(suffix=".mp4")
+            stream.download(filename=out_path)
+            return out_path
+        except Exception as e:
+            return f"[❌ Errore download audio]: {e}"
+
+    def transcribe_audio(self, file_path: str) -> str:
+        """
+        Trascrive un file audio/video tramite Whisper.
+        Accetta qualsiasi file locale audio o video.
+        """
+        if not self.model:
+            return "[❌ Whisper non disponibile]"
+        try:
+            result = self.model.transcribe(file_path, language="it")
+            return result.get("text", "[nessuna trascrizione]")
+        except Exception as e:
+            return f"[❌ Errore Whisper]: {e}"
+
+    def extract_insights_from_video(self, source: str) -> str:
+        """
+        Processo completo:
+        - Se input è un file locale esistente (MP4/MP3/etc.), trascrive direttamente.
+        - Se input è un URL, scarica l'audio e poi trascrive.
+        """
+        if not MODULES_AVAILABLE:
+            return "[❌ Moduli mancanti: pytube, whisper]"
+        
+        if os.path.exists(source):
+            # Input è un file locale
+            return self.transcribe_audio(source)
+        
+        # Altrimenti tratta l’input come URL YouTube
+        audio_path = self.download_audio(source)
+        if audio_path.startswith("[❌"):
+            return audio_path
+        
+        return self.transcribe_audio(audio_path)
+
+
+def extract_insights_from_video(source: str) -> str:
+    """Convenience wrapper to use VideoLearner in functional style."""
+    learner = VideoLearner()
+    return learner.extract_insights_from_video(source)
+
+# Fine modulo — Mercurius∞ è pronto a divorare video, audio e URL senza pietà.
+
+## llm/llm_router.py
+# llm/llm_router.py
+
+"""
+Modulo: llm_router.py
+Descrizione: Router centralizzato per la gestione dei Large Language Models (LLM) usati da Mercurius∞.
+Supporta OpenAI, Ollama e GPT-4o. Seleziona il modello in base a disponibilità, compito o preferenza.
+"""
+
+import requests
+import openai
+import json
+import os
+
+CONFIG_PATH = "config/llm_config.json"
+
+
+class LLMRouter:
+    def __init__(self):
+        if os.path.exists(CONFIG_PATH):
+            with open(CONFIG_PATH, "r") as f:
+                self.config = json.load(f)
+        else:
+            self.config = {
+                "default_model": "openai",
+                "openai_key": "",
+                "ollama_url": "http://localhost:11434",
+                "gpt4o_token": ""
+            }
+
+    def query(self, prompt: str, model: str = None) -> str:
+        engine = model or self.config["default_model"]
+        if engine == "openai":
+            return self._query_openai(prompt)
+        elif engine == "ollama":
+            return self._query_ollama(prompt)
+        elif engine == "gpt4o":
+            return self._query_gpt4o(prompt)
+        else:
+            return f"[ERRORE] Modello non riconosciuto: {engine}"
+
+    def _query_openai(self, prompt: str) -> str:
+        try:
+            openai.api_key = self.config["openai_key"]
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            return f"[OpenAI Errore]: {e}"
+
+    def _query_ollama(self, prompt: str) -> str:
+        try:
+            response = requests.post(
+                f"{self.config['ollama_url']}/api/generate",
+                json={"model": "llama3", "prompt": prompt}
+            )
+            return response.json().get("response", "[nessuna risposta da Ollama]")
+        except Exception as e:
+            return f"[Ollama Errore]: {e}"
+
+    def _query_gpt4o(self, prompt: str) -> str:
+        try:
+            headers = {"Authorization": f"Bearer {self.config['gpt4o_token']}"}
+            response = requests.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers=headers,
+                json={
+                    "model": "gpt-4o",
+                    "messages": [{"role": "user", "content": prompt}]
+                }
+            )
+            return response.json()["choices"][0]["message"]["content"]
+        except Exception as e:
+            return f"[GPT-4o Errore]: {e}"
+
+## logs/README.md
+# 📜 Logs – Tracciamento Neuronale
+
+Contiene file di log e modulo `genesis_logger.py`.
+
+## Funzione
+
+Salvare eventi neurali, attivazioni, errori, cicli decisionali.
+
+## logs/aion_activation_report.md
+# Aion Activation Report
+
+- Aion API server added (`deployment/aion_api.py`).
+- Boot script launches the API server automatically.
+- Flutter UI now detects hotwords and displays responses.
+- Use `flutter run -d android` to build the app.
+
+## logs/self_tuning_report.md
+# 📘 Rapporto Auto-Adattamento – Mercurius∞
+
+🔧 Modulo incompleto: core\dialogue_manager.py
+🔧 Modulo incompleto: core\self_tuner.py
+🔧 Modulo incompleto: core\thinking_loop.py
+🔧 Modulo incompleto: deploy\deployment_handler.py
+🔧 Modulo incompleto: evolution\logic_injector.py
+🔧 Modulo incompleto: memory\long_term_memory.py
+🔧 Modulo incompleto: modules\network_analyzer.py
+🔧 Modulo incompleto: security\pairing_manager.py
+🔧 Modulo incompleto: tests\test_modular_end2end.py
+🔧 Modulo incompleto: tests\test_neuro_learning.py
+🔧 Modulo incompleto: tests\test_policy.py
+🔧 Modulo incompleto: tests\test_secure_executor.py
+🔧 Modulo incompleto: trading\trading_core.py
+🔧 Modulo incompleto: utils\environment.py
+🔧 Modulo incompleto: vision\ocr_reader.py
+🔧 Modulo incompleto: modules\local\leon_ai_bridge.py
+🔧 Modulo incompleto: modules\mobile\note_interface.py
+🔧 Modulo incompleto: modules\voice_bridge\multimodal_controller.py
+💡 Suggerimento: consolidare dashboard → orchestrator con feedback loop.
+
+## logs/thinking_feed.md
+# Thinking Feed
+
+
+
+## logs/upgrade_status.md
+# ✅ Mercurius∞ – Stato Avanzamento Upgrade
+
+> Data: 2025-05-31  
+> Versione: Mercurius∞ v3.0 – Autonomous Personal AI
+
+---
+
+## 1. 🛰️ Deploy su cloud personale
+
+| Funzione                              | Stato |
+|---------------------------------------|--------|
+| Avvio automatico su boot              | ✅ Completato via `autostart_manager.py` |
+| Telemetria (uptime, stato, log)       | ✅ Completato via `telemetry_monitor.py` |
+| Accesso remoto sicuro (FastAPI/SSH)   | ✅ Completato via `remote_access.py` |
+| Task programmati                      | ✅ Completato via `task_scheduler.py` |
+
+---
+
+## 2. 🔊👁️ Upgrade Voce + Visione Avanzata
+
+| Funzione                              | Stato |
+|---------------------------------------|--------|
+| STT con Whisper v3                    | ✅ Completato via `whisper_engine.py` |
+| Visione YOLOv8 e OCR                  | ✅ Completato via `yolov8_engine.py`, `ocr_reader.py` |
+| Reazione a contesto (visivo/emotivo) | ✅ Completato via `context_adapter.py`, `sensory_bus.py` |
+| Analisi ambientale                    | ✅ Completato via `environment_analyzer.py` |
+
+---
+
+## 3. 🔐 Firma Crittografica Codice
+
+| Funzione                              | Stato |
+|---------------------------------------|--------|
+| SHA256 + timestamp                    | ✅ Completato via `code_signer.py` |
+| Verifica integrità                    | ✅ Completato via `code_verifier.py` |
+| Firma/verifica GPG opzionale          | ✅ Completato via `gpg_support.py` |
+
+---
+
+## ✅ Stato Finale: Mercurius∞ è ora completo
+
+Mercurius∞ è in grado di:
+- Auto-apprendere, evolversi, parlare e osservare
+- Firmare e verificare il proprio codice
+- Lavorare in background su sistemi locali e remoti
+- Interagire in modo adattivo con il contesto
+
+🧠 Pronto per produzione. Tutte le funzionalità principali sono operative e testate.
+
+
+## memory/__init__.py
+
+## memory/dialog_style_profile.json
+{}
+
+## memory/episodic_memory.py
+# memory/episodic_memory.py
+
+"""
+Modulo: episodic_memory.py
+Descrizione: Gestione della memoria episodica per Mercurius∞. Salva e recupera eventi specifici
+con dettagli temporali, contesto e risposta.
+"""
+
+import json
+import os
+from datetime import datetime
+from typing import Dict, List
+
+EPISODES_PATH = "data/memory/episodic_memory.json"
+
+
+class EpisodicMemory:
+    def __init__(self):
+        os.makedirs(os.path.dirname(EPISODES_PATH), exist_ok=True)
+        if not os.path.exists(EPISODES_PATH):
+            with open(EPISODES_PATH, "w") as f:
+                json.dump([], f)
+        self._load_memory()
+
+    def _load_memory(self):
+        with open(EPISODES_PATH, "r") as f:
+            self.episodes = json.load(f)
+
+    def _save_memory(self):
+        with open(EPISODES_PATH, "w") as f:
+            json.dump(self.episodes, f, indent=2)
+
+    def record_episode(self, context: str, user_input: str, ai_response: str):
+        episode = {
+            "timestamp": datetime.now().isoformat(),
+            "context": context,
+            "user_input": user_input,
+            "ai_response": ai_response
+        }
+        self.episodes.append(episode)
+        self._save_memory()
+
+    def get_recent_episodes(self, limit: int = 10) -> List[Dict]:
+        return self.episodes[-limit:]
+
+    def search_episodes(self, keyword: str) -> List[Dict]:
+        return [ep for ep in self.episodes if keyword.lower() in ep["user_input"].lower() or keyword.lower() in ep["ai_response"].lower()]
+
+## memory/genesis_memory.py
+class GenesisMemory:
+    def __init__(self):
+        self.short_term = {}
+        self.long_term = {}
+
+    def save_context(self, key: str, value: str, long: bool = False):
+        if long:
+            self.long_term[key] = value
+        else:
+            self.short_term[key] = value
+
+    def recall(self, key: str) -> str:
+        return self.short_term.get(key) or self.long_term.get(key, "∅")
+
+    def forget(self, key: str):
+        self.short_term.pop(key, None)
+        self.long_term.pop(key, None)
+
+## memory/long_term_memory.py
+"""
+Modulo: long_term_memory.py
+Descrizione: Gestisce la memoria a lungo termine per Mercurius∞.
+Offre due possibili backend di archiviazione:
+  - SQLite (database locale)
+  - JSON/YAML (file locale)
+L’utente può scegliere quale backend attivare passando il parametro 'backend' al costruttore.
+"""
+
+import sqlite3
+import json
+from pathlib import Path
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+# ----------------------------------------------------------------------
+# CONFIGURAZIONE DEI PATH
+# ----------------------------------------------------------------------
+
+# Percorso del database SQLite
+DB_PATH = Path("data/memory/long_term_memory.db")
+
+# Cartella e file per il backend JSON
+JSON_DIR  = Path("memory/long_term_data")
+JSON_DIR.mkdir(parents=True, exist_ok=True)
+JSON_DEFAULT_FILE = JSON_DIR / "experiences.json"
+
+# ----------------------------------------------------------------------
+# CLASSE: _SQLiteMemory
+# ----------------------------------------------------------------------
+
+class _SQLiteMemory:
+    """
+    Backend SQLite per la memoria a lungo termine.
+    Crea una tabella 'memories' con i campi:
+      - id (INTEGER PRIMARY KEY AUTOINCREMENT)
+      - timestamp (TEXT)
+      - category  (TEXT)
+      - content   (TEXT)
+    """
+
+    def __init__(self, db_path: Union[str, Path] = DB_PATH):
+        db_path = Path(db_path)
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.conn = sqlite3.connect(str(db_path))
+        self._create_table()
+
+    def _create_table(self) -> None:
+        with self.conn:
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS memories (
+                    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT,
+                    category  TEXT,
+                    content   TEXT
+                )
+            """)
+
+    def store_memory(self, content: str, category: str = "general") -> None:
+        timestamp = datetime.utcnow().isoformat()
+        with self.conn:
+            self.conn.execute("""
+                INSERT INTO memories (timestamp, category, content)
+                VALUES (?, ?, ?)
+            """, (timestamp, category, content))
+
+    def retrieve_memories(self, category: Optional[str] = None, limit: int = 50) -> List[Tuple[str, str, str]]:
+        cursor = self.conn.cursor()
+        if category:
+            cursor.execute("""
+                SELECT timestamp, category, content FROM memories
+                WHERE category = ?
+                ORDER BY timestamp DESC
+                LIMIT ?
+            """, (category, limit))
+        else:
+            cursor.execute("""
+                SELECT timestamp, category, content FROM memories
+                ORDER BY timestamp DESC
+                LIMIT ?
+            """, (limit,))
+        return cursor.fetchall()
+
+    def search_memory(self, keyword: str, limit: int = 20) -> List[Tuple[str, str, str]]:
+        cursor = self.conn.cursor()
+        query = """
+            SELECT timestamp, category, content FROM memories
+            WHERE content LIKE ?
+            ORDER BY timestamp DESC
+            LIMIT ?
+        """
+        cursor.execute(query, (f"%{keyword}%", limit))
+        return cursor.fetchall()
+
+    def close(self) -> None:
+        self.conn.close()
+
+# ----------------------------------------------------------------------
+# CLASSE: _JSONMemory
+# ----------------------------------------------------------------------
+[TRONCATO]
+
+## memory/memory_core.py
+# memory/memory_core.py
+
+"""
+Modulo: memory_core.py
+Descrizione: Gestione unificata della memoria cognitiva (a lungo termine, episodica e log sinaptico)
+per Mercurius∞. Punto centrale di accesso e coordinamento dei moduli mnemonici.
+"""
+
+from memory.long_term_memory import LongTermMemory
+from memory.episodic_memory import EpisodicMemory
+from memory.synaptic_log import SynapticLog
+
+
+class MemoryCore:
+    def __init__(self):
+        self.long_term = LongTermMemory()
+        self.episodic = EpisodicMemory()
+        self.synaptic_log = SynapticLog()
+        self.synaptic_log.log_event("MemoryCore", "initialized")
+
+    def store_fact(self, content: str, category: str = "general"):
+        self.long_term.store_memory(content, category)
+        self.synaptic_log.log_event("LongTermMemory", "store_fact", f"Category: {category}")
+
+    def recall_facts(self, category: str = None, limit: int = 10):
+        facts = self.long_term.retrieve_memories(category, limit)
+        self.synaptic_log.log_event("LongTermMemory", "recall_facts", f"Category: {category}")
+        return facts
+
+    def record_interaction(self, context: str, user_input: str, ai_response: str):
+        self.episodic.record_episode(context, user_input, ai_response)
+        self.synaptic_log.log_event("EpisodicMemory", "record_interaction", f"Input: {user_input[:30]}...")
+
+    def review_recent_episodes(self, limit: int = 5):
+        episodes = self.episodic.get_recent_episodes(limit)
+        self.synaptic_log.log_event("EpisodicMemory", "review_recent_episodes")
+        return episodes
+
+    def search_knowledge(self, keyword: str):
+        facts = self.long_term.search_memory(keyword)
+        episodes = self.episodic.search_episodes(keyword)
+        self.synaptic_log.log_event("MemoryCore", "search_knowledge", f"Keyword: {keyword}")
+        return {"facts": facts, "episodes": episodes}
+
+## memory/neural_plasticity.py
+# memory/neural_plasticity.py
+
+"""
+Estensione: Plasticità neurale dinamica di Mercurius∞
+Descrizione: Mappa adattiva della frequenza di utilizzo dei moduli e suggerimenti di rinforzo o disattivazione.
+"""
+
+import json
+import os
+from datetime import datetime
+
+class NeuralPlasticity:
+    def __init__(self, map_path="memory/plasticity_map.json"):
+        self.map_path = map_path
+        self.map = self.load_map()
+
+    def load_map(self):
+        if os.path.exists(self.map_path):
+            with open(self.map_path, "r") as f:
+                return json.load(f)
+        return {}
+
+    def save_map(self):
+        with open(self.map_path, "w") as f:
+            json.dump(self.map, f, indent=2)
+
+    def track_usage(self, module_name: str):
+        if module_name not in self.map:
+            self.map[module_name] = {"count": 0, "last_used": None}
+        self.map[module_name]["count"] += 1
+        self.map[module_name]["last_used"] = datetime.now().isoformat()
+        self.save_map()
+
+    def recommend_adaptation(self) -> list:
+        sorted_usage = sorted(self.map.items(), key=lambda x: x[1]["count"], reverse=True)
+        return [f"{mod[0]} → {mod[1]['count']} utilizzi" for mod in sorted_usage[:5]]
+
+    def strengthen_pathways(self):
+        adaptations = self.recommend_adaptation()
+        print("🔧 Rinforzo neurale per i moduli più utilizzati:")
+        for line in adaptations:
+            print(f"  ⚡ {line}")
+        return adaptations
+
+## memory/synaptic_log.py
+# memory/synaptic_log.py
+
+"""
+Modulo: synaptic_log.py
+Descrizione: Registro cronologico delle interazioni e modifiche sinaptiche della memoria cognitiva.
+Utile per analisi, debug e tracciamento evolutivo del comportamento AI.
+"""
+
+import os
+from datetime import datetime
+from typing import Optional
+
+LOG_PATH = "data/memory/synaptic_log.txt"
+
+
+class SynapticLog:
+    def __init__(self):
+        os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+        if not os.path.exists(LOG_PATH):
+            with open(LOG_PATH, "w") as f:
+                f.write("=== Synaptic Log Initialized ===\n")
+
+    def log_event(self, module: str, action: str, detail: Optional[str] = ""):
+        timestamp = datetime.now().isoformat()
+        log_entry = f"[{timestamp}] [{module}] {action}"
+        if detail:
+            log_entry += f" - {detail}"
+        with open(LOG_PATH, "a") as f:
+            f.write(log_entry + "\n")
+
+    def get_log_tail(self, lines: int = 20) -> str:
+        with open(LOG_PATH, "r") as f:
+            return "\n".join(f.readlines()[-lines:])
+
+## mercurius_infinite.egg-info/SOURCES.txt
+README.md
+pyproject.toml
+setup.py
+generated_agents/__init__.py
+mercurius_infinite.egg-info/PKG-INFO
+mercurius_infinite.egg-info/SOURCES.txt
+mercurius_infinite.egg-info/dependency_links.txt
+mercurius_infinite.egg-info/entry_points.txt
+mercurius_infinite.egg-info/top_level.txt
+tests/test_autonomia_cognitiva.py
+tests/test_end2end.py
+tests/test_multimodal.py
+tests/test_neuro_learning.py
+tests/test_orchestrator.py
+tests/test_planner.py
+tests/test_supervisione.py
+
+## mercurius_infinite.egg-info/dependency_links.txt
+
+
+## mercurius_infinite.egg-info/entry_points.txt
+[console_scripts]
+merc-start = start_fullmode:main
+
+## mercurius_infinite.egg-info/top_level.txt
+generated_agents
+
+## mobile_jarvis_ui/README.md
+# Mobile Jarvis UI
+
+Flutter-based HUD interface for Mercurius∞. The app offers voice interaction using
+`speech_to_text` and `flutter_tts`, with simple hotword detection ("Hey Mercurius"
+or "Aion attivati"). Requests are sent to the local Aion API (`/ask`) which in
+turn forwards them to the orchestrator.
+
+Build and run using the Flutter SDK on an Android device:
+
+```bash
+flutter run -d android
+```
+
+## mobile_jarvis_ui/analysis_options.yaml
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+#
+# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
+# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
+# invoked from the command line by running `flutter analyze`.
+
+# The following line activates a set of recommended lints for Flutter apps,
+# packages, and plugins designed to encourage good coding practices.
+include: package:flutter_lints/flutter.yaml
+
+
+linter:
+  # The lint rules applied to this project can be customized in the
+  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
+  # included above or to enable additional rules. A list of all available lints
+  # and their documentation is published at https://dart.dev/lints.
+  #
+  # Instead of disabling a lint rule for the entire project in the
+  # section below, it can also be suppressed for a single line of code
+  # or a specific dart file by using the `// ignore: name_of_lint` and
+  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
+  # producing the lint.
+  rules:
+    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
+    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options
+
+## mobile_jarvis_ui/pubspec.yaml
+name: mobile_jarvis_ui
+description: Jarvis-like HUD for Mercurius∞
+version: 0.1.0
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  rive: ^0.13.20
+  flutter_tts: ^4.2.3
+  flutter_sound: ^9.2.13
+  speech_to_text: ^7.0.0
+  permission_handler: ^12.0.0+1
+  connectivity_plus: ^6.1.4
+  network_info_plus: ^6.1.4
+  wifi_scan: ^0.4.0
+  animated_background: ^2.0.0
+  http: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+
+## mobile_jarvis_ui/assets/placeholder.txt
+placeholder
+
+## mobile_jarvis_ui/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
+{
+  "images" : [
+    {
+      "size" : "20x20",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-20x20@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-20x20@3x.png",
+      "scale" : "3x"

@@ -1,0 +1,885 @@
+Questa è la parte 13 di project_tree. Continua da quella precedente.
+
+        self.api_key = os.getenv("OPENAI_API_KEY")
+        openai.api_key = self.api_key
+
+    def elaborate(self, prompt: str, context: dict = {}) -> str:
+        try:
+            response = openai.ChatCompletion.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "Sei un assistente AI avanzato."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=1024
+            )
+            return response['choices'][0]['message']['content']
+        except Exception as e:
+            return f"Errore ChatGPT: {e}"
+
+### --- modules/llm/gpt4o_validator.py --- ###
+# modules/llm/gpt4o_validator.py
+"""
+Modulo: gpt4o_validator.py
+Descrizione: Validazione e finalizzazione di risposte tramite modello GPT-4 ottimizzato.
+"""
+import os
+import openai
+
+class GPT4oAgent:
+    def __init__(self, model_name: str = "gpt-4"):
+        self.model = model_name
+        self.api_key = os.getenv("OPENAI_API_KEY")
+        openai.api_key = self.api_key
+
+    def validate(self, prompt: str, context: dict = None) -> str:
+        """
+        Genera una risposta perfezionata/sintetizzata per il prompt fornito, utilizzando GPT-4.
+        """
+        try:
+            messages = [
+                {"role": "system", "content": "Sei un assistente esperto in sintesi e perfezionamento delle risposte."},
+                {"role": "user", "content": prompt}
+            ]
+            response = openai.ChatCompletion.create(model=self.model, messages=messages, temperature=0.7, max_tokens=1024)
+            result = response['choices'][0]['message']['content']
+            return result
+        except Exception as e:
+            return f"Errore GPT4o: {e}"
+
+### --- modules/llm/ollama3_interface.py --- ###
+"""
+Modulo: ollama3_interface
+Descrizione: Interfaccia con Ollama3 per generazione di codice economica e brainstorming.
+"""
+
+import requests
+
+class Ollama3Agent:
+    def __init__(self, base_url="http://localhost:11434"):
+        self.url = base_url
+
+    def generate(self, prompt: str, context: dict = {}) -> str:
+        try:
+            response = requests.post(
+                f"{self.url}/api/generate",
+                json={"model": "llama3", "prompt": prompt}
+            )
+            return response.json().get("response", "Nessuna risposta.")
+        except Exception as e:
+            return f"Errore Ollama3: {e}"
+
+### --- modules/local/README.md --- ###
+# 🧱 Modulo Local – Esecuzione Offline
+
+Contiene agenti AI che operano localmente senza cloud.
+
+## File
+
+- `localai_adapter.py`
+- `leon_ai_bridge.py`
+- `huggingface_tools.py`
+- `n8n_connector.py`
+
+## Scopo
+
+Permettere a Mercurius∞ di operare completamente offline, con AI locali e strumenti autonomi.
+
+### --- modules/local/github_sync.py --- ###
+class GitHubSync:
+    def push_changes(self, commit_msg: str = "🔄 Sync GENESIS commit"):
+        return f"[GitHubSync] Commit e push: {commit_msg}"
+
+### --- modules/local/huggingface_tools.py --- ###
+class HuggingFaceTools:
+    def __init__(self):
+        self.name = "HuggingFaceTools"
+
+    def execute(self, tool_name: str, args: dict) -> str:
+        return f"[{self.name}] Strumento '{tool_name}' eseguito con parametri {args}"
+
+### --- modules/local/leon_ai_bridge.py --- ###
+"""
+Modulo: leon_ai_bridge.py
+Descrizione: Esecuzione sicura di comandi di sistema in locale.
+Supporta Windows, Linux e Mac. Output sempre loggato.
+"""
+
+import subprocess
+import platform
+import datetime
+
+class LeonAI:
+    def __init__(self, log_file="leonai_actions.log"):
+        self.name = "LeonAI"
+        self.log_file = log_file
+
+    def run_command(self, command: str) -> str:
+        now = datetime.datetime.now().isoformat()
+        try:
+            result = subprocess.run(command, shell=True, capture_output=True, text=True)
+            output = result.stdout.strip()
+            error = result.stderr.strip()
+            msg = output if result.returncode == 0 else f"[{self.name}] ERRORE: {error}"
+            self._log_action(command, msg, now)
+            return msg
+        except Exception as e:
+            err_msg = f"[{self.name}] Errore di sistema: {e}"
+            self._log_action(command, err_msg, now)
+            return err_msg
+
+    def _log_action(self, command, result, timestamp):
+        try:
+            with open(self.log_file, "a", encoding="utf-8") as logf:
+                logf.write(f"[{timestamp}] CMD: {command}\nRES: {result}\n\n")
+        except Exception:
+            pass  # Logging silenzioso se fallisce
+
+### --- modules/local/localai_adapter.py --- ###
+"""
+Modulo: localai_adapter.py
+Descrizione: Integrazione LLM locale (es. GPT-2 HuggingFace).
+Risponde ai prompt senza cloud. Funziona offline!
+"""
+
+import os
+
+class LocalAI:
+    def __init__(self, model_name="gpt2"):
+        self.name = "LocalAI"
+        try:
+            from transformers import pipeline
+            self.generator = pipeline("text-generation", model=model_name)
+            self.online = True
+        except Exception as e:
+            self.generator = None
+            self.online = False
+            print(f"[LocalAI] Errore nel caricamento modello locale: {e}")
+
+    def execute_task(self, prompt: str) -> str:
+        if self.generator:
+            try:
+                output = self.generator(prompt, max_length=200, do_sample=True)
+                return output[0]["generated_text"]
+            except Exception as e:
+                return f"[{self.name}] Errore modello locale: {e}"
+        else:
+            return f"[{self.name}] Offline: modello non disponibile. Prompt ricevuto: '{prompt}'."
+
+### --- modules/local/n8n_connector.py --- ###
+class N8nConnector:
+    def __init__(self):
+        self.name = "n8n"
+
+    def trigger_flow(self, flow_id: str) -> str:
+        return f"[{self.name}] Flusso {flow_id} attivato localmente"
+
+### --- modules/localai_executor.py --- ###
+# modules/localai_executor.py
+
+"""
+Modulo: localai_executor.py
+Descrizione: Wrapper per gestire LocalAI in locale con modelli in formato GGUF.
+Supporta: GPT, STT/TTS, SD.
+"""
+
+import subprocess
+
+class LocalAIExecutor:
+    def __init__(self, base_url="http://localhost:8080"):
+        self.base_url = base_url
+
+    def call_model(self, prompt: str, model="gpt4all"):
+        try:
+            # Simulazione chiamata locale (sostituibile con requests.post se installato)
+            command = f'curl -X POST {self.base_url}/chat -d \'{{"prompt": "{prompt}", "model": "{model}"}}\''
+            output = subprocess.getoutput(command)
+            return output
+        except Exception as e:
+            return f"❌ Errore durante l'esecuzione: {str(e)}"
+
+### --- modules/messaging/__init__.py --- ###
+"""Utilities for internal messaging."""
+
+### --- modules/messaging/rabbitmq_messenger.py --- ###
+"""rabbitmq_messenger.py
+=======================
+Modulo di messaggistica basato su RabbitMQ per Mercurius∞.
+
+Fornisce funzioni semplici per pubblicare e consumare messaggi utilizzando il
+protocollo AMQP tramite la libreria ``pika``. In assenza del server RabbitMQ le
+funzioni restituiscono errori gestiti senza sollevare eccezioni critiche.
+"""
+
+from typing import Callable, Optional
+
+import pika
+from utils.logger import setup_logger
+
+logger = setup_logger("RabbitMQMessenger")
+
+
+def publish_message(queue: str, message: str, url: str = "amqp://guest:guest@localhost:5672/") -> bool:
+    """Invia un messaggio alla coda specificata.
+
+    Ritorna ``True`` se l'operazione è andata a buon fine, altrimenti ``False``.
+    """
+    try:
+        params = pika.URLParameters(url)
+        connection = pika.BlockingConnection(params)
+        channel = connection.channel()
+        channel.queue_declare(queue=queue, durable=True)
+        channel.basic_publish(exchange="", routing_key=queue, body=message)
+        connection.close()
+        logger.info(f"[RabbitMQ] Sent to {queue}: {message}")
+        return True
+    except Exception as exc:
+        logger.error(f"[RabbitMQ] publish failed: {exc}")
+        return False
+
+
+def consume_messages(queue: str, handler: Callable[[str], None], url: str = "amqp://guest:guest@localhost:5672/", limit: Optional[int] = None) -> None:
+    """Consuma messaggi dalla coda chiamando ``handler`` per ogni messaggio.
+
+    ``limit`` permette di definire quante messaggi leggere prima di chiudere la
+    connessione (``None`` per ciclo infinito).
+    """
+    try:
+        params = pika.URLParameters(url)
+        connection = pika.BlockingConnection(params)
+        channel = connection.channel()
+        channel.queue_declare(queue=queue, durable=True)
+
+        count = 0
+        for method_frame, _properties, body in channel.consume(queue):
+            handler(body.decode())
+            channel.basic_ack(method_frame.delivery_tag)
+            count += 1
+            if limit and count >= limit:
+                break
+        channel.cancel()
+        connection.close()
+    except Exception as exc:
+        logger.error(f"[RabbitMQ] consume failed: {exc}")
+
+### --- modules/meta_team_agent.py --- ###
+# modules/meta_team_agent.py
+
+"""
+Modulo: meta_team_agent.py
+Descrizione: Simula un team AI composto da PM, Developer e QA utilizzando MetaGPT o logica equivalente. Coordina task evolutivi.
+"""
+
+class MetaTeamAgent:
+    def __init__(self):
+        self.roles = {
+            "PM": self.project_manager,
+            "DEV": self.developer,
+            "QA": self.quality_assurance
+        }
+
+    def assign_task(self, task: str) -> str:
+        pm_result = self.roles["PM"](task)
+        dev_result = self.roles["DEV"](pm_result)
+        return self.roles["QA"](dev_result)
+
+    def project_manager(self, task: str) -> str:
+        return f"[PM] Definizione requisiti per: {task}"
+
+    def developer(self, spec: str) -> str:
+        return f"[DEV] Implementazione codice basata su: {spec}"
+
+    def quality_assurance(self, code: str) -> str:
+        return f"[QA] Validazione e test eseguiti su: {code}"
+
+
+# Test locale
+if __name__ == "__main__":
+    meta = MetaTeamAgent()
+    print(meta.assign_task("Crea un modulo per la gestione vocale"))
+
+### --- modules/mobile/note_interface.py --- ###
+"""note_interface.py
+Interfaccia HUD per Samsung Note10+ in stile Jarvis.
+"""
+from __future__ import annotations
+
+import threading
+import time
+
+try:
+    import requests
+    import speech_recognition as sr
+    import pyttsx3
+    from kivy.app import App
+    from kivy.uix.label import Label
+    from kivy.uix.boxlayout import BoxLayout
+    from kivy.core.window import Window
+    from kivy.clock import Clock
+except Exception:  # pragma: no cover - librerie opzionali
+    requests = None
+    sr = None
+    pyttsx3 = None
+    App = object  # type: ignore
+    Label = object  # type: ignore
+    BoxLayout = object  # type: ignore
+    Window = object  # type: ignore
+    Clock = object  # type: ignore
+
+try:
+    from voice.engine.elevenlabs_tts import ElevenLabsTTS
+except Exception:  # pragma: no cover
+    ElevenLabsTTS = None
+
+HOTWORDS = ["aion", "signore", "analizza questo", "dimmi aion"]
+
+
+class HUDApp(App):
+    """Semplice interfaccia grafica translucida."""
+
+    def build(self):
+        if hasattr(Window, "clearcolor"):
+            Window.clearcolor = (0, 0, 0, 0)
+        self.label = Label(text="AION HUD", color=(0, 1, 1, 1), font_size="20sp")
+        layout = BoxLayout(orientation="vertical")
+        layout.add_widget(self.label)
+        if hasattr(Clock, "schedule_interval"):
+            Clock.schedule_interval(self._tick, 1)
+        threading.Thread(target=self._listen_loop, daemon=True).start()
+        return layout
+
+    def _tick(self, _):  # pragma: no cover - placeholder animazione
+        pass
+
+    def _speak(self, text: str) -> None:
+        if ElevenLabsTTS:
+            try:
+                ElevenLabsTTS().synthesize(text, voice="Jarvis")
+                return
+            except Exception:
+                pass
+        if pyttsx3:
+            engine = pyttsx3.init()
+            engine.say(text)
+            engine.runAndWait()
+
+    def _listen_loop(self) -> None:
+        if not sr:
+            return
+        recognizer = sr.Recognizer()
+        mic = sr.Microphone()
+        with mic as source:
+            recognizer.adjust_for_ambient_noise(source)
+        while True:
+            with mic as source:
+                audio = recognizer.listen(source, phrase_time_limit=4)
+            try:
+                text = recognizer.recognize_google(audio, language="it-IT").lower()
+            except Exception:
+                continue
+            if any(hw in text for hw in HOTWORDS):
+                response = self._ask_backend(text)
+                self._speak(response)
+                self.label.text = response
+
+    def _ask_backend(self, prompt: str) -> str:
+        if not requests:
+            return "Elaboro, signore..."
+        try:
+            resp = requests.post("http://localhost:8000/ask", json={"prompt": prompt}, timeout=3)
+            if resp.ok:
+                return resp.json().get("response", "")
+        except Exception:
+            pass
+        return "Elaboro, signore..."
+
+
+def start_mobile_hud() -> None:
+    """Avvia l'app mobile HUD."""
+    HUDApp().run()
+
+
+if __name__ == "__main__":  # pragma: no cover
+    start_mobile_hud()
+
+### --- modules/mobile_flutter/__init__.py --- ###
+
+
+### --- modules/mobile_flutter/flutter_bridge.py --- ###
+"""Launcher for the Flutter-based mobile Jarvis UI."""
+from __future__ import annotations
+
+import subprocess
+import shutil
+from pathlib import Path
+
+PROJECT_DIR = Path(__file__).resolve().parent.parent.parent / "mobile_jarvis_ui"
+
+
+def start_mobile_ui() -> None:
+    """Attempt to launch the Flutter app."""
+    flutter = shutil.which("flutter")
+    if not flutter:
+        print("⚠️ Flutter SDK not found. Please run the app manually from mobile_jarvis_ui.")
+        return
+    try:
+        subprocess.Popen([flutter, "run", "-d", "android"], cwd=str(PROJECT_DIR))
+        print("📱 Mobile Jarvis UI launched")
+    except Exception as exc:
+        print(f"⚠️ Unable to launch Flutter app: {exc}")
+
+### --- modules/n8n_connector.py --- ###
+# modules/n8n_connector.py
+
+"""
+Modulo: n8n_connector.py
+Descrizione: Invio e ricezione webhook da n8n per orchestrare flussi AI → PC locale.
+"""
+
+import requests
+
+class N8NConnector:
+    def __init__(self, webhook_url="http://localhost:5678/webhook/test"):
+        self.webhook_url = webhook_url
+
+    def trigger_flow(self, payload: dict) -> str:
+        try:
+            res = requests.post(self.webhook_url, json=payload)
+            return f"📡 Webhook n8n attivato: {res.status_code}"
+        except Exception as e:
+            return f"❌ Errore n8n: {str(e)}"
+
+### --- modules/network_analyzer.py --- ###
+"""network_analyzer.py
+Analizza dispositivi sulla rete locale e categoriza le ricerche web.
+"""
+
+from __future__ import annotations
+
+import os
+from pathlib import Path
+from collections import defaultdict
+from datetime import datetime
+
+try:
+    from scapy.all import ARP, Ether, srp, sniff, DNSQR
+except Exception:  # pragma: no cover - scapy may not be installed
+    ARP = Ether = srp = sniff = DNSQR = None  # type: ignore
+
+try:
+    import bluetooth
+except Exception:  # pragma: no cover - bluetooth may not be installed
+    bluetooth = None  # type: ignore
+
+try:
+    import pywhatkit
+except Exception:  # pragma: no cover - pywhatkit may not be installed
+    pywhatkit = None  # type: ignore
+
+# Categoria di parole chiave per le ricerche
+CATEGORY_PATTERNS = {
+    "salute": ["salute", "medic", "ospedale", "dieta", "farmac"],
+    "politica": ["politic", "governo", "elezion"],
+    "gossip": ["gossip", "vip", "celebrity"],
+    "economia": ["econom", "borsa", "finanza"],
+    "viaggi": ["viagg", "hotel", "voli"],
+    "religione": ["chiesa", "papa", "religion"],
+    "social": ["facebook", "instagram", "tiktok", "twitter"],
+}
+
+# Eventuale mappatura IP/MAC -> nome utente
+KNOWN_DEVICES = {
+    "AA:BB:CC:DD:EE:FF": "PAPA",
+}
+
+
+def scan_wifi_network(network_range: str = "192.168.1.0/24") -> list[dict]:
+    """Rileva i dispositivi Wi-Fi sulla rete locale."""
+    if ARP is None:
+        return []
+    arp = ARP(pdst=network_range)
+    ether = Ether(dst="ff:ff:ff:ff:ff:ff")
+    packet = ether / arp
+    result = srp(packet, timeout=3, verbose=0)[0]
+    devices = []
+    for sent, received in result:
+        devices.append({"ip": received.psrc, "mac": received.hwsrc})
+    return devices
+
+
+def scan_bluetooth_devices() -> list[dict]:
+    """Scansione dei dispositivi Bluetooth vicini."""
+    if bluetooth is None:
+        return []
+    devices = []
+    try:
+        nearby = bluetooth.discover_devices(duration=5, lookup_names=True)
+        for addr, name in nearby:
+            devices.append({"mac": addr, "name": name})
+    except Exception:
+        pass
+    return devices
+
+
+def _extract_domain(packet) -> str | None:
+    if DNSQR and packet.haslayer(DNSQR):
+        try:
+            return packet[DNSQR].qname.decode().rstrip('.')
+        except Exception:
+            return None
+    return None
+
+
+def capture_dns_queries(duration: int = 30) -> list[str]:
+    """Sniffa il traffico DNS per un certo periodo."""
+    if sniff is None:
+        return []
+    queries = []
+    packets = sniff(filter="udp port 53", timeout=duration)
+    for p in packets:
+        d = _extract_domain(p)
+        if d:
+            queries.append(d)
+    return queries
+
+
+def categorize_domain(domain: str) -> str:
+    lower = domain.lower()
+    for cat, keywords in CATEGORY_PATTERNS.items():
+        for kw in keywords:
+            if kw in lower:
+                return cat
+    return "altro"
+
+
+def analyze_queries(queries: list[str]) -> dict:
+    counts = defaultdict(int)
+    for q in queries:
+        counts[categorize_domain(q)] += 1
+    total = sum(counts.values()) or 1
+    return {c: round(v / total * 100, 2) for c, v in counts.items()}
+
+
+def generate_report(devices: list[dict], bt_devices: list[dict], stats: dict) -> str:
+    lines = [f"Report generato: {datetime.now().isoformat()}\n"]
+    if devices:
+        lines.append("Dispositivi Wi-Fi:")
+        for d in devices:
+            name = KNOWN_DEVICES.get(d.get("mac"), d.get("ip"))
+            lines.append(f"- {name} ({d.get('ip')} {d.get('mac')})")
+    if bt_devices:
+        lines.append("\nDispositivi Bluetooth:")
+        for b in bt_devices:
+            lines.append(f"- {b.get('name','?')} ({b.get('mac')})")
+    lines.append("\nPercentuali ricerche web:")
+    for cat, perc in stats.items():
+        lines.append(f"- {cat}: {perc}%")
+    return "\n".join(lines)
+
+
+def save_report(text: str, path: str = "logs/network_search_report.txt") -> str:
+    Path("logs").mkdir(exist_ok=True)
+    report_path = Path(path)
+    report_path.write_text(text)
+    return str(report_path)
+
+
+def send_whatsapp_message(message: str):
+    """Invia un messaggio WhatsApp se pywhatkit è disponibile."""
+    if pywhatkit is None:
+        return
+    to = os.getenv("WHATSAPP_NUMBER")
+    if not to:
+        return
+    try:
+        pywhatkit.sendwhatmsg_instantly(to, message, wait_time=5, tab_close=True)
+    except Exception:
+        pass
+
+
+def analyze_and_notify(duration: int = 30, network_range: str = "192.168.1.0/24"):
+    wifi_devices = scan_wifi_network(network_range)
+    bt_devices = scan_bluetooth_devices()
+    queries = capture_dns_queries(duration)
+    stats = analyze_queries(queries)
+    report = generate_report(wifi_devices, bt_devices, stats)
+    path = save_report(report)
+    send_whatsapp_message(f"Analisi rete completata. Report in {path}")
+    return report
+
+
+if __name__ == "__main__":
+    print(analyze_and_notify(5))
+
+### --- modules/nlp.py --- ###
+"""
+Modulo: nlp.py
+Responsabilità: Interpretazione semantica dei comandi vocali/testuali
+Autore: Mercurius∞ Engineer Mode
+"""
+
+from typing import Dict
+
+
+class CommandInterpreter:
+    """
+    Interpreta frasi e comandi naturali in azioni simboliche.
+    """
+
+    def __init__(self):
+        self.known_commands = {
+            "analizza l'ambiente": {"action": "analizza_ambiente"},
+            "vai alla base": {"action": "raggiungi_destinazione", "context": {"destinazione": "base"}},
+            "parla con me": {"action": "interagisci_utente"},
+        }
+
+    def interpret(self, text: str) -> Dict:
+        """
+        Converte una frase in comando semantico.
+        """
+        text = text.lower().strip()
+        if text in self.known_commands:
+            return self.known_commands[text]
+        elif "ambiente" in text:
+            return {"action": "analizza_ambiente"}
+        elif "base" in text:
+            return {"action": "raggiungi_destinazione", "context": {"destinazione": "base"}}
+        elif "parla" in text or "conversazione" in text:
+            return {"action": "interagisci_utente"}
+        else:
+            return {"action": "ignora", "context": {"frase": text}}
+
+### --- modules/ollama3_interface.py --- ###
+"""
+Modulo: ollama3_interface.py
+Descrizione: Interfaccia per comunicare con il server locale di Ollama 3 e ottenere risposte da modelli LLM open source.
+"""
+
+import requests
+import json
+
+
+class Ollama3Interface:
+    def __init__(self, base_url="http://localhost:11434/api/generate", model="llama3"):
+        self.base_url = base_url
+        self.model = model
+
+    def ask(self, prompt: str, stream: bool = False) -> str:
+        """
+        Invia un prompt al modello Ollama 3 e restituisce la risposta.
+        """
+        headers = {"Content-Type": "application/json"}
+        data = {
+            "model": self.model,
+            "prompt": prompt,
+            "stream": stream
+        }
+
+        try:
+            response = requests.post(self.base_url, headers=headers, data=json.dumps(data))
+            response.raise_for_status()
+
+            if stream:
+                return self._handle_stream_response(response)
+            else:
+                output = response.json().get("response", "").strip()
+                return output
+        except Exception as e:
+            return f"⚠️ Errore comunicazione con Ollama: {e}"
+
+    def _handle_stream_response(self, response) -> str:
+        output = ""
+        for line in response.iter_lines():
+            if line:
+                try:
+                    decoded = json.loads(line.decode("utf-8"))
+                    chunk = decoded.get("response", "")
+                    output += chunk
+                except json.JSONDecodeError:
+                    continue
+        return output
+
+
+# Test del modulo
+if __name__ == "__main__":
+    ollama = Ollama3Interface()
+    reply = ollama.ask("Scrivi una funzione Python che calcola il fattoriale.")
+    print(reply)
+
+### --- modules/openbb_terminal.py --- ###
+# modules/openbb_terminal.py
+
+"""
+Modulo: openbb_terminal.py
+Descrizione: Wrapper per OpenBB Terminal. Supporta richieste CLI per dati e strategie via comando.
+"""
+
+import subprocess
+
+class OpenBBWrapper:
+    def run_command(self, command: str) -> str:
+        try:
+            result = subprocess.run(
+                command, shell=True, capture_output=True, text=True
+            )
+            return result.stdout or "✅ Comando eseguito"
+        except Exception as e:
+            return f"❌ Errore: {e}"
+
+
+# Test
+if __name__ == "__main__":
+    obb = OpenBBWrapper()
+    print(obb.run_command("echo 'Simulazione OpenBB'"))
+
+### --- modules/optional/elevenlabs_tts.py --- ###
+"""
+Modulo: elevenlabs_tts.py
+Responsabilità: Sintesi vocale tramite ElevenLabs API.
+Autore: Mercurius∞ AI Engineer
+"""
+
+class ElevenLabsTTS:
+    def __init__(self, api_key=None):
+        self.api_key = api_key or "inserisci_qua_la_tua_chiave"
+        self.base_url = "https://api.elevenlabs.io/v1/text-to-speech"
+
+    def is_available(self):
+        return bool(self.api_key and "inserisci_qua" not in self.api_key)
+    
+    def speak(self, text: str, voice_id="default", output_path="output.mp3"):
+        """
+        Genera audio da testo usando ElevenLabs API (stub demo).
+        """
+        if not self.is_available():
+            return "[❌ API key ElevenLabs mancante]"
+        # Esempio di chiamata API (stub, va integrato con richiesta reale)
+        return f"[✔️ Stub ElevenLabs]: testo '{text}' inviato a {self.base_url}"
+
+### --- modules/optional/huggingface_tools.py --- ###
+"""
+Modulo: huggingface_tools.py
+Responsabilità: Integrazione task avanzati HuggingFace (NLP, NLU, visione, ecc.)
+Autore: Mercurius∞ AI Engineer
+"""
+
+class HuggingFaceTools:
+    def __init__(self):
+        try:
+            from transformers import pipeline
+            self.pipeline = pipeline
+            self.ready = True
+        except ImportError:
+            self.pipeline = None
+            self.ready = False
+
+    def is_available(self) -> bool:
+        return self.ready
+
+    def run_task(self, task: str, input_data: str) -> str:
+        """
+        Esegue un task NLP/NLU HuggingFace (es. sentiment-analysis, summarization, ecc.).
+        """
+        if not self.ready:
+            return "[❌ HuggingFace non disponibile]"
+        try:
+            pipe = self.pipeline(task)
+            result = pipe(input_data)
+            return str(result)
+        except Exception as e:
+            return f"[❌ Errore HuggingFace]: {e}"
+
+### --- modules/optional/n8n_connector.py --- ###
+"""
+Modulo: n8n_connector.py
+Responsabilità: Interfaccia per workflow automation tramite n8n (API, webhook).
+Autore: Mercurius∞ AI Engineer
+"""
+
+import requests
+
+class N8NConnector:
+    def __init__(self, webhook_url=None):
+        self.webhook_url = webhook_url or "http://localhost:5678/webhook/test"
+    
+    def is_available(self):
+        # Prova di reachability
+        try:
+            response = requests.get(self.webhook_url, timeout=2)
+            return response.status_code == 200
+        except Exception:
+            return False
+
+    def run_task(self, payload: dict):
+        """
+        Invia un payload a un workflow n8n tramite webhook POST.
+        """
+        if not self.is_available():
+            return "[❌ n8n non raggiungibile]"
+        try:
+            response = requests.post(self.webhook_url, json=payload, timeout=5)
+            return f"Risposta n8n: {response.status_code} - {response.text}"
+        except Exception as e:
+            return f"[❌ Errore n8n]: {e}"
+
+### --- modules/optional/plugin_manager.py --- ###
+"""
+Modulo: plugin_manager.py
+Responsabilità: Rileva e gestisce moduli opzionali/plugin caricabili runtime.
+Autore: Mercurius∞ AI Engineer
+"""
+
+import importlib
+
+OPTIONAL_PLUGINS = [
+    "modules.optional.huggingface_tools",
+    "modules.optional.n8n_connector",
+    "modules.optional.elevenlabs_tts",
+    "modules.optional.vosk_stt"
+]
+
+class PluginManager:
+    def __init__(self):
+        self.plugins = {}
+        self._load_plugins()
+
+    def _load_plugins(self):
+        for plugin_path in OPTIONAL_PLUGINS:
+            try:
+                module = importlib.import_module(plugin_path)
+                # Usa la prima classe trovata nel modulo (convenzionale)
+                cls = [obj for name, obj in vars(module).items() if isinstance(obj, type) and name != "PluginManager"][0]
+                self.plugins[plugin_path] = cls()
+            except Exception as e:
+                self.plugins[plugin_path] = f"[❌ Non caricato]: {e}"
+
+    def is_plugin_available(self, plugin_name):
+        plugin = self.plugins.get(plugin_name)
+        return hasattr(plugin, "is_available") and plugin.is_available()
+
+    def run_plugin_task(self, plugin_name, *args, **kwargs):
+        plugin = self.plugins.get(plugin_name)
+        if hasattr(plugin, "run_task"):
+            return plugin.run_task(*args, **kwargs)
+        return "[❌ Metodo run_task non disponibile]"
+
+    def list_plugins(self):
+        return {k: "[OK]" if hasattr(v, "is_available") and v.is_available() else v for k, v in self.plugins.items()}
+
+### --- modules/optional/vosk_stt.py --- ###
+"""
+Modulo: vosk_stt.py
+Responsabilità: Speech-to-Text offline tramite Vosk.
+Autore: Mercurius∞ AI Engineer
+"""
+
+class VoskSTT:
+    def __init__(self, model_path="model"):
+        try:
+            import vosk
+            self.vosk = vosk
+            self.model = vosk.Model(model_path)
+            self.ready = True
+        except Exception:
+            self.vosk = None

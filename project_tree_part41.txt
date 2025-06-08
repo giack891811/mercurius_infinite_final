@@ -1,106 +1,68 @@
-Questa è la parte 7 di project_tree. Continua da quella precedente.
+Questa è la parte 41 di project_tree. Continua da quella precedente.
 
+        for row in soup.select("table.snapshot-table2 tr"):
+            cells = row.find_all("td")
+            for i in range(0, len(cells), 2):
+                if i+1 < len(cells):
+                    key = cells[i].text.strip()
+                    val = cells[i+1].text.strip()
+                    data[key] = val
+        return data
+
+## integrations/system_control.py
+class SystemControl:
     def __init__(self):
-        super().__init__(name="ApprendimentoGenericoAgent")
-        # Inizializzazione aggiuntiva basata sul concetto estratto (se necessaria)
+        self.name = "SystemControl"
 
-    def think(self, input_data):
-        # Metodo di esempio che utilizza il concetto appreso
-        print(f"🧠 {self.name} applica il concetto di apprendimento generico all'input fornito.")
-        return "Insight basato su rete neurale generativa multi-scopo"
+    def execute(self, system_command: str) -> str:
+        return f"[{self.name}] Comando eseguito: {system_command}"
 
-### --- generated_agents/__init__.py --- ###
-# Inizializzazione agenti generati
-
-### --- genesis_core/autogpt_bridge.py --- ###
-import subprocess
-import os
-
-def run_autogpt(task_prompt: str):
-    os.chdir("AutoGPT")
-    with open("input.txt", "w") as f:
-        f.write(task_prompt)
-
-    result = subprocess.run(["python", "-m", "autogpt"], capture_output=True, text=True)
-    return result.stdout
-
-### --- goals.txt --- ###
-Genera uno script Python che stampa 'Hello Strategic Brain'
-
-### --- installer/package_builder.py --- ###
-# installer/package_builder.py
-
+## integrations/tradingview_feed.py
 """
-Modulo: package_builder.py
-Descrizione: Creazione automatica di eseguibili desktop Mercurius∞ per Windows, Linux, Mac.
+tradingview_feed.py
+===================
+Feed di dati simulato compatibile con layout TradingView. Simula ticker in tempo reale.
 """
 
-import os
-import subprocess
-from datetime import datetime
+import random
+import time
+from threading import Thread
 
-class PackageBuilder:
-    def __init__(self, exports_dir="exports/"):
-        self.exports_dir = exports_dir
-        os.makedirs(exports_dir, exist_ok=True)
+class TradingViewFeed:
+    def __init__(self, symbols, callback=None, interval=1.0):
+        self.symbols = symbols
+        self.interval = interval
+        self.callback = callback
+        self.running = False
 
-    def build_windows_exe(self, entry_script: str, icon: str = None):
-        cmd = [
-            "pyinstaller", "--onefile", "--noconsole", entry_script,
-            "--distpath", self.exports_dir,
-            "--name", "Mercurius"
-        ]
-        if icon:
-            cmd += ["--icon", icon]
-        self._run(cmd, "windows")
+    def _generate_tick(self, symbol):
+        price = round(random.uniform(100, 500), 2)
+        volume = random.randint(1000, 10000)
+        return {
+            "symbol": symbol,
+            "price": price,
+            "volume": volume,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
 
-    def build_linux_sh(self, entry_script: str):
-        output_file = os.path.join(self.exports_dir, "mercurius.sh")
-        with open(output_file, "w") as f:
-            f.write(f"#!/bin/bash\npython3 {entry_script}")
-        os.chmod(output_file, 0o755)
-        self._log_build("linux", output_file)
+    def _run_feed(self):
+        while self.running:
+            for symbol in self.symbols:
+                tick = self._generate_tick(symbol)
+                if self.callback:
+                    self.callback(tick)
+            time.sleep(self.interval)
 
-    def build_mac_app(self, entry_script: str):
-        app_path = os.path.join(self.exports_dir, "Mercurius.app")
-        os.makedirs(app_path, exist_ok=True)
-        os.symlink(entry_script, os.path.join(app_path, "Mercurius"))
-        self._log_build("mac", app_path)
+    def start(self):
+        self.running = True
+        Thread(target=self._run_feed, daemon=True).start()
 
-    def _run(self, cmd, platform: str):
-        try:
-            subprocess.run(cmd, check=True)
-            self._log_build(platform, self.exports_dir)
-        except subprocess.CalledProcessError as e:
-            print(f"❌ Errore durante build {platform}: {e}")
+    def stop(self):
+        self.running = False
 
-    def _log_build(self, platform: str, path: str):
-        log_path = os.path.join(self.exports_dir, "README.txt")
-        with open(log_path, "a") as f:
-            f.write(f"[{datetime.now().isoformat()}] Build completata ({platform}): {path}\n")
+## integrations/agenda/__init__.py
 
-### --- integrations/README.md --- ###
-# 🌐 Integration – Interoperabilità
-
-Modulo per connettività con ambienti esterni: GitHub, Colab, sistema operativo.
-
-## Contenuto
-
-- `github_sync.py`
-- `colab_linker.py`
-- `system_control.py`
-
-## Obiettivo
-
-Gestire flussi DevOps, sincronizzazioni remote e automazioni locali.
-
-### --- integrations/__init__.py --- ###
-
-
-### --- integrations/agenda/__init__.py --- ###
-
-
-### --- integrations/agenda/agenda_manager.py --- ###
+## integrations/agenda/agenda_manager.py
 # integrations/agenda/agenda_manager.py
 """
 Modulo: agenda_manager.py
@@ -153,124 +115,9 @@ class AgendaManager:
         ICS_FILE.parent.mkdir(parents=True, exist_ok=True)
         ICS_FILE.write_text(json.dumps(self._events, indent=2), encoding="utf-8")
 
-### --- integrations/bridge_josch.py --- ###
-"""bridge_josch.py
-===================
-Interfaccia FastAPI per comunicare con il sistema "Josh" (alias JOSCH).
+## integrations/smart_home/__init__.py
 
-Il modulo espone un piccolo server FastAPI che consente l'esecuzione remota
-di comandi su un sistema esterno e fornisce inoltre la funzione
-``send_command_to_pc`` da utilizzare all'interno di Mercurius∞ per inviare
-comandi al bridge.
-"""
-
-import requests
-
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import subprocess
-import uvicorn
-import time
-
-app = FastAPI(title="JOSCH Bridge")
-start_time = time.time()
-
-
-class CommandRequest(BaseModel):
-    command: str
-    mode: str = "cmd"  # cmd | powershell | python
-
-
-@app.get("/ping")
-def ping():
-    return {"status": "online", "uptime": f"{int(time.time() - start_time)}s"}
-
-
-@app.post("/cmd")
-def run_command(req: CommandRequest):
-    try:
-        if req.mode == "cmd":
-            result = subprocess.run(req.command, shell=True, capture_output=True, text=True)
-        elif req.mode == "powershell":
-            result = subprocess.run(["powershell", "-Command", req.command], capture_output=True, text=True)
-        elif req.mode == "python":
-            result = subprocess.run(["python", "-c", req.command], capture_output=True, text=True)
-        else:
-            raise HTTPException(status_code=400, detail="Invalid mode specified")
-
-        return {
-            "returncode": result.returncode,
-            "stdout": result.stdout.strip(),
-            "stderr": result.stderr.strip(),
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-def send_command_to_pc(command: str, mode: str = "cmd", base_url: str = "http://localhost:3020") -> dict:
-    """Invia un comando al bridge JOSCH e restituisce la risposta JSON."""
-    try:
-        res = requests.post(
-            f"{base_url}/cmd",
-            json={"command": command, "mode": mode},
-            timeout=5,
-        )
-        if res.status_code == 200:
-            return res.json()
-        return {"error": res.text, "status": res.status_code}
-    except Exception as exc:
-        return {"error": str(exc)}
-
-
-def start_bridge(host="0.0.0.0", port=3020):
-    uvicorn.run(app, host=host, port=port)
-
-
-if __name__ == "__main__":
-    start_bridge()
-
-### --- integrations/colab_linker.py --- ###
-class ColabLinker:
-    def __init__(self):
-        self.name = "ColabLinker"
-
-    def send_code(self, module: str):
-        return f"[{self.name}] Modulo {module} inviato a Colab"
-
-### --- integrations/finviz_connector.py --- ###
-"""
-finviz_connector.py
-===================
-Scraping dei fondamentali e notizie da Finviz per Mercurius∞.
-"""
-
-import requests
-from bs4 import BeautifulSoup
-
-
-class FinvizConnector:
-    def __init__(self):
-        self.base = "https://finviz.com/quote.ashx?t="
-
-    def fetch(self, symbol):
-        url = self.base + symbol
-        headers = {"User-Agent": "Mozilla/5.0"}
-        soup = BeautifulSoup(requests.get(url, headers=headers).text, "html.parser")
-        data = {}
-        for row in soup.select("table.snapshot-table2 tr"):
-            cells = row.find_all("td")
-            for i in range(0, len(cells), 2):
-                if i+1 < len(cells):
-                    key = cells[i].text.strip()
-                    val = cells[i+1].text.strip()
-                    data[key] = val
-        return data
-
-### --- integrations/smart_home/__init__.py --- ###
-
-
-### --- integrations/smart_home/home_assistant_bridge.py --- ###
+## integrations/smart_home/home_assistant_bridge.py
 # integrations/smart_home/home_assistant_bridge.py
 """
 Modulo: home_assistant_bridge.py
@@ -299,58 +146,7 @@ class HomeAssistantBridge:
         return self.call_service("climate", "set_temperature",
                                  {"entity_id": entity_id, "temperature": temp})
 
-### --- integrations/system_control.py --- ###
-class SystemControl:
-    def __init__(self):
-        self.name = "SystemControl"
-
-    def execute(self, system_command: str) -> str:
-        return f"[{self.name}] Comando eseguito: {system_command}"
-
-### --- integrations/tradingview_feed.py --- ###
-"""
-tradingview_feed.py
-===================
-Feed di dati simulato compatibile con layout TradingView. Simula ticker in tempo reale.
-"""
-
-import random
-import time
-from threading import Thread
-
-class TradingViewFeed:
-    def __init__(self, symbols, callback=None, interval=1.0):
-        self.symbols = symbols
-        self.interval = interval
-        self.callback = callback
-        self.running = False
-
-    def _generate_tick(self, symbol):
-        price = round(random.uniform(100, 500), 2)
-        volume = random.randint(1000, 10000)
-        return {
-            "symbol": symbol,
-            "price": price,
-            "volume": volume,
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-        }
-
-    def _run_feed(self):
-        while self.running:
-            for symbol in self.symbols:
-                tick = self._generate_tick(symbol)
-                if self.callback:
-                    self.callback(tick)
-            time.sleep(self.interval)
-
-    def start(self):
-        self.running = True
-        Thread(target=self._run_feed, daemon=True).start()
-
-    def stop(self):
-        self.running = False
-
-### --- interface/dashboard_stub.py --- ###
+## interface/dashboard_stub.py
 # interface/dashboard.py
 
 """
@@ -451,9 +247,9 @@ class DashboardStub:
     def show(self):
         print("=== MERCURIUS∞ CLI DASHBOARD ===")
         for k, v in self.kpi.items():
-            print(f"{k:<15}: {v}")
+[TRONCATO]
 
-### --- interface/genesis_bridge.py --- ###
+## interface/genesis_bridge.py
 class GenesisBridge:
     def __init__(self):
         self.hotword = "Hey Mercurius, attiva GENESIS"
@@ -468,7 +264,7 @@ class GenesisBridge:
         print("🚀 Attivazione GENESIS in corso via:", method)
         return True
 
-### --- interop/colab_bridge.py --- ###
+## interop/colab_bridge.py
 """
 Modulo: colab_bridge.py
 Descrizione: Rilevamento ed estensione delle capacità di esecuzione su Google Colab.
@@ -492,7 +288,7 @@ def setup_drive():
 if __name__ == "__main__":
     setup_drive()
 
-### --- interop/github_handler.py --- ###
+## interop/github_handler.py
 # interop/github_handler.py
 
 """
@@ -523,7 +319,7 @@ class GitHubHandler:
         except GitCommandError as e:
             print(f"❌ Errore durante il push: {e}")
 
-### --- interop/local_controller.py --- ###
+## interop/local_controller.py
 # interop/local_controller.py
 
 """
@@ -555,13 +351,13 @@ class LocalController:
             print(f"❌ Errore nell'esecuzione: {e}")
             return False
 
-### --- learning/__init__.py --- ###
+## learning/__init__.py
 from .video_learner import extract_insights_from_video
 from .document_parser import parse_document
 
 __all__ = ["extract_insights_from_video", "parse_document"]
 
-### --- learning/document_parser.py --- ###
+## learning/document_parser.py
 # learning/document_parser.py
 
 """
@@ -625,7 +421,7 @@ def parse_document(source: str) -> dict:
     keywords = parser.extract_keywords(text)
     return {"text": text, "keywords": keywords}
 
-### --- learning/video_learner.py --- ###
+## learning/video_learner.py
 """
 Modulo: video_learner.py
 Descrizione: Apprendimento da contenuti video e audio (YouTube, file locali).
@@ -710,19 +506,7 @@ def extract_insights_from_video(source: str) -> str:
 
 # Fine modulo — Mercurius∞ è pronto a divorare video, audio e URL senza pietà.
 
-### --- list_files.py --- ###
-import os
-
-with open("file_albero_locale.txt", "w", encoding="utf-8") as f:
-    for root, dirs, files in os.walk("."):
-        level = root.replace(os.getcwd(), '').count(os.sep)
-        indent = '  ' * level
-        f.write(f"{indent}{os.path.basename(root)}/\n")
-        subindent = '  ' * (level + 1)
-        for file in files:
-            f.write(f"{subindent}{file}\n")
-
-### --- llm/llm_router.py --- ###
+## llm/llm_router.py
 # llm/llm_router.py
 
 """
@@ -799,7 +583,7 @@ class LLMRouter:
         except Exception as e:
             return f"[GPT-4o Errore]: {e}"
 
-### --- logs/README.md --- ###
+## logs/README.md
 # 📜 Logs – Tracciamento Neuronale
 
 Contiene file di log e modulo `genesis_logger.py`.
@@ -808,7 +592,7 @@ Contiene file di log e modulo `genesis_logger.py`.
 
 Salvare eventi neurali, attivazioni, errori, cicli decisionali.
 
-### --- logs/aion_activation_report.md --- ###
+## logs/aion_activation_report.md
 # Aion Activation Report
 
 - Aion API server added (`deployment/aion_api.py`).
@@ -816,7 +600,7 @@ Salvare eventi neurali, attivazioni, errori, cicli decisionali.
 - Flutter UI now detects hotwords and displays responses.
 - Use `flutter run -d android` to build the app.
 
-### --- logs/self_tuning_report.md --- ###
+## logs/self_tuning_report.md
 # 📘 Rapporto Auto-Adattamento – Mercurius∞
 
 🔧 Modulo incompleto: core\dialogue_manager.py
@@ -839,10 +623,12 @@ Salvare eventi neurali, attivazioni, errori, cicli decisionali.
 🔧 Modulo incompleto: modules\voice_bridge\multimodal_controller.py
 💡 Suggerimento: consolidare dashboard → orchestrator con feedback loop.
 
-### --- logs/thinking_feed.md --- ###
+## logs/thinking_feed.md
 # Thinking Feed
 
-### --- logs/upgrade_status.md --- ###
+
+
+## logs/upgrade_status.md
 # ✅ Mercurius∞ – Stato Avanzamento Upgrade
 
 > Data: 2025-05-31  
@@ -868,3 +654,232 @@ Salvare eventi neurali, attivazioni, errori, cicli decisionali.
 | STT con Whisper v3                    | ✅ Completato via `whisper_engine.py` |
 | Visione YOLOv8 e OCR                  | ✅ Completato via `yolov8_engine.py`, `ocr_reader.py` |
 | Reazione a contesto (visivo/emotivo) | ✅ Completato via `context_adapter.py`, `sensory_bus.py` |
+| Analisi ambientale                    | ✅ Completato via `environment_analyzer.py` |
+
+---
+
+## 3. 🔐 Firma Crittografica Codice
+
+| Funzione                              | Stato |
+|---------------------------------------|--------|
+| SHA256 + timestamp                    | ✅ Completato via `code_signer.py` |
+| Verifica integrità                    | ✅ Completato via `code_verifier.py` |
+| Firma/verifica GPG opzionale          | ✅ Completato via `gpg_support.py` |
+
+---
+
+## ✅ Stato Finale: Mercurius∞ è ora completo
+
+Mercurius∞ è in grado di:
+- Auto-apprendere, evolversi, parlare e osservare
+- Firmare e verificare il proprio codice
+- Lavorare in background su sistemi locali e remoti
+- Interagire in modo adattivo con il contesto
+
+🧠 Pronto per produzione. Tutte le funzionalità principali sono operative e testate.
+
+
+## memory/__init__.py
+
+## memory/dialog_style_profile.json
+{}
+
+## memory/episodic_memory.py
+# memory/episodic_memory.py
+
+"""
+Modulo: episodic_memory.py
+Descrizione: Gestione della memoria episodica per Mercurius∞. Salva e recupera eventi specifici
+con dettagli temporali, contesto e risposta.
+"""
+
+import json
+import os
+from datetime import datetime
+from typing import Dict, List
+
+EPISODES_PATH = "data/memory/episodic_memory.json"
+
+
+class EpisodicMemory:
+    def __init__(self):
+        os.makedirs(os.path.dirname(EPISODES_PATH), exist_ok=True)
+        if not os.path.exists(EPISODES_PATH):
+            with open(EPISODES_PATH, "w") as f:
+                json.dump([], f)
+        self._load_memory()
+
+    def _load_memory(self):
+        with open(EPISODES_PATH, "r") as f:
+            self.episodes = json.load(f)
+
+    def _save_memory(self):
+        with open(EPISODES_PATH, "w") as f:
+            json.dump(self.episodes, f, indent=2)
+
+    def record_episode(self, context: str, user_input: str, ai_response: str):
+        episode = {
+            "timestamp": datetime.now().isoformat(),
+            "context": context,
+            "user_input": user_input,
+            "ai_response": ai_response
+        }
+        self.episodes.append(episode)
+        self._save_memory()
+
+    def get_recent_episodes(self, limit: int = 10) -> List[Dict]:
+        return self.episodes[-limit:]
+
+    def search_episodes(self, keyword: str) -> List[Dict]:
+        return [ep for ep in self.episodes if keyword.lower() in ep["user_input"].lower() or keyword.lower() in ep["ai_response"].lower()]
+
+## memory/genesis_memory.py
+class GenesisMemory:
+    def __init__(self):
+        self.short_term = {}
+        self.long_term = {}
+
+    def save_context(self, key: str, value: str, long: bool = False):
+        if long:
+            self.long_term[key] = value
+        else:
+            self.short_term[key] = value
+
+    def recall(self, key: str) -> str:
+        return self.short_term.get(key) or self.long_term.get(key, "∅")
+
+    def forget(self, key: str):
+        self.short_term.pop(key, None)
+        self.long_term.pop(key, None)
+
+## memory/long_term_memory.py
+"""
+Modulo: long_term_memory.py
+Descrizione: Gestisce la memoria a lungo termine per Mercurius∞.
+Offre due possibili backend di archiviazione:
+  - SQLite (database locale)
+  - JSON/YAML (file locale)
+L’utente può scegliere quale backend attivare passando il parametro 'backend' al costruttore.
+"""
+
+import sqlite3
+import json
+from pathlib import Path
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+# ----------------------------------------------------------------------
+# CONFIGURAZIONE DEI PATH
+# ----------------------------------------------------------------------
+
+# Percorso del database SQLite
+DB_PATH = Path("data/memory/long_term_memory.db")
+
+# Cartella e file per il backend JSON
+JSON_DIR  = Path("memory/long_term_data")
+JSON_DIR.mkdir(parents=True, exist_ok=True)
+JSON_DEFAULT_FILE = JSON_DIR / "experiences.json"
+
+# ----------------------------------------------------------------------
+# CLASSE: _SQLiteMemory
+# ----------------------------------------------------------------------
+
+class _SQLiteMemory:
+    """
+    Backend SQLite per la memoria a lungo termine.
+    Crea una tabella 'memories' con i campi:
+      - id (INTEGER PRIMARY KEY AUTOINCREMENT)
+      - timestamp (TEXT)
+      - category  (TEXT)
+      - content   (TEXT)
+    """
+
+    def __init__(self, db_path: Union[str, Path] = DB_PATH):
+        db_path = Path(db_path)
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.conn = sqlite3.connect(str(db_path))
+        self._create_table()
+
+    def _create_table(self) -> None:
+        with self.conn:
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS memories (
+                    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT,
+                    category  TEXT,
+                    content   TEXT
+                )
+            """)
+
+    def store_memory(self, content: str, category: str = "general") -> None:
+        timestamp = datetime.utcnow().isoformat()
+        with self.conn:
+            self.conn.execute("""
+                INSERT INTO memories (timestamp, category, content)
+                VALUES (?, ?, ?)
+            """, (timestamp, category, content))
+
+    def retrieve_memories(self, category: Optional[str] = None, limit: int = 50) -> List[Tuple[str, str, str]]:
+        cursor = self.conn.cursor()
+        if category:
+            cursor.execute("""
+                SELECT timestamp, category, content FROM memories
+                WHERE category = ?
+                ORDER BY timestamp DESC
+                LIMIT ?
+            """, (category, limit))
+        else:
+            cursor.execute("""
+                SELECT timestamp, category, content FROM memories
+                ORDER BY timestamp DESC
+                LIMIT ?
+            """, (limit,))
+        return cursor.fetchall()
+
+    def search_memory(self, keyword: str, limit: int = 20) -> List[Tuple[str, str, str]]:
+        cursor = self.conn.cursor()
+        query = """
+            SELECT timestamp, category, content FROM memories
+            WHERE content LIKE ?
+            ORDER BY timestamp DESC
+            LIMIT ?
+        """
+        cursor.execute(query, (f"%{keyword}%", limit))
+        return cursor.fetchall()
+
+    def close(self) -> None:
+        self.conn.close()
+
+# ----------------------------------------------------------------------
+# CLASSE: _JSONMemory
+# ----------------------------------------------------------------------
+[TRONCATO]
+
+## memory/memory_core.py
+# memory/memory_core.py
+
+"""
+Modulo: memory_core.py
+Descrizione: Gestione unificata della memoria cognitiva (a lungo termine, episodica e log sinaptico)
+per Mercurius∞. Punto centrale di accesso e coordinamento dei moduli mnemonici.
+"""
+
+from memory.long_term_memory import LongTermMemory
+from memory.episodic_memory import EpisodicMemory
+from memory.synaptic_log import SynapticLog
+
+
+class MemoryCore:
+    def __init__(self):
+        self.long_term = LongTermMemory()
+        self.episodic = EpisodicMemory()
+        self.synaptic_log = SynapticLog()
+        self.synaptic_log.log_event("MemoryCore", "initialized")
+
+    def store_fact(self, content: str, category: str = "general"):
+        self.long_term.store_memory(content, category)
+        self.synaptic_log.log_event("LongTermMemory", "store_fact", f"Category: {category}")
+
+    def recall_facts(self, category: str = None, limit: int = 10):
+        facts = self.long_term.retrieve_memories(category, limit)
+        self.synaptic_log.log_event("LongTermMemory", "recall_facts", f"Category: {category}")

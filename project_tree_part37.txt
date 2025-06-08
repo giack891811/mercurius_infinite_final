@@ -1,6 +1,244 @@
-Questa è la parte 1 di project_tree. Continua da quella precedente.
+Questa è la parte 37 di project_tree. Continua da quella precedente.
 
-### --- .github/workflows/mercurius_ci.yml --- ###
+fastapi==0.115.12
+ffmpy==0.5.0
+filelock==3.18.0
+fire==0.7.0
+flatten-dict==0.4.2
+fonttools==4.58.1
+fsspec==2025.5.1
+future==1.0.0
+gitdb==4.0.12
+GitPython==3.1.44
+gradio==5.32.0
+gradio_client==1.10.2
+greenlet==3.2.2
+groovy==0.1.2
+grpcio==1.71.0
+h11==0.16.0
+httpcore==1.0.9
+httpx==0.28.1
+huggingface-hub==0.32.3
+idna==3.10
+imageio==2.37.0
+imageio-ffmpeg==0.6.0
+importlib_resources==6.5.2
+iniconfig==2.1.0
+ipython==9.3.0
+ipython_pygments_lexers==1.1.1
+jedi==0.19.2
+Jinja2==3.1.6
+jiter==0.10.0
+joblib==1.5.1
+jsonpatch==1.33
+jsonpointer==3.0.0
+jsonschema==4.24.0
+jsonschema-specifications==2025.4.1
+julius==0.2.7
+kiwisolver==1.4.8
+langchain==0.3.25
+langchain-core==0.3.63
+langchain-text-splitters==0.3.8
+langsmith==0.3.43
+lazy_loader==0.4
+librosa==0.11.0
+llama_cpp_python==0.3.9
+llvmlite==0.44.0
+lxml==5.4.0
+lxml_html_clean==0.4.2
+Markdown==3.8
+markdown-it-py==3.0.0
+markdown2==2.5.3
+MarkupSafe==3.0.2
+matplotlib==3.10.3
+matplotlib-inline==0.1.7
+mdurl==0.1.2
+-e git+https://github.com/giack891811/mercurius_infinite_final.git@92670b6422489a439fa7e6e9c4a47cdaa4aef3e1#egg=mercurius_infinite
+more-itertools==10.7.0
+moviepy==2.2.1
+mpmath==1.3.0
+msgpack==1.1.0
+-e git+https://github.com/nari-labs/dia.git@2811af1c5f476b1f49f4744fabf56cf352be21e5#egg=nari_tts
+narwhals==1.41.0
+networkx==3.5
+numba==0.61.2
+numpy==1.26.4
+openai==1.82.1
+openai-whisper==20240930
+opencv-python==4.11.0.86
+[TRONCATO]
+
+## seleziona_cartella.py
+from tkinter import Tk, filedialog
+
+root = Tk()
+root.withdraw()  # Nasconde la finestra principale
+folder_path = filedialog.askdirectory(title="Seleziona una cartella")
+
+print("📁 Cartella selezionata:", folder_path)
+
+## setup.py
+from setuptools import setup, find_packages
+
+setup(
+    name="mercurius-infinite",
+    version="1.0.0",
+    packages=find_packages(),
+    include_package_data=True,
+    install_requires=[
+        "altair==5.5.0",
+        "altgraph==0.17.4",
+        "annotated-types==0.7.0",
+        "anyio==4.9.0",
+        "attrs==25.3.0",
+        "blinker==1.9.0",
+        "cachetools==5.5.2",
+        "certifi==2025.4.26",
+        "cffi==1.17.1",
+        "charset-normalizer==3.4.2",
+        "click==8.2.1",
+        "colorama==0.4.6",
+        "comtypes==1.4.11",
+        "contourpy==1.3.2",
+        "cycler==0.12.1",
+        "decorator==5.2.1",
+        "defusedxml==0.7.1",
+        "distro==1.9.0",
+        "filelock==3.18.0",
+        "fonttools==4.58.1",
+        "fsspec==2025.5.1",
+        "gitdb==4.0.12",
+        "GitPython==3.1.44",
+        "h11==0.16.0",
+        "httpcore==1.0.9",
+        "httpx==0.28.1",
+        "huggingface-hub==0.32.3",
+        "idna==3.10",
+        "imageio==2.37.0",
+        "imageio-ffmpeg==0.6.0",
+        "Jinja2==3.1.6",
+        "jiter==0.10.0",
+        "joblib==1.5.1",
+        "jsonschema==4.24.0",
+        "jsonschema-specifications==2025.4.1",
+        "kiwisolver==1.4.8",
+        "MarkupSafe==3.0.2",
+        "matplotlib==3.10.3",
+        "moviepy==2.2.1",
+        "mpmath==1.3.0",
+        "narwhals==1.41.0",
+        "networkx==3.5",
+        "numpy==2.2.6",
+        "openai==1.82.1",
+        "opencv-python==4.11.0.86",
+        "packaging==24.2",
+        "pandas==2.2.3",
+        "pefile==2023.2.7",
+        "pillow==11.2.1",
+        "proglog==0.1.12",
+        "protobuf==6.31.1",
+        "psutil==7.0.0",
+        "py-cpuinfo==9.0.0",
+        "pyarrow==20.0.0",
+        "pycparser==2.22",
+        "pydantic==2.11.5",
+        "pydantic_core==2.33.2",
+        "pydeck==0.9.1",
+        "pyinstaller==6.13.0",
+        "pyinstaller-hooks-contrib==2025.4",
+        "pyparsing==3.2.3",
+        "pypiwin32==223",
+        "PyQt5==5.15.11",
+        "PyQt5-Qt5==5.15.2",
+        "PyQt5_sip==12.17.0",
+        "pytesseract==0.3.13",
+        "python-dateutil==2.9.0.post0",
+        "python-dotenv==1.1.0",
+        "pyttsx3==2.98",
+        "pytube==15.0.0",
+        "pytz==2025.2",
+        "pywin32==310",
+        "pywin32-ctypes==0.2.3",
+        "PyYAML==6.0.2",
+        "referencing==0.36.2",
+        "regex==2024.11.6",
+        "requests==2.32.3",
+        "rpds-py==0.25.1",
+        "safetensors==0.5.3",
+        "scikit-learn==1.6.1",
+        "scipy==1.15.3",
+        "sentence-transformers==4.1.0",
+        "setuptools==80.9.0",
+        "six==1.17.0",
+        "smmap==5.0.2",
+        "sniffio==1.3.1",
+        "sounddevice==0.5.2",
+        "SpeechRecognition==3.14.3",
+        "srt==3.5.3",
+        "streamlit==1.45.1",
+        "supervision==0.25.1",
+        "sympy==1.14.0",
+[TRONCATO]
+
+## start_fullmode.py
+def main():
+    print("🔁 Avvio completo Mercurius∞")
+    print("🧠 Modalità Jarvis+ attiva: Visione, Voce, Dashboard, AI Cognitiva")
+    # Avviare sequenze di bootstrap dei moduli AI
+    from modules.Neo.trainer_orchestrator import bootstrap_agents
+    bootstrap_agents()
+
+if __name__ == "__main__":
+    main()
+
+## start_voice_interface.py
+"""
+Script: start_voice_interface
+Funzione: Comunicazione vocale Mercurius∞ da file audio nella root.
+Autore: Mercurius∞ AI Engineer
+"""
+
+import os
+from modules.voice_bridge.multimodal_controller import MultimodalController
+from modules.ai_kernel.agent_core import AgentCore
+
+AUDIO_FILE = "audio_input.wav"  # Assicurati che il file sia nella root!
+
+def ensure_audio_exists(path):
+    if not os.path.exists(path):
+        print(f"[ERRORE] File audio non trovato: {path}")
+        exit(1)
+
+def avvia_interazione_vocale(audio_file):
+    ensure_audio_exists(audio_file)
+
+    agente = AgentCore()
+    multimodale = MultimodalController()
+
+    print("🎙️ Avvio comunicazione vocale...")
+    multimodale.listen_and_respond(audio_file, agente.process_input)
+
+if __name__ == "__main__":
+    avvia_interazione_vocale(AUDIO_FILE)
+
+## task_manager_cli.py
+from modules.task_manager_cli import main
+
+if __name__ == "__main__":
+    main()
+
+## test_exp.json
+[
+  {
+    "tags": [
+      "unit"
+    ],
+    "result": "ok",
+    "timestamp": "2025-06-01T12:23:47.154527"
+  }
+]
+
+## .github/workflows/mercurius_ci.yml
 # .github/workflows/ci.yml
 name: Mercurius CI/CD
 
@@ -85,100 +323,7 @@ jobs:
       - name: 🧠 Run Mercurius Autonomous Action Plan
         run: echo "🧠 Executing Mercurius Autonomous Plan..."
 
-### --- CHANGELOG.md --- ###
-
-### Ciclo 019
-- Creato `hierarchy_controller.py` per definizione core-controller e comunicazioni interne tra agenti
-
-### Ciclo 020
-- Creato `strategic_coordinator.py` con mappatura obiettivi, log interazioni e scelta agenti
-
-### Ciclo 021
-- Creato modulo `cognitive_simulator.py` per apprendimento esperienziale e adattamento comportamentale
-
-### --- README.md --- ###
-# AION – Advanced Intelligence Of Nexus
-
-🔬 **AION** è un sistema AI evolutivo full-stack, autonomo, multimodale e cognitivamente attivo.
-Progettato per **apprendere**, **riflettere**, **generare codice** e **interagire** con ambienti complessi in tempo reale.
-
-## 🧠 Caratteristiche Principali
-
-- 🧠 **Autonomia cognitiva** – Apprende da esperienze passate, simula riflessioni e ottimizza strategie.
-- 🗺️ **Pianificazione intelligente** – Crea piani operativi e migliora tramite feedback (AZR).
-- 🎤 **Multimodalità attiva** – Supporta voce, testo, immagini e input sensoriali reali.
-- 🛠️ **Autogenerazione codice** – Scrive e modifica moduli Python in autonomia.
-- 📊 **Supervisione interna** – Telemetria cognitiva, metriche performance e logging avanzato.
-- 🧩 **Architettura modulare** – Ogni componente è plug&play e indipendente.
-
----
-
-## 📂 Struttura del Progetto
-
-```plaintext
-├── main.py                    # Entry point principale
-├── start_fullmode.py         # Avvio completo in modalità "Jarvis+"
-├── modules/
-│   ├── Neo/                  # Agenti evolutivi, ragionamento e simulazione
-│   ├── GPT/                  # Prompting e generazione LLM
-│   ├── AZR/                  # Modulo Reasoning e feedback
-│   ├── dashboard/            # Interfaccia utente (Tk + Streamlit)
-│   └── Reasoner/             # Catene logiche e planning
-├── tools/                    # Logger, loader, scheduler, tester
-├── config/                   # Configurazioni e ambienti
-├── culture/                  # File cognitivi e conoscenza appresa
-└── memory/                   # Memoria esperienziale degli agenti
-
-## 🚀 Modalità GENESIS
-Per avviare Mercurius∞ con tutti i moduli attivi, eseguire:
-
-```bash
-python scripts/aion_boot.py
-```
-
-Il comando abilita la rete di agenti (OpenAI, Ollama, AZR), la voce (Whisper + gTTS) e la visione YOLO tramite webcam IP.
-
-## 🛰 Mission Controller Evolutivo
-Il file `orchestrator/mission_controller.py` introduce un controller che gestisce un ciclo di self-questioning tra gli agenti (Reasoner, AZR e Codex). Ogni workspace contiene un prompt dedicato e il controller salva log e patch generate in automatico.
-
-Per una prova rapida è disponibile la GUI Streamlit:
-
-```bash
-streamlit run modules/dashboard/mission_gui.py
-```
-
-Da qui è possibile creare nuovi workspace, avviare il ciclo evolutivo e visualizzare i log della sandbox.
-
-## 🛠 Generazione automatica del prompt per GPT-Engineer
-
-Sono disponibili tre script per creare i file di lavoro:
-
-1. `scripts/update_project_tree.py` aggiorna `project_tree.txt` con l'albero del repository e le prime 100 righe dei file di testo.
-2. `scripts/build_prompt.py` unisce `project_tree.txt` e `prompt_commands.txt` nel file finale `prompt.txt`.
-3. `update_project_tree.py` salva in `project_tree` tutti i file testuali del progetto con percorso e contenuto completo.
-
-### Utilizzo manuale
-
-```bash
-python scripts/update_project_tree.py
-python scripts/build_prompt.py
-python update_project_tree.py
-```
-
-### Integrazione con Git
-
-```bash
-# abilita i githook personalizzati
-git config core.hooksPath githooks
-```
-
-`githooks/post-merge` aggiorna `project_tree.txt` dopo ogni merge.
-`githooks/pre-commit` genera `project_tree` e lo aggiunge al commit.
-Attiva l'hook con:
-`git config core.hooksPath githooks && chmod +x githooks/pre-commit`
-(valido sia su Linux che su Windows con Git Bash).
-
-### --- agents/__init__.py --- ###
+## agents/__init__.py
 """
 📦 agents/__init__.py
 Modulo inizializzatore per il caricamento dinamico degli agenti AI della rete neurale Mercurius∞
@@ -188,7 +333,7 @@ Modulo inizializzatore per il caricamento dinamico degli agenti AI della rete ne
 # Ogni modulo dovrà contenere una classe con lo stesso nome dell'agente definito in genesis_config.yaml
 # Esempio: agents/ChatGPT4.py -> class ChatGPT4:
 
-### --- agents/adaptive_trader.py --- ###
+## agents/adaptive_trader.py
 # agents/adaptive_trader.py
 """
 adaptive_trader.py
@@ -271,7 +416,7 @@ class AdaptiveTrader:
         """Restituisce lo storico delle operazioni eseguite."""
         return self.trade_log
 
-### --- agents/agent_comm.py --- ###
+## agents/agent_comm.py
 # agents/agent_comm.py
 
 """
@@ -308,7 +453,7 @@ def get_messages(agent_id: str) -> List[Dict]:
     """
     return MESSAGES.get(agent_id, [])
 
-### --- agents/agent_generator.py --- ###
+## agents/agent_generator.py
 # agents/agent_generator.py
 
 """
@@ -342,33 +487,7 @@ def generate_agent(personality: str, mission: str, name: str = "Unnamed Agent") 
     """
     return Agent(name, personality, mission)
 
-### --- agents/azr/azr_supervisor.py --- ###
-"""
-azr_supervisor.py
-=================
-Controllore strategico per adattamento Mercurius∞ basato su esperienze.
-"""
-
-from modules.experience.azr_analyzer import AZRAnalyzer
-from modules.metrics.performance_metrics import PerformanceMetrics
-
-
-class AZRSupervisor:
-    def __init__(self, agent, experience_memory, config):
-        self.agent = agent
-        self.memory = experience_memory
-        self.config = config
-        self.analyzer = AZRAnalyzer(self.memory, config)
-
-    def supervise(self):
-        analysis = self.analyzer.analyze_recent_performance()
-        suggestion = analysis.get("decision", {})
-        if suggestion.get("action") == "decrease_risk":
-            new_qty = suggestion["new_qty"]
-            self.agent.adjust_strategy({"base_trade_qty": new_qty})
-        return analysis
-
-### --- agents/azr.py --- ###
+## agents/azr.py
 """AZR reasoning agent."""
 from modules.llm.azr_reasoner import AZRAgent
 
@@ -382,7 +501,7 @@ class AZR:
     def neural_feedback(self):
         print("[AZR] feedback cycle active")
 
-### --- agents/azr_server.py --- ###
+## agents/azr_server.py
 """azr_server.py
 Modulo FastAPI che espone l'endpoint introspect per il Reasoner AZR.
 Utilizzabile da Mercurius∞ per sapere se AZR è attivo.
@@ -403,7 +522,7 @@ def start_server(host: str = "0.0.0.0", port: int = 4010):
 if __name__ == "__main__":
     start_server()
 
-### --- agents/memory_manager.py --- ###
+## agents/memory_manager.py
 """
 memory_manager.py
 =================
@@ -463,7 +582,7 @@ class MemoryManager:
             counts[symbol] = counts.get(symbol, 0) + 1
         return sorted(counts.items(), key=lambda x: -x[1])
 
-### --- agents/ollama.py --- ###
+## agents/ollama.py
 """Ollama local LLM agent."""
 import requests
 import json
@@ -488,7 +607,7 @@ class OLLAMA:
     def neural_feedback(self):
         print("[Ollama] feedback cycle active")
 
-### --- agents/openai.py --- ###
+## agents/openai.py
 """OpenAI agent wrapper for Mercurius∞."""
 import os
 import openai
@@ -513,57 +632,35 @@ class OPENAI:
     def neural_feedback(self):
         print("[OpenAI] feedback cycle active")
 
-### --- ai_launcher.py --- ###
-import subprocess
-import requests
-import time
-import os
-from typing import List
+## agents/azr/azr_supervisor.py
+"""
+azr_supervisor.py
+=================
+Controllore strategico per adattamento Mercurius∞ basato su esperienze.
+"""
 
-from utils.logger import get_file_logger
-
-LOG_FILE = os.path.join("logs", "service_launcher.log")
-logger = get_file_logger("ServiceLauncher", LOG_FILE)
-
-def is_service_running(url: str, timeout: int = 2) -> bool:
-    """Check if a service responds on the given URL."""
-    try:
-        response = requests.get(url, timeout=timeout)
-        return response.status_code in [200, 401, 403]
-    except requests.exceptions.RequestException:
-        return False
-
-def launch_service(name: str, url: str, command: List[str], delay: int = 5, retries: int = 5) -> None:
-    """Ensure that a service is running, otherwise try to start it."""
-    if is_service_running(url):
-        logger.info(f"{name} è già attivo su {url}")
-        return
-
-    logger.info(f"Avvio {name}: {' '.join(command)}")
-    subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-    for _ in range(retries):
-        if is_service_running(url):
-            logger.info(f"{name} avviato correttamente.")
-            return
-        time.sleep(delay)
-
-    logger.error(f"{name} non risponde su {url}")
-
-def ensure_ai_online():
-    launch_service("Ollama", "http://localhost:11434", ["ollama", "serve"], delay=3)
-    launch_service("Ollama3", "http://localhost:11434/api/tags", ["ollama", "run", "llama3"], delay=3)
-    launch_service("AZR", "http://localhost:4010/introspect", ["python", "agents/azr_server.py"], delay=2)
-    launch_service("JOSCH", "http://localhost:3020/ping", ["python", "integrations/bridge_josch.py"], delay=2)
-    launch_service("n8n", "http://localhost:5678", ["n8n", "start"], delay=4)
-
-if __name__ == "__main__":
-    ensure_ai_online()
-
-### --- analytics/__init__.py --- ###
+from modules.experience.azr_analyzer import AZRAnalyzer
+from modules.metrics.performance_metrics import PerformanceMetrics
 
 
-### --- analytics/behavior_logger.py --- ###
+class AZRSupervisor:
+    def __init__(self, agent, experience_memory, config):
+        self.agent = agent
+        self.memory = experience_memory
+        self.config = config
+        self.analyzer = AZRAnalyzer(self.memory, config)
+
+    def supervise(self):
+        analysis = self.analyzer.analyze_recent_performance()
+        suggestion = analysis.get("decision", {})
+        if suggestion.get("action") == "decrease_risk":
+            new_qty = suggestion["new_qty"]
+            self.agent.adjust_strategy({"base_trade_qty": new_qty})
+        return analysis
+
+## analytics/__init__.py
+
+## analytics/behavior_logger.py
 # analytics/behavior_logger.py
 """
 Modulo: behavior_logger.py
@@ -599,7 +696,7 @@ class BehaviorLogger:
             return []
         return self.file.read_text(encoding="utf-8").splitlines()[-n:]
 
-### --- analytics/meta_learner.py --- ###
+## analytics/meta_learner.py
 # analytics/meta_learner.py
 """
 Modulo: meta_learner.py
@@ -641,7 +738,7 @@ class MetaLearner:
             return f"🤖 Consiglio: test approfonditi su modulo '{worst}' (errore>20%)."
         return "✅ Sistema stabile: nessuna azione critica."
 
-### --- analytics/neuro_optimizer.py --- ###
+## analytics/neuro_optimizer.py
 # analytics/neuro_optimizer.py
 """
 Modulo: neuro_optimizer.py
@@ -686,7 +783,7 @@ class NeuroOptimizer:
         new_code = self._call_llm(prompt)
         return {"path": str(file_path), "code": new_code}
 
-### --- analytics/self_patch_engine.py --- ###
+## analytics/self_patch_engine.py
 # analytics/self_patch_engine.py
 """
 Modulo: self_patch_engine.py
@@ -724,10 +821,9 @@ class SelfPatchEngine:
         print(f"✅ Patch applicata su branch {branch}")
         return branch
 
-### --- cognition/__init__.py --- ###
+## cognition/__init__.py
 
-
-### --- cognition/agent_router.py --- ###
+## cognition/agent_router.py
 # cognition/agent_router.py
 """
 Modulo: agent_router.py
@@ -753,88 +849,3 @@ class AgentRouter:
         }
 
     def _match_rule(self, task: str):
-        for pattern, types in self.rules.items():
-            if re.search(pattern, task, re.IGNORECASE):
-                return types
-        return ["cognitive"]
-
-    def choose_agent(self, task: str) -> str:
-        desired_types = self._match_rule(task)
-        candidates = []
-        for t in desired_types:
-            candidates.extend(self.map.agents_by_type(t))
-        # se più candidati, usa memoria di successo
-        if candidates:
-            return self.memory.suggest_best(candidates)
-        # fallback: primo agente generico
-        return next(iter(self.map.nodes))
-
-    def record_result(self, agent: str, task: str, success: bool):
-        self.memory.add_record(agent, task, success)
-
-### --- cognition/cognitive_map.py --- ###
-# cognition/cognitive_map.py
-"""
-Modulo: cognitive_map.py
-Descrizione: Rappresentazione dinamica della mappa mentale di Mercurius∞.
-Ogni nodo è un agente, ogni arco è una dipendenza o canale di comunicazione.
-"""
-
-from collections import defaultdict
-from typing import Dict, List
-
-
-class CognitiveMap:
-    def __init__(self):
-        # {agent: {"type": "cognitive|trading|voice", "edges": [to_agent, ...]}}
-        self.nodes: Dict[str, Dict] = defaultdict(lambda: {"type": "generic", "edges": []})
-
-    # ---------- Gestione nodi ----------
-    def add_agent(self, name: str, agent_type: str = "generic"):
-        self.nodes[name]["type"] = agent_type
-
-    def link(self, src: str, dest: str):
-        if dest not in self.nodes[src]["edges"]:
-            self.nodes[src]["edges"].append(dest)
-
-    def remove_agent(self, name: str):
-        self.nodes.pop(name, None)
-        for n in self.nodes.values():
-            if name in n["edges"]:
-                n["edges"].remove(name)
-
-    # ---------- Query ----------
-    def agents_by_type(self, agent_type: str) -> List[str]:
-        return [a for a, meta in self.nodes.items() if meta["type"] == agent_type]
-
-    def connections_of(self, name: str) -> List[str]:
-        return self.nodes[name]["edges"]
-
-    def to_dict(self):
-        return self.nodes
-
-### --- cognition/task_memory.py --- ###
-# cognition/task_memory.py
-"""
-Modulo: task_memory.py
-Descrizione: Salvataggio outcome dei task per apprendere preferenze di routing.
-"""
-
-from collections import deque
-from typing import Dict, Any, Deque, List
-
-
-class TaskMemory:
-    def __init__(self, maxlen: int = 2000):
-        self.records: Deque[Dict[str, Any]] = deque(maxlen=maxlen)
-
-    def add_record(self, agent: str, task: str, success: bool):
-        self.records.append({"agent": agent, "task": task, "success": success})
-
-    def agent_score(self, agent: str) -> float:
-        """Percentuale di successi dell’agente."""
-        entries = [r for r in self.records if r["agent"] == agent]
-        if not entries:
-            return 0.5
-        ok = sum(1 for e in entries if e["success"])
-        return ok / len(entries)

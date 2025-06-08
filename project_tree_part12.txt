@@ -1,0 +1,798 @@
+Questa è la parte 12 di project_tree. Continua da quella precedente.
+
+    AZRAnalyzer unisce due livelli di analisi:
+      1. Analisi statistica su profitti (mean, volatility, ed eventuale suggerimento di riduzione rischio).
+      2. Creazione di un prompt testuale per AZRAgent, che analizza il batch recente e suggerisce adattamenti.
+    """
+
+    def __init__(self, exp_memory: ExperienceMemory, config: Dict[str, Any]):
+        """
+        - exp_memory: istanza di ExperienceMemory già inizializzata (backend JSON).
+        - config: dizionario di configurazione, con possibili chiavi:
+            - "azr_profit_floor": soglia minima media dei profitti (float), default 0.5
+            - "base_trade_qty": quantità base del trade (int), default 100
+            - "use_azr": booleano che abilita l’analisi LLM (default True)
+        """
+        self.exp_memory = exp_memory
+        self.config = config
+        self.azr = AZRAgent() if config.get("use_azr", True) else None
+
+    def analyze_recent_performance(
+        self, limit: int = 20
+    ) -> Dict[str, Union[str, float, Dict[str, Any]]]:
+        """
+        Esegue un’analisi statistica sui profitti delle ultime `limit` esperienze.
+        Restituisce un dizionario contenente:
+          - "status": "no_data" o "ok"
+          - "mean_profit": media dei profitti (float)
+          - "volatility": deviazione standard (float)
+          - "decision": suggerimento generico basato sul confronto con "azr_profit_floor"
+        """
+        recent = self.exp_memory.get_recent_experiences(limit)
+        # Estrae la lista dei profitti, default a 0 se mancante
+        profits: List[float] = [
+            e.get("result", {}).get("profit", 0.0) for e in recent
+        ]
+
+        if not profits:
+            return {"status": "no_data"}
+
+        avg_profit = mean(profits)
+        vol = stdev(profits) if len(profits) > 1 else 0.0
+        decision = self._suggest_statistical(avg_profit)
+
+        return {
+            "status": "ok",
+            "mean_profit": avg_profit,
+            "volatility": vol,
+            "decision": decision,
+        }
+
+    def _suggest_statistical(self, avg_profit: float) -> Dict[str, Any]:
+        """
+        Suggerisce un’azione di tuning se la media dei profitti è inferiore a "azr_profit_floor".
+        Se avg_profit < soglia, restituisce:
+          {
+            "action": "decrease_risk",
+            "new_qty": <metà di base_trade_qty o 10, se inferiore>
+          }
+        Altrimenti restituisce {"action": "maintain"}.
+        """
+        threshold = float(self.config.get("azr_profit_floor", 0.5))
+        base_qty = int(self.config.get("base_trade_qty", 100))
+
+        if avg_profit < threshold:
+            new_qty = max(10, int(base_qty * 0.5))
+            return {"action": "decrease_risk", "new_qty": new_qty}
+
+        return {"action": "maintain"}
+
+    def apply_statistical_adaptation(self, limit: int = 20) -> Dict[str, Any]:
+        """
+        Esegue l’analisi statistica e, se viene suggerita una riduzione del rischio,
+        aggiorna `config["base_trade_qty"]`. Restituisce il risultato dell'analisi.
+        """
+        result = self.analyze_recent_performance(limit)
+        decision = result.get("decision", {})
+        if decision.get("action") == "decrease_risk":
+            self.config["base_trade_qty"] = decision["new_qty"]
+        return result
+
+    def analyze_with_azr(self, limit: int = 10) -> Optional[Dict[str, Any]]:
+        """
+        Crea un prompt testuale basato sulle ultime `limit` esperienze e lo invia ad AZRAgent,
+        che restituisce un’analisi in linguaggio naturale. Se AZRAgent suggerisce un cambiamento
+        di rischio, viene applicato a config["base_trade_qty"] e viene restituito il dizionario
+        {"action": ..., "new_qty": ...}. Altrimenti restituisce None.
+        """
+        if not self.azr:
+            return None
+
+        recent = self.exp_memory.get_recent_experiences(limit)
+        if not recent:
+            return None
+
+        # Costruzione del prompt
+        prompt_lines = ["Analizza queste esperienze di trading e suggerisci adattamento del rischio:"]
+        for e in recent:
+            profit = e.get("result", {}).get("profit", 0.0)
+            qty = e.get("trade", {}).get("quantity", self.config.get("base_trade_qty", 100))
+            prompt_lines.append(f"- Profit: {profit}, Quantity: {qty}")
+        prompt = "\n".join(prompt_lines)
+
+        # Chiamata ad AZRAgent
+        analysis_text = self.azr.analyze(prompt)
+
+        # Se AZRAgent parla di 'rischio' (o 'risk'), applichiamo la modifica
+        if "rischio" in analysis_text.lower() or "risk" in analysis_text.lower():
+            base_qty = int(self.config.get("base_trade_qty", 100))
+            new_qty = max(1, int(base_qty * 0.5))
+            self.config["base_trade_qty"] = new_qty
+            return {"action": "decrease_risk", "new_qty": new_qty, "analysis": analysis_text}
+
+        return None
+
+    def apply_adaptation(self, use_azr: bool = True, limit: int = 20) -> Dict[str, Any]:
+        """
+        Combina le due modalità di adattamento:
+          - Se use_azr=True e AZRAgent è disponibile, prova prima l’adattamento LLM:
+            se AZR suggerisce un cambiamento, lo applica e lo restituisce.
+          - Altrimenti, (o se AZR non suggerisce nulla) esegue l’adattamento statistico
+            tramite `apply_statistical_adaptation(limit)`.
+        Restituisce sempre un dizionario con la decisione effettiva.
+        """
+        # Tentativo con AZRAgent
+        if use_azr and self.azr:
+            azr_result = self.analyze_with_azr(limit // 2)
+            if azr_result is not None:
+                return {"method": "azr", "decision": azr_result}
+
+        # Altrimenti, adattamento statistico
+        stat_result = self.apply_statistical_adaptation(limit)
+        return {"method": "statistical", "decision": stat_result.get("decision", {})}
+
+
+# ========== ESEMPIO DI UTILIZZO ==========
+if __name__ == "__main__":
+    # Simulazione di integrazione con ExperienceMemory e config
+    from modules.experience.experience_memory import ExperienceMemory
+
+    config = {
+        "azr_profit_floor": 0.5,
+        "base_trade_qty": 100,
+        "use_azr": True
+    }
+
+    # Inizializza la memoria esperienziale
+    em = ExperienceMemory({"experience_file": "memory/experience_log.json", "max_recent": 50})
+
+    # Registra alcune esperienze di test
+    em.record_experience(
+        signal={"symbol": "EURUSD", "type": "BUY", "price": 1.1000},
+        trade={"quantity": 100, "entry": 1.1000, "exit": 1.1020},
+        result={"profit": 20, "currency": "USD"},
+        feedback="Esecuzione corretta"
+    )
+    em.record_experience(
+        signal={"symbol": "EURUSD", "type": "SELL", "price": 1.1050},
+        trade={"quantity": 100, "entry": 1.1050, "exit": 1.1030},
+        result={"profit": -20, "currency": "USD"},
+        feedback="Stop troppo stretto"
+    )
+
+    # Inizializza l’analizzatore
+    analyzer = AZRAnalyzer(exp_memory=em, config=config)
+
+    # Applichiamo l’adattamento (AZR o statistico)
+    adaptation = analyzer.apply_adaptation(use_azr=True, limit=20)
+    print("Adattamento applicato:", json.dumps(adaptation, indent=2))
+
+### --- modules/experience/experience_memory.py --- ###
+# modules/experience/experience_memory.py
+
+"""
+Modulo: experience_memory.py
+Descrizione: Memoria evolutiva esperienziale per il sistema Mercurius∞.
+Registra segnali, trade e risultati; usa internamente il backend JSON di LongTermMemory.
+"""
+
+import os
+import json
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Union
+from memory.long_term_memory import LongTermMemory
+
+
+class ExperienceMemory:
+    """
+    Strato di astrazione sopra LongTermMemory (backend JSON) con API di alto livello per il trading.
+
+    - Se config contiene la chiave "experience_file", userà quel file JSON (es. "memory/experience_log.json").
+    - Mantiene, in aggiunta, una lista self.recent in memoria con le ultime N esperienze.
+    """
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """
+        - config: dizionario di configurazione. Se config["experience_file"] è presente, verrà usato come nome del file JSON.
+        - In assenza di config, viene creato/riutilizzato “memory/experience_log.json”.
+        """
+        if config is None:
+            config = {}
+
+        # Decidiamo il percorso del file JSON: o quello fornito in config, oppure il default
+        default_path = "memory/experience_log.json"
+        self.storage_path: str = config.get("experience_file", default_path)
+
+        # Creiamo la cartella se non esiste
+        os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
+
+        # 🔥 Patch: inizializziamo il limite PRIMA di caricare la storia!
+        self._max_recent: int = config.get("max_recent", 50)
+
+        # Inizializziamo LongTermMemory in modalità JSON, usando il file indicato
+        self.store = LongTermMemory(
+            backend="json",
+            json_filename=self.storage_path
+        )
+
+        # Carichiamo la storia esistente dal file JSON, se esiste
+        self.recent: List[Dict[str, Any]] = self._load_existing_history()
+
+    def _load_existing_history(self) -> List[Dict[str, Any]]:
+        """
+        Legge il file JSON e restituisce la lista completa delle esperienze salvate.
+        Popola self.recent con gli ultimi _max_recent elementi (o meno, se il file contiene di meno).
+        """
+        try:
+            with open(self.storage_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if not isinstance(data, list):
+                    return []
+                # Manteniamo in recent solo gli ultimi max_recent elementi
+                return data[-self._max_recent :]
+        except FileNotFoundError:
+            return []
+        except json.JSONDecodeError:
+            return []
+
+    def record_experience(
+        self,
+        signal: Any,
+        trade: Any,
+        result: Any,
+        feedback: Any,
+        tags: Optional[List[str]] = None
+    ) -> None:
+        """
+        Registra una nuova esperienza di trading, composta da:
+         - signal: informazioni sul segnale (es. "BUY EURUSD a 1.1000")
+         - trade: dettagli del trade (es. numero di lotti, entry, exit)
+         - result: risultato (es. profitto/perdita)
+         - feedback: eventuali commenti o valutazioni
+         - tags: lista opzionale di stringhe per categorizzare l’esperienza (di default ["trading"])
+        """
+        if tags is None:
+            tags = ["trading"]
+
+        # Costruiamo il dizionario dell’esperienza, aggiungendo timestamp UTC
+        exp: Dict[str, Any] = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "signal": signal,
+            "trade": trade,
+            "result": result,
+            "feedback": feedback,
+            "tags": tags,
+        }
+
+        # Salviamo l’esperienza nel backend JSON di LongTermMemory
+        self.store.save_experience(exp)
+
+        # Aggiungiamo in cache
+        self.recent.append(exp)
+        # Se superiamo _max_recent, eliminiamo i più vecchi
+        if len(self.recent) > self._max_recent:
+            self.recent = self.recent[-self._max_recent :]
+
+    def get_recent_experiences(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        Restituisce le ultime 'limit' esperienze direttamente dalla cache self.recent.
+        Se limit > len(recent), restituisce tutta la cache.
+        """
+        return self.recent[-limit:]
+
+    def get_all_experiences(self) -> List[Dict[str, Any]]:
+        """
+        Legge tutte le esperienze dal file JSON (tramite LongTermMemory.get_all).
+        Se si vuole lavorare con la lista completa, anche quelle non in cache.
+        """
+        return self.store.get_all()
+
+    def reset(self) -> None:
+        """
+        Svuota completamente la memoria delle esperienze:
+         - Cancella la cache self.recent
+         - Sovrascrive il file JSON con lista vuota
+        """
+        self.recent.clear()
+        try:
+            with open(self.storage_path, "w", encoding="utf-8") as f:
+                json.dump([], f, indent=2)
+        except Exception as e:
+            raise RuntimeError(f"Impossibile resettare il file '{self.storage_path}': {e}")
+
+    def summarize(self) -> Dict[str, Any]:
+        """
+        Restituisce un dizionario riepilogativo della memoria:
+         - 'total': numero totale di esperienze salvate
+         - 'last_timestamp': timestamp dell’ultima esperienza (se esiste)
+         - 'cached_recent': numero di esperienze in cache
+        """
+        all_exps = self.get_all_experiences()
+        total = len(all_exps)
+        last_ts = all_exps[-1]["timestamp"] if total > 0 else None
+        return {
+            "total": total,
+            "last_timestamp": last_ts,
+            "cached_recent": len(self.recent),
+        }
+
+
+# ===================== ESEMPIO DI UTILIZZO =====================
+if __name__ == "__main__":
+    # Esempio di configurazione: memorizza in 'memory/experience_log.json' e tiene 50 esperienze in cache
+    config = {
+        "experience_file": "memory/experience_log.json",
+        "max_recent": 50
+    }
+    em = ExperienceMemory(config)
+
+    # Registra un’esperienza di prova
+    em.record_experience(
+        signal={"symbol": "EURUSD", "type": "BUY", "price": 1.1000},
+        trade={"lots": 0.1, "entry": 1.1000, "exit": 1.1020},
+        result={"pnl": 20, "currency": "USD"},
+        feedback="Buon segnale, gestione corretta dello stop."
+    )
+
+    # Ottieni le ultime 5 esperienze
+    recenti = em.get_recent_experiences(limit=5)
+    print("Ultime esperienze:", recenti)
+
+    # Riassunto della memoria
+    riassunto = em.summarize()
+    print("Riepilogo:", riassunto)
+
+    # Se vuoi resettare tutto, scommenta la riga seguente:
+    # em.reset()
+
+### --- modules/feedback_loop.py --- ###
+# modules/feedback_loop.py
+
+"""
+Modulo: feedback_loop.py
+Descrizione: Coordina il feedback tra moduli AI in Mercurius∞ per auto-apprendimento, miglioramento codice e decisioni collettive.
+"""
+
+class FeedbackLoop:
+    def __init__(self):
+        self.logs = []
+
+    def collect_feedback(self, source: str, message: str):
+        entry = f"🔁 [{source}] → {message}"
+        self.logs.append(entry)
+        print(entry)
+
+    def last_feedback(self, n=5):
+        return "\n".join(self.logs[-n:])
+
+
+# Test rapido
+if __name__ == "__main__":
+    fb = FeedbackLoop()
+    fb.collect_feedback("AZR", "Codice semanticamente corretto.")
+    fb.collect_feedback("GPT-4o", "Suggerita ottimizzazione per compatibilità.")
+    print(fb.last_feedback())
+
+### --- modules/fingpt_analyzer.py --- ###
+# modules/fingpt_analyzer.py
+
+"""
+Modulo: fingpt_analyzer.py
+Descrizione: Modulo di analisi NLP con FinGPT per generare segnali operativi da notizie e sentiment.
+"""
+
+class FinGPTAnalyzer:
+    def __init__(self):
+        self.last_signal = None
+
+    def analyze_text(self, text: str) -> str:
+        if "inflation" in text.lower():
+            self.last_signal = "SELL"
+        else:
+            self.last_signal = "BUY"
+        return f"📉 Segnale da news: {self.last_signal}"
+
+
+# Test rapido
+if __name__ == "__main__":
+    bot = FinGPTAnalyzer()
+    print(bot.analyze_text("US Inflation data released - very high"))
+
+### --- modules/finrl_agent.py --- ###
+# modules/finrl_agent.py
+
+"""
+Modulo: finrl_agent.py
+Descrizione: Wrapper per l’utilizzo di FinRL all’interno di Mercurius∞. Consente addestramento e deploy di agenti RL per trading.
+"""
+
+class FinRLAgent:
+    def __init__(self):
+        self.model = None
+
+    def train(self, data_path: str, model_type="ppo"):
+        print(f"📈 Addestramento agente {model_type} su {data_path}")
+        # Qui si collegherà al training FinRL in futuro
+
+    def predict(self, state):
+        return "🧠 Predizione (stub): buy/sell/hold"
+
+    def evaluate(self):
+        return "📊 Performance dell’agente: +4.2% (simulata)"
+
+
+# Test
+if __name__ == "__main__":
+    agent = FinRLAgent()
+    agent.train("data/btc.csv")
+    print(agent.predict("BTC_state"))
+
+### --- modules/freqtrade_bot.py --- ###
+# modules/freqtrade_bot.py
+
+"""
+Modulo: freqtrade_bot.py
+Descrizione: Struttura base per l'integrazione di strategie ML con Freqtrade.
+"""
+
+class FreqtradeBot:
+    def __init__(self, strategy_name="MLBaseline"):
+        self.strategy = strategy_name
+
+    def run(self):
+        return f"🤖 Esecuzione bot crypto con strategia: {self.strategy}"
+
+    def update_strategy(self, new_name):
+        self.strategy = new_name
+        return f"🔁 Strategia aggiornata a: {self.strategy}"
+
+
+# Test
+if __name__ == "__main__":
+    bot = FreqtradeBot()
+    print(bot.run())
+    print(bot.update_strategy("SuperAI_MACD"))
+
+### --- modules/gesture.py --- ###
+"""
+Modulo: gesture.py
+Responsabilità: Stub logico per riconoscimento gesti e azioni gestuali
+Autore: Mercurius∞ Engineer Mode
+"""
+
+from typing import Dict
+
+
+class GestureRecognizer:
+    """
+    Placeholder per riconoscimento gesti. Può essere integrato con visione artificiale.
+    """
+
+    def recognize(self, input_frame) -> Dict:
+        """
+        Analizza un frame video e ritorna un gesto identificato (stub logico).
+        """
+        # In un sistema reale si integrerebbe OpenCV + ML per gesture spotting
+        return {
+            "gesture": "saluto",
+            "action": "inizia_conversazione"
+        }
+
+    def interpret_gesture(self, gesture: str) -> Dict:
+        """
+        Converte un gesto in comando.
+        """
+        if gesture == "saluto":
+            return {"action": "interagisci_utente"}
+        elif gesture == "indicazione":
+            return {"action": "raggiungi_destinazione", "context": {"destinazione": "indicata"}}
+        else:
+            return {"action": "ignora"}
+
+### --- modules/goal_manager.py --- ###
+"""
+Modulo: goal_manager.py
+Descrizione: Gestione di obiettivi (Goal) con priorità, stato e contesto.
+Autore: Mercurius∞ AI Engineer
+"""
+
+from dataclasses import dataclass, field
+from typing import List, Dict, Any, Optional
+
+@dataclass(order=False)  # disattiva ordinamento automatico
+class Goal:
+    name: str
+    priority: int = 1
+    context: Dict[str, Any] = field(default_factory=dict)
+    done: bool = False
+    status: str = "pending"  # possible values: pending, active, completed
+
+class GoalManager:
+    def __init__(self):
+        self._goals: List[Goal] = []
+
+    # --- API principale ---
+    def add_goal(self, name: str, priority: int = 1, context: Optional[Dict[str, Any]] = None):
+        self._goals.append(Goal(name=name, priority=priority, context=context or {}))
+        # ordina per PRIORITÀ decrescente (priorità alta prima)
+        self._goals.sort(key=lambda g: g.priority, reverse=True)
+
+    def get_next_goal(self) -> Optional[Goal]:
+        for g in self._goals:
+            if not g.done:
+                g.status = "active"  # aggiorna lo stato a active
+                return g
+        return None
+
+    def complete_goal(self, name: str):
+        for g in self._goals:
+            if g.name == name:
+                g.done = True
+                g.status = "completed"
+                break
+
+    def list_goals(self) -> List[Goal]:
+        return self._goals
+
+    def active_goals(self) -> List[Goal]:
+        """Restituisce la lista di goal attivi (status active e non done)."""
+        return [g for g in self._goals if g.status == "active" and not g.done]
+
+    def pending_goals(self) -> List[Goal]:
+        """Ritorna i goal ancora in attesa di essere attivati."""
+        return [g for g in self._goals if g.status == "pending" and not g.done]
+
+    def all_goals(self) -> List[Dict[str, Any]]:
+        """Rappresentazione serializzabile di tutti i goal."""
+        return [
+            {
+                "name": g.name,
+                "priority": g.priority,
+                "context": g.context,
+                "status": g.status,
+                "done": g.done,
+            }
+            for g in self._goals
+        ]
+
+# Esempio di utilizzo
+if __name__ == "__main__":
+    gm = GoalManager()
+    gm.add_goal("Scrivere report", priority=5)
+    gm.add_goal("Debug sistema", priority=10)
+    next_goal = gm.get_next_goal()
+    print("Goal attivo:", next_goal)
+    gm.complete_goal(next_goal.name)
+    print("Lista goal:", gm.list_goals())
+
+### --- modules/gpt4o_interface.py --- ###
+"""
+Modulo: gpt4o_interface.py
+Descrizione: Comunicazione diretta con GPT-4o per validazione, riflessione e finalizzazione dei task AI.
+"""
+
+import openai
+import os
+
+class GPT4oInterface:
+    def __init__(self, api_key: str = None, model: str = "gpt-4o"):
+        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
+        self.model = model
+        openai.api_key = self.api_key
+
+    def ask(self, prompt: str, temperature: float = 0.7, max_tokens: int = 1024) -> str:
+        """
+        Invia un prompt a GPT-4o e restituisce la risposta testuale.
+        """
+        try:
+            response = openai.ChatCompletion.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            return response["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            return f"❌ Errore GPT-4o: {str(e)}"
+
+
+# Test locale
+if __name__ == "__main__":
+    gpt = GPT4oInterface()
+    reply = gpt.ask("Validami questa funzione Python: def somma(a, b): return a + b")
+    print(reply)
+
+### --- modules/gpt_engineer_wrapper.py --- ###
+# modules/gpt_engineer_wrapper.py
+
+"""
+Modulo: gpt_engineer_wrapper.py
+Descrizione: Interfaccia per pilotare GPT-Engineer via CLI o API, permettendo generazione autonoma di progetti e moduli.
+"""
+
+import subprocess
+import os
+
+class GPTEngineerWrapper:
+    def __init__(self, project_path="generated_projects/", config_file=None):
+        self.project_path = project_path
+        self.config_file = config_file or "gpt_config.yaml"
+
+    def generate_project(self, prompt: str) -> str:
+        """
+        Avvia GPT-Engineer per generare un progetto in base al prompt.
+        """
+        try:
+            os.makedirs(self.project_path, exist_ok=True)
+            with open("prompt.txt", "w") as f:
+                f.write(prompt)
+
+            result = subprocess.run(
+                ["gpt-engineer", "."],
+                cwd=self.project_path,
+                capture_output=True,
+                text=True
+            )
+            return result.stdout or "✅ Generazione completata."
+        except Exception as e:
+            return f"❌ Errore GPT-Engineer: {e}"
+
+
+# Test
+if __name__ == "__main__":
+    wrapper = GPTEngineerWrapper()
+    print(wrapper.generate_project("Crea un'applicazione per il tracciamento del sonno"))
+
+### --- modules/gpt_task_router.py --- ###
+
+
+### --- modules/hf_tools_manager.py --- ###
+# modules/hf_tools_manager.py
+
+"""
+Modulo: hf_tools_manager.py
+Descrizione: Integrazione con HuggingFace Transformers Agents per interagire con strumenti locali.
+"""
+
+from transformers import HfAgent
+
+class HFToolsManager:
+    def __init__(self):
+        self.agent = HfAgent("https://api-inference.huggingface.co/models/bigcode/starcoder")
+
+    def use_tool(self, query: str) -> str:
+        try:
+            return self.agent.run(query)
+        except Exception as e:
+            return f"❌ Errore HuggingFace Tools: {str(e)}"
+
+### --- modules/io_modules/mobile_connect.py --- ###
+import cv2
+
+def start_note10_sync(ip_camera_url="http://192.168.0.10:8080/video",
+                      use_hotword=True,
+                      request_qr_if_fail=True):
+    print("📲 Avvio sincronizzazione con Note10+...")
+
+    try:
+        cap = cv2.VideoCapture(ip_camera_url)
+        if not cap.isOpened():
+            raise ConnectionError("⚠️ Impossibile connettersi alla camera IP")
+
+        print("✅ Stream ricevuto. Avvio visione artificiale...")
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            cv2.imshow("Note10+ Camera Feed", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+    except Exception as e:
+        print(f"❌ Errore connessione: {e}")
+        if request_qr_if_fail:
+            print("📸 Generazione QR code per pairing alternativo (simulazione)")
+
+### --- modules/leonai_bridge.py --- ###
+# modules/leonai_bridge.py
+
+"""
+Modulo: leonai_bridge.py
+Descrizione: Integrazione Leon AI per il controllo testuale/vocale del sistema operativo.
+"""
+
+import os
+
+class LeonAI:
+    def execute_command(self, command: str) -> str:
+        try:
+            result = os.popen(command).read()
+            return f"✅ Comando eseguito:\n{result}"
+        except Exception as e:
+            return f"❌ Errore: {str(e)}"
+
+
+# Test
+if __name__ == "__main__":
+    leon = LeonAI()
+    print(leon.execute_command("echo 'Mercurius è operativo!'"))
+
+### --- modules/llm/azr_reasoner.py --- ###
+# modules/llm/azr_reasoner.py
+"""
+Modulo: azr_reasoner.py
+Descrizione: Sistema di validazione logica del codice e dei pensieri AI secondo la logica AZR.
+Utilizza analisi sintattica ed esecuzione controllata per determinare la validità di frammenti di codice.
+"""
+import ast
+import traceback
+from typing import Any
+
+class AZRReasoning:
+    def __init__(self):
+        self.log = []
+
+    def validate_with_azr(self, code: str) -> bool:
+        """
+        Analizza il codice ricevuto e ne valuta la coerenza logica e l'eseguibilità.
+        """
+        self.log.append(f"🔍 Validating code:\n{code}")
+        try:
+            tree = ast.parse(code)
+            self.log.append("✅ AST parsing succeeded.")
+        except SyntaxError as e:
+            self.log.append(f"❌ Syntax Error: {e}")
+            return False
+        try:
+            compiled = compile(tree, filename="<azr_check>", mode="exec")
+            test_env: dict[str, Any] = {}
+            exec(compiled, test_env)
+            self.log.append("✅ Execution succeeded.")
+            return True
+        except Exception as e:
+            self.log.append(f"⚠️ Execution Error: {traceback.format_exc()}")
+            return False
+
+    def last_validation_log(self) -> str:
+        """Restituisce le ultime voci di log della validazione."""
+        return "\n".join(self.log[-5:])
+
+# Funzione diretta per uso esterno
+def validate_with_azr(code: str) -> bool:
+    azr = AZRReasoning()
+    return azr.validate_with_azr(code)
+
+# Agente AZR: utilizza AZRReasoning per analizzare task di debug/logica
+class AZRAgent:
+    def __init__(self):
+        self.azr = AZRReasoning()
+
+    def analyze(self, text: str, context: dict = None) -> str:
+        """
+        Analizza il testo (es. codice) con la logica AZR e restituisce un responso.
+        """
+        code_to_check = text if context is None else context.get("code", text)
+        success = self.azr.validate_with_azr(code_to_check)
+        if success:
+            return "✅ AZR: codice valido e logica consistente."
+        else:
+            # Include dettagli di errore nel risultato
+            error_log = self.azr.last_validation_log()
+            return f"❌ AZR: rilevate criticità logiche.\nLog: {error_log}"
+
+### --- modules/llm/chatgpt_interface.py --- ###
+"""
+Modulo: chatgpt_interface
+Descrizione: Interfaccia con ChatGPT-4 per ragionamento linguistico e conversazione.
+"""
+
+import openai
+import os
+
+class ChatGPTAgent:
+    def __init__(self, model_name="gpt-4"):
+        self.model = model_name

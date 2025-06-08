@@ -1,0 +1,962 @@
+Questa è la parte 55 di project_tree. Continua da quella precedente.
+
+    print("🔁 Avvio completo Mercurius∞")
+    print("🧠 Modalità Jarvis+ attiva: Visione, Voce, Dashboard, AI Cognitiva")
+    # Avviare sequenze di bootstrap dei moduli AI
+    from modules.Neo.trainer_orchestrator import bootstrap_agents
+    bootstrap_agents()
+
+if __name__ == "__main__":
+    main()
+
+### --- start_voice_interface.py --- ###
+"""
+Script: start_voice_interface
+Funzione: Comunicazione vocale Mercurius∞ da file audio nella root.
+Autore: Mercurius∞ AI Engineer
+"""
+
+import os
+from modules.voice_bridge.multimodal_controller import MultimodalController
+from modules.ai_kernel.agent_core import AgentCore
+
+AUDIO_FILE = "audio_input.wav"  # Assicurati che il file sia nella root!
+
+def ensure_audio_exists(path):
+    if not os.path.exists(path):
+        print(f"[ERRORE] File audio non trovato: {path}")
+        exit(1)
+
+def avvia_interazione_vocale(audio_file):
+    ensure_audio_exists(audio_file)
+
+    agente = AgentCore()
+    multimodale = MultimodalController()
+
+    print("🎙️ Avvio comunicazione vocale...")
+    multimodale.listen_and_respond(audio_file, agente.process_input)
+
+if __name__ == "__main__":
+    avvia_interazione_vocale(AUDIO_FILE)
+
+### --- strategies/strategy_executor.py --- ###
+"""
+strategy_executor.py
+====================
+Genera segnali operativi basati su output del modello predittivo.
+"""
+
+class StrategyExecutor:
+    def __init__(self, config):
+        self.config = config
+
+    def generate_signals(self, model, features):
+        """Genera segnali di trading basandosi sull'output del modello."""
+        signals = []
+        for f in features:
+            pred = model.forward([
+                f["price_volatility_ratio"],
+                f["momentum"],
+                f["volatility"]
+            ])[0]
+            action = "BUY" if pred > 0.5 else "SELL"
+            signals.append({
+                "symbol": f["symbol"],
+                "action": action,
+                "confidence": pred,
+                "volatility": f["volatility"],
+                "timestamp": "2025-05-30T12:00:00"
+            })
+        return signals
+
+    def filter_signals(self, signals, min_confidence=0.6):
+        """Filtra i segnali con bassa confidenza."""
+        return [s for s in signals if s["confidence"] >= min_confidence]
+
+    def summary_stats(self, signals):
+        """Statistiche dei segnali generati."""
+        summary = {"BUY": 0, "SELL": 0}
+        for s in signals:
+            summary[s["action"]] += 1
+        return summary
+
+### --- task_manager_cli.py --- ###
+from modules.task_manager_cli import main
+
+if __name__ == "__main__":
+    main()
+
+### --- test_exp.json --- ###
+[
+  {
+    "tags": [
+      "unit"
+    ],
+    "result": "ok",
+    "timestamp": "2025-06-01T12:23:47.154527"
+  }
+]
+
+### --- tests/conftest.py --- ###
+import sys
+import pathlib
+import types
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+# Stub external dependencies
+_dummy_openai = types.SimpleNamespace(
+    ChatCompletion=types.SimpleNamespace(create=lambda **_: {"choices": [{"message": {"content": "ok"}}]})
+)
+_dummy = types.SimpleNamespace()
+for name, mod in {
+    "openai": _dummy_openai,
+    "torch": _dummy,
+    "speech_recognition": _dummy,
+    "fitz": _dummy,
+    "yaml": _dummy,
+    "psutil": _dummy,
+    "requests": _dummy,
+}.items():
+    if name not in sys.modules:
+        sys.modules[name] = mod
+
+### --- tests/run_simulation.py --- ###
+"""
+Simulazione: Avvio sistema Mercurius∞ in modalità autonoma.
+Scopo: Verifica operatività integrata dei moduli principali.
+"""
+
+from modules.start_fullmode.initializer import SystemInitializer
+
+def run_simulation():
+    print("🔁 Simulazione in corso...")
+
+    # Inizializzazione e avvio
+    system = SystemInitializer()
+    system.initialize_environment()
+    system.start_components()
+
+    # Interazione simulata
+    audio_input = system.audio.listen()
+    system.agent.perceive(audio_input)
+    decision = system.agent.reason()
+    system.agent.act(decision)
+    system.audio.speak(f"Ho elaborato: {decision}")
+
+    # Arresto video per sicurezza
+    system.vision.stop()
+    print("✅ Simulazione completata.")
+
+if __name__ == "__main__":
+    run_simulation()
+
+### --- tests/test_agent_core.py --- ###
+from modules.ai_kernel.agent_core import AgentCore
+
+
+class DummyReasoner:
+    def think(self, query: str) -> str:
+        return "dummy decision"
+
+
+def test_agent_boot(monkeypatch):
+    monkeypatch.setattr(
+        "modules.ai_kernel.agent_core.LangReasoner", lambda: DummyReasoner()
+    )
+    agent = AgentCore("TestAgent")
+    agent.boot()
+    assert agent.status == "ready"
+
+### --- tests/test_audio_interface.py --- ###
+from modules.voice_bridge.audio_interface import AudioInterface
+
+def test_audio_initialization():
+    audio = AudioInterface()
+    audio.initialize()
+    assert audio.microphone_ready
+    assert audio.tts_ready
+
+def test_audio_listen_and_speak():
+    audio = AudioInterface()
+    audio.initialize()
+    spoken = audio.listen()
+    assert isinstance(spoken, str)
+    assert "simulato" in spoken
+    response = audio.speak("Messaggio di test")
+    assert response is None  # La funzione speak stampa ma non ritorna nulla
+
+### --- tests/test_autonomia_cognitiva.py --- ###
+"""
+Test: test_autonomia_cognitiva.py
+Responsabilità: Verifica dei moduli self_reflection.py e learning.py
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+import os
+
+from core.self_reflection import SelfReflection
+from core.learning import ContinuousLearner
+
+class TestAutonomiaCognitiva(unittest.TestCase):
+    def setUp(self):
+        self.test_reflection_path = "data/test_reflection_log.json"
+        self.test_learning_path = "data/test_knowledge_base.json"
+
+        if os.path.exists(self.test_reflection_path):
+            os.remove(self.test_reflection_path)
+        if os.path.exists(self.test_learning_path):
+            os.remove(self.test_learning_path)
+
+        self.reflection = SelfReflection(log_path=self.test_reflection_path)
+        self.learner = ContinuousLearner(knowledge_path=self.test_learning_path)
+
+    def test_reflection_logging(self):
+        context = {"error": "Timeout"}
+        result = self.reflection.evaluate_action("Scan Area", "No response", False, context)
+        self.assertIn("insight", result)
+        self.assertFalse(result["success"])
+
+        log = self.reflection.logger.load_log()
+        self.assertEqual(len(log), 1)
+        self.assertEqual(log[0]["action"], "Scan Area")
+
+    def test_reflection_summary(self):
+        self.reflection.evaluate_action("Init Sequence", "OK", True, {})
+        self.reflection.evaluate_action("Connect API", "403 Forbidden", False, {"error": "Auth failed"})
+        summary = self.reflection.summarize_reflections()
+        self.assertEqual(summary["total"], 2)
+        self.assertEqual(summary["successes"], 1)
+        self.assertEqual(summary["failures"], 1)
+
+    def test_learning_mechanism(self):
+        context = {"sensor": "IR"}
+        insight = self.learner.learn_from_experience("Move Forward", "Success", True, context)
+        self.assertTrue("Esperienza positiva" in insight["insight"])
+
+        data = self.learner.kb.load()
+        self.assertEqual(len(data), 1)
+
+    def test_learning_statistics(self):
+        self.learner.learn_from_experience("Pick Object", "Failed", False, {"error": "gripper jam"})
+        self.learner.learn_from_experience("Drop Object", "OK", True, {})
+        stats = self.learner.stats()
+        self.assertEqual(stats["total"], 2)
+        self.assertEqual(stats["successes"], 1)
+        self.assertEqual(stats["failures"], 1)
+
+    def tearDown(self):
+        if os.path.exists(self.test_reflection_path):
+            os.remove(self.test_reflection_path)
+        if os.path.exists(self.test_learning_path):
+            os.remove(self.test_learning_path)
+
+if __name__ == "__main__":
+    unittest.main()
+
+### --- tests/test_end2end.py --- ###
+"""
+Test: test_end2end.py
+Responsabilità: Simulazione di un flusso intero da input a pianificazione e log
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+import pytest
+
+pytest.skip("Test End-to-End richiede dipendenze audio/video", allow_module_level=True)
+
+from orchestrator.multimodal_controller import MultimodalController
+from modules.supervisor import Supervisor
+
+
+class TestEndToEnd(unittest.TestCase):
+
+    def setUp(self):
+        self.controller = MultimodalController()
+        self.supervisor = Supervisor()
+
+    def test_complete_workflow(self):
+        """
+        Simula ciclo completo da voce a comportamento e supervisione.
+        """
+        self.controller.run_full_cycle(input_text="parla con me")
+        self.controller.run_full_cycle(input_text="analizza l'ambiente")
+        self.controller.run_full_cycle(gesture="saluto")
+
+        summary = self.controller.autonomy.summarize_autonomy()
+        self.assertGreaterEqual(summary["reflection_summary"]["successes"], 2)
+
+    def test_supervised_actions(self):
+        """
+        Simula log supervisionato indipendente.
+        """
+        self.supervisor.observe("auto-test", "OK", True, {"canale": "debug"})
+        report = self.supervisor.performance_report()
+        self.assertEqual(report["successes"], 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+### --- tests/test_initializer.py --- ###
+import os
+import pytest
+
+cv2 = pytest.importorskip('cv2', reason='cv2 non disponibile')
+from modules.start_fullmode.initializer import SystemInitializer
+
+def test_system_initializer():
+    system = SystemInitializer()
+    assert system.agent is not None
+    assert system.audio is not None
+    assert system.vision is not None
+
+def test_environment_setup(monkeypatch):
+    monkeypatch.setenv("MERCURIUS_MODE", "")
+    system = SystemInitializer()
+    system.initialize_environment()
+    assert "MERCURIUS_MODE" in os.environ
+    assert os.environ["MERCURIUS_MODE"] == "full"
+
+### --- tests/test_josch_bridge.py --- ###
+from integrations.bridge_josch import send_command_to_pc
+
+def test_send_command_format():
+    resp = send_command_to_pc("echo test")
+    assert isinstance(resp, dict)
+
+### --- tests/test_logger.py --- ###
+from utils.logger import setup_logger
+
+
+def test_setup_logger():
+    logger = setup_logger("test_logger")
+    logger.info("log message")
+    assert logger.name == "test_logger"
+
+### --- tests/test_memory.py --- ###
+# tests/test_memory.py
+import os
+import tempfile
+from memory.long_term_memory import LongTermMemory
+
+def test_save_and_load():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        json_path = os.path.join(tmpdir, "test_exp.json")
+        mem = LongTermMemory(json_path)
+        mem.save_experience({"tags": ["unit"], "result": "ok"})
+        data = mem.get_all()
+        assert data and "tags" in data[-1]
+
+### --- tests/test_messaging.py --- ###
+from modules.messaging.rabbitmq_messenger import publish_message
+
+def test_publish_message_no_server():
+    ok = publish_message('test_queue', 'hello')
+    assert ok in (True, False)
+
+### --- tests/test_modular_end2end.py --- ###
+# tests/test_modular_end2end.py
+
+"""
+Test End-to-End per Mercurius∞
+Simula i flussi completi: video -> trascrizione -> generazione codice -> sandbox -> auto-fix -> comando -> log.
+Autore: Mercurius∞ AI Engineer
+"""
+
+import os
+import sys
+import pytest
+
+# Importa i moduli core di Mercurius∞
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+pytest.skip("Dipendenze pesanti non disponibili", allow_module_level=True)
+
+from learning.video_learner import VideoLearner
+from core.sandbox_executor import SandboxExecutor
+from modules.local.localai_adapter import LocalAI
+from modules.local.leon_ai_bridge import LeonAI
+
+import datetime
+
+RESULT_LOG = "end2end_test_results.log"
+
+def log_result(test_name, result, details=""):
+    timestamp = datetime.datetime.now().isoformat()
+    with open(RESULT_LOG, "a", encoding="utf-8") as logf:
+        logf.write(f"[{timestamp}] {test_name} — {'SUCCESS' if result else 'FAIL'}\n{details}\n\n")
+    print(f"{test_name}: {'✅' if result else '❌'}")
+
+# Test 1: Video locale → Trascrizione
+def test_video_to_text():
+    print("\n--- Test 1: Video locale → Trascrizione ---")
+    video_path = "tests/sample.mp3"  # Puoi sostituire con un file audio/video locale reale
+    vl = VideoLearner()
+    if not os.path.exists(video_path):
+        log_result("test_video_to_text", False, "File video/audio di test non trovato.")
+        return False
+    transcript = vl.extract_insights_from_video(video_path)
+    passed = isinstance(transcript, str) and len(transcript.strip()) > 0 and not transcript.startswith("[❌")
+    log_result("test_video_to_text", passed, transcript)
+    return passed
+
+# Test 2: Prompt a LocalAI → Risposta testuale
+def test_localai_text_generation():
+    print("\n--- Test 2: Prompt a LocalAI ---")
+    ai = LocalAI()
+    prompt = "Scrivi una poesia sull'intelligenza artificiale."
+    response = ai.execute_task(prompt)
+    passed = isinstance(response, str) and len(response.strip()) > 10
+    log_result("test_localai_text_generation", passed, response)
+    return passed
+
+# Test 3: Codice errato → Sandbox → Auto-fix
+def test_sandbox_autofix():
+    print("\n--- Test 3: Codice errato → Sandbox → Auto-fix ---")
+    code_with_bug = "for i in range(5)\n    print(i)"  # Manca i due punti!
+    sandbox = SandboxExecutor(timeout_seconds=3)
+    static_ok = sandbox.static_analysis(code_with_bug)
+    # static_analysis dovrebbe fallire, quindi tentiamo subito autofix
+    if not static_ok:
+        fix = sandbox.autofix_with_llm(code_with_bug, "SyntaxError: expected ':'")
+        # Ora testiamo il fix se esiste
+        result = sandbox.run_sandboxed(fix)
+        passed = result.get("success", False)
+        log_result("test_sandbox_autofix", passed, result.get("output", fix))
+        return passed
+    else:
+        log_result("test_sandbox_autofix", False, "Il codice errato è stato accettato erroneamente.")
+        return False
+
+# Test 4: Comando locale via LeonAI
+def test_leonai_command():
+    print("\n--- Test 4: LeonAI comando locale ---")
+    leon = LeonAI()
+    command = "echo Mercurius è operativo!"
+    output = leon.run_command(command)
+    passed = "Mercurius" in output
+    log_result("test_leonai_command", passed, output)
+    return passed
+
+# Test 5: Pipeline completa — Video → Trascrizione → Generazione codice → Sandbox
+def test_full_pipeline():
+    print("\n--- Test 5: Pipeline completa ---")
+    ai = LocalAI()
+    sandbox = SandboxExecutor(timeout_seconds=3)
+    video_path = "tests/sample.mp3"  # Sostituisci con un tuo file di test
+
+    # Step 1: Trascrizione
+    vl = VideoLearner()
+    if not os.path.exists(video_path):
+        log_result("test_full_pipeline", False, "File video/audio di test non trovato.")
+        return False
+    transcript = vl.extract_insights_from_video(video_path)
+
+    # Step 2: Generazione codice dalla trascrizione
+    prompt = f"Genera un semplice script Python che stampa la frase:\n{transcript.strip().split('.')[0]}"
+    code = ai.execute_task(prompt)
+
+    # Step 3: Validazione Sandbox
+    result = sandbox.run_sandboxed(code)
+    passed = result.get("success", False)
+    log_result("test_full_pipeline", passed, result.get("output", code))
+    return passed
+
+if __name__ == "__main__":
+    print("🧪 Mercurius∞ — Test End-to-End")
+    all_passed = True
+    tests = [
+        test_video_to_text,
+        test_localai_text_generation,
+        test_sandbox_autofix,
+        test_leonai_command,
+        test_full_pipeline,
+    ]
+    for test in tests:
+        try:
+            all_passed &= test()
+        except Exception as e:
+            log_result(test.__name__, False, f"Exception: {e}")
+            all_passed = False
+    print("\n=== RISULTATO FINALE ===")
+    print("Tutti i test superati!" if all_passed else "Alcuni test NON superati — vedi log.")
+
+### --- tests/test_multimodal.py --- ###
+"""
+Test: test_multimodal.py
+Responsabilità: Verifica il flusso integrato multimodale del sistema
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+import pytest
+
+pytest.skip("Test multimodale richiede dipendenze audio/video", allow_module_level=True)
+
+from orchestrator.multimodal_controller import MultimodalController
+
+
+class TestMultimodalInteraction(unittest.TestCase):
+
+    def setUp(self):
+        self.controller = MultimodalController()
+
+    def test_text_input_simulation(self):
+        """
+        Simula input vocale tramite testo e verifica esecuzione logica.
+        """
+        result = self.controller.listen_and_interpret(simulate_input="analizza l'ambiente")
+        self.assertEqual(result["action"], "analizza_ambiente")
+
+    def test_gesture_input_simulation(self):
+        """
+        Simula interpretazione di gesto riconosciuto.
+        """
+        result = self.controller.receive_gesture("saluto")
+        self.assertEqual(result["action"], "interagisci_utente")
+
+    def test_full_cycle_text_command(self):
+        """
+        Testa un ciclo completo da comando a pianificazione + esecuzione.
+        """
+        self.controller.run_full_cycle(input_text="vai alla base")
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+### --- tests/test_neuro_learning.py --- ###
+"""Test base per motore di apprendimento visivo.""" 
+
+from modules.Neo.neuro_learning_engine import parse_video_and_generate_knowledge
+
+def test_video_learning():
+    result = parse_video_and_generate_knowledge("Plasticità sinaptica")
+    assert "concept" in result
+    print("✅ Test neuro-learning passed")
+
+### --- tests/test_orchestrator.py --- ###
+"""
+Test: test_orchestrator.py
+Responsabilità: Validazione AutonomyController e processi decisionali
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+from orchestrator.autonomy_controller import AutonomyController
+
+
+class TestAutonomyController(unittest.TestCase):
+
+    def setUp(self):
+        self.controller = AutonomyController()
+
+    def test_process_experience(self):
+        """
+        Valida la riflessione e l'apprendimento su azione positiva.
+        """
+        feedback = self.controller.process_experience(
+            action="test_comando",
+            outcome="Eseguito correttamente",
+            success=True,
+            context={"livello": "base"}
+        )
+        self.assertIn("Apprendimento", feedback["learning"])
+        self.assertIn("successo", feedback["reflection"])
+
+    def test_summarize_autonomy(self):
+        """
+        Verifica il report cognitivo riepilogativo.
+        """
+        self.controller.process_experience("cmd", "done", True, {})
+        summary = self.controller.summarize_autonomy()
+        self.assertIn("successes", summary["reflection_summary"])
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+### --- tests/test_planner.py --- ###
+"""
+Test: test_planner.py
+Responsabilità: Verifica per ActionPlanner e GoalManager
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+from modules.planner import ActionPlanner
+from modules.goal_manager import GoalManager
+
+
+class TestActionPlanner(unittest.TestCase):
+
+    def setUp(self):
+        self.planner = ActionPlanner()
+
+    def test_generate_plan_for_known_goal(self):
+        plan = self.planner.generate_plan("analizza_ambiente", {})
+        self.assertGreater(len(plan), 0)
+        self.assertTrue(all("action" in step for step in plan))
+
+    def test_validate_plan(self):
+        plan = self.planner.generate_plan("interagisci_utente", {})
+        self.assertTrue(self.planner.validate_plan(plan))
+
+    def test_describe_plan(self):
+        plan = self.planner.generate_plan("raggiungi_destinazione", {"destinazione": "Base"})
+        description = self.planner.describe_plan(plan)
+        self.assertIn("calcola_percorso", description)
+        self.assertIn("Base", description)
+
+    def test_plan_summary(self):
+        self.planner.generate_plan("analizza_ambiente", {})
+        summary = self.planner.plan_summary()
+        self.assertIn("step_count", summary)
+        self.assertGreater(summary["step_count"], 0)
+
+
+class TestGoalManager(unittest.TestCase):
+
+    def setUp(self):
+        self.manager = GoalManager()
+
+    def test_add_and_sort_goals(self):
+        self.manager.add_goal("goal1", priority=2)
+        self.manager.add_goal("goal2", priority=5)
+        top = self.manager.get_next_goal()
+        self.assertEqual(top.name, "goal2")
+
+    def test_goal_status_transition(self):
+        self.manager.add_goal("goalX")
+        g = self.manager.get_next_goal()
+        self.assertEqual(g.status, "active")
+        self.manager.complete_goal("goalX")
+        all_goals = self.manager.all_goals()
+        self.assertEqual(all_goals[0]["status"], "completed")
+
+    def test_active_and_pending_filter(self):
+        self.manager.add_goal("goalY", priority=1)
+        self.manager.add_goal("goalZ", priority=2)
+        self.manager.get_next_goal()
+        active = self.manager.active_goals()
+        pending = self.manager.pending_goals()
+        self.assertEqual(len(active), 1)
+        self.assertEqual(len(pending), 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+### --- tests/test_policy.py --- ###
+# tests/test_policy.py
+import pytest
+
+pytest.skip("PolicyManager richiede dipendenze yaml", allow_module_level=True)
+
+from safety.policy_manager import PolicyManager
+
+def test_policy_block():
+    mgr = PolicyManager()
+    mgr.add_policy("no_secrets", "password=", "block")
+    assert mgr.check("here is password=123")["name"] == "no_secrets"
+
+### --- tests/test_reasoner_dispatcher.py --- ###
+from modules.reasoner_dispatcher import ReasonerDispatcher
+
+
+class DummyAgent:
+    def __init__(self, resp: str):
+        self.resp = resp
+
+    def elaborate(self, prompt):
+        return self.resp
+
+    def generate(self, prompt):
+        return self.resp
+
+    def analyze(self, prompt):
+        return self.resp
+
+    def validate(self, prompt):
+        return self.resp
+
+
+def test_dispatcher_combines_responses():
+    dispatcher = ReasonerDispatcher()
+    dispatcher.reasoners = {
+        "chatgpt4": DummyAgent("a"),
+        "ollama3": DummyAgent("b"),
+        "azr": DummyAgent("c"),
+        "gpt4o": DummyAgent("final"),
+    }
+    result = dispatcher.dispatch("ciao")
+    assert result == "final"
+
+### --- tests/test_secure_executor.py --- ###
+from modules.sandbox_executor.secure_executor import SecureExecutor
+
+def test_successful_execution():
+    executor = SecureExecutor(timeout=2)
+    result = executor.execute("x = 1 + 1\nprint(x)")
+    assert "2" in result["output"]
+    assert result["error"] == ""
+    assert result["stderr"] == ""
+
+def test_timeout_execution():
+    executor = SecureExecutor(timeout=1)
+    result = executor.execute("while True: pass")
+    assert result["error"] == "Execution timed out."
+
+def test_error_handling():
+    executor = SecureExecutor()
+    result = executor.execute("raise ValueError('Errore di test')")
+    assert "ValueError" in result["error"]
+
+### --- tests/test_supervisione.py --- ###
+"""
+Test: test_supervisione.py
+Responsabilità: Verifica comportamento dei moduli di supervisione e telemetria
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import unittest
+import pytest
+
+pytest.skip("Tests di supervisione richiedono psutil", allow_module_level=True)
+
+from modules.supervisor import Supervisor
+from utils.telemetry import Telemetry
+
+
+class TestSupervisor(unittest.TestCase):
+
+    def setUp(self):
+        self.supervisor = Supervisor()
+
+    def test_observe_and_report(self):
+        self.supervisor.observe("scan", "ok", True, {"sensor": "lidar"})
+        self.supervisor.observe("move", "collision", False, {"speed": "fast"})
+
+        report = self.supervisor.performance_report()
+        self.assertEqual(report["actions_total"], 2)
+        self.assertEqual(report["successes"], 1)
+        self.assertEqual(report["failures"], 1)
+        self.assertGreaterEqual(report["success_rate"], 0.0)
+
+    def test_last_actions(self):
+        self.supervisor.observe("test1", "done", True, {})
+        self.supervisor.observe("test2", "done", True, {})
+        last = self.supervisor.last_actions(1)
+        self.assertEqual(len(last), 1)
+        self.assertEqual(last[0]["action"], "test2")
+
+
+class TestTelemetry(unittest.TestCase):
+
+    def test_system_info_keys(self):
+        info = Telemetry.system_info()
+        self.assertIn("platform", info)
+        self.assertIn("memory_total_MB", info)
+
+    def test_current_usage_structure(self):
+        usage = Telemetry.current_usage()
+        self.assertIn("cpu_percent", usage)
+        self.assertIn("memory_used_MB", usage)
+
+    def test_process_info(self):
+        process = Telemetry.process_info()
+        self.assertIn("pid", process)
+        self.assertGreaterEqual(process["memory_MB"], 0)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+### --- tests/test_task_manager_cli.py --- ###
+import sys
+import types
+
+# crea moduli Localai.local_ai e Leonai.leon_ai fittizi prima dell'import
+localai_stub = types.SimpleNamespace(LocalAI=lambda: None)
+leonai_stub = types.SimpleNamespace(LeonAI=lambda: None)
+sys.modules.setdefault('modules.Localai.local_ai', localai_stub)
+sys.modules.setdefault('modules.Leonai.leon_ai', leonai_stub)
+
+import importlib
+modules_cli = importlib.import_module('modules.task_manager_cli')
+
+
+def test_create_agent(monkeypatch):
+    called = {}
+
+    def fake_bootstrap():
+        called['ok'] = True
+
+    monkeypatch.setattr(modules_cli, 'bootstrap_agents', fake_bootstrap)
+    modules_cli.create_agent('AgentX')
+    assert called.get('ok')
+
+### --- tests/test_video_pipeline.py --- ###
+
+
+### --- tools/conflict_inspector.py --- ###
+"""Basic project conflict analyzer."""
+from __future__ import annotations
+
+import pkgutil
+from collections import defaultdict
+
+
+def scan_conflicts() -> None:
+    packages = defaultdict(list)
+    for module in pkgutil.iter_modules():
+        root = module.name.split('.')[0].lower()
+        packages[root].append(module.name)
+    conflicts = {k: v for k, v in packages.items() if len(v) > 1}
+    if not conflicts:
+        print("No obvious module name conflicts found.")
+        return
+    print("Potential conflicts detected:")
+    for base, mods in conflicts.items():
+        joined = ', '.join(mods)
+        print(f" - {base}: {joined}")
+
+
+if __name__ == "__main__":
+    scan_conflicts()
+
+### --- tools/console.py --- ###
+"""
+console.py
+==========
+Console interattiva CLI per lanciare operazioni Mercurius∞.
+Permette esecuzioni batch, test, AZR e analisi performance.
+"""
+
+from core.pipeline_controller import PipelineController
+from core.auto_tester import AutoTester
+from utils.config_loader import load_config
+from modules.experience.experience_memory import ExperienceMemory
+from modules.metrics.performance_metrics import PerformanceMetrics
+
+def main():
+    config = load_config("config.yaml")
+    pipeline = PipelineController(config)
+    tester = AutoTester()
+    memory = ExperienceMemory(config)
+
+    print("=== Mercurius∞ CLI ===")
+    print("1. Esegui una sessione")
+    print("2. Simula 3 sessioni")
+    print("3. Avvia test automatici")
+    print("4. Mostra metriche esperienziali")
+    print("5. Esci")
+
+    choice = input("Scelta: ")
+
+    if choice == "1":
+        pipeline.run_batch_session()
+    elif choice == "2":
+        pipeline.simulate_multiple_sessions(3)
+    elif choice == "3":
+        tester.run()
+        tester.test_signal_confidence()
+        tester.test_adaptive_behavior()
+    elif choice == "4":
+        summary = PerformanceMetrics(memory.get_recent_experiences()).summary()
+        print("📊 Metriche Esperienziali:")
+        for k, v in summary.items():
+            print(f"- {k}: {v}")
+    else:
+        print("Uscita...")
+
+if __name__ == "__main__":
+    main()
+
+### --- tools/feedback_collector.py --- ###
+"""
+feedback_collector.py
+=====================
+Modulo per raccolta di feedback operativi su performance in tempo reale.
+"""
+
+class FeedbackCollector:
+    def __init__(self):
+        self.log = []
+
+    def record(self, symbol, action, result, confidence, feedback):
+        """Registra un feedback strutturato su ogni azione."""
+        entry = {
+            "symbol": symbol,
+            "action": action,
+            "profit": result.get("profit", 0),
+            "confidence": confidence,
+            "feedback": feedback
+        }
+        self.log.append(entry)
+
+    def summary(self):
+        """Statistiche rapide del feedback operativo."""
+        if not self.log:
+            return {}
+        total = len(self.log)
+        avg_profit = sum(f["profit"] for f in self.log) / total
+        avg_conf = sum(f["confidence"] for f in self.log) / total
+        return {
+            "total": total,
+            "avg_profit": avg_profit,
+            "avg_confidence": avg_conf
+        }
+
+    def clear(self):
+        self.log.clear()
+
+### --- tools/live_logger.py --- ###
+"""
+live_logger.py
+==============
+Modulo per stream di log interattivi su terminale o file. Usato per monitoraggio real-time.
+"""
+
+import logging
+import sys
+
+def setup_stream_logger(name="MercuriusLive", level=logging.INFO):
+    logger = logging.getLogger(name)
+    if not logger.hasHandlers():
+        logger.setLevel(level)
+        handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    return logger
+
+def redirect_logs_to_file(name="MercuriusFile", filename="output.log"):
+    logger = logging.getLogger(name)
+    if not logger.hasHandlers():
+        logger.setLevel(logging.DEBUG)
+        file_handler = logging.FileHandler(filename)
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    return logger
+
+### --- trading/fin_gpt.py --- ###
+class FinGPTAgent:
+    def __init__(self):
+        self.name = "FinGPT"
+
+    def execute_task(self, market_context: str, parameters: dict = {}) -> str:
+        return f"[{self.name}] Analisi sentiment su: {market_context}"
+
+### --- trading/finrl_agent.py --- ###
+class FinRLAgent:
+    def __init__(self):
+        self.name = "FinRL"
+
+    def train(self, dataset_path: str, environment: str = "stocks") -> str:

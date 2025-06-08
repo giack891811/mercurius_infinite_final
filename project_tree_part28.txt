@@ -1,0 +1,827 @@
+Questa è la parte 28 di project_tree. Continua da quella precedente.
+
+from __future__ import annotations
+
+import os
+import openai
+from utils.logger import setup_logger
+
+logger = setup_logger("CodexCLI")
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
+def generate_code(prompt: str) -> str:
+    """Invia il prompt a Codex (o modello GPT) e restituisce il codice risultante."""
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0,
+            max_tokens=1024,
+        )
+        return response["choices"][0]["message"]["content"].strip()
+    except Exception as exc:
+        logger.error(f"Errore Codex: {exc}")
+        return f"Errore Codex: {exc}"
+
+
+def run_codex(prompt: str | None = None) -> str:
+    """Esegui Codex da linea di comando o come funzione."""
+    if prompt is None:
+        prompt = input("Codex prompt> ")
+    logger.info(f"[CODEX] Invio prompt: {prompt}")
+    result = generate_code(prompt)
+    print(result)
+    return result
+
+
+if __name__ == "__main__":
+    run_codex()
+
+## modules/dashboard/__init__.py
+# Init for dashboard
+
+## modules/dashboard/control_center.py
+"""
+Modulo: control_center
+Descrizione: Interfaccia Streamlit per controllo agenti Mercurius∞ (stub).
+Autore: Mercurius∞ AI Engineer
+"""
+
+import streamlit as st
+
+def main():
+    st.set_page_config(page_title="Mercurius∞ Control", layout="wide")
+    st.title("🚀 Mercurius∞ Control Center")
+    st.markdown("Benvenuto nella dashboard operativa.")
+
+    with st.sidebar:
+        st.header("Controlli di Sistema")
+        st.button("Avvia Agente")
+        st.button("Ascolta Audio")
+        st.button("Elabora Ragionamento")
+    
+    st.write("🧠 Stato dell'agente:")
+    st.success("Agente attivo e in ascolto.")
+
+if __name__ == "__main__":
+    main()
+
+## modules/dashboard/control_panel.py
+"""Pannello di controllo AI."""
+
+import streamlit as st
+
+def render_control_panel():
+    st.sidebar.title("Pannello AI")
+    st.sidebar.button("Analizza Stato")
+
+## modules/dashboard/dashboard_streamlit.py
+import streamlit as st
+from modules.Neo.self_awareness import get_current_state
+from modules.Neo.context_memory import get_recent_context
+from modules.Neo.interaction_style import get_style
+
+st.set_page_config(page_title="Mercurius∞ Dashboard", layout="wide")
+
+st.title("🧠 Mercurius∞ – Interfaccia Cognitiva")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.header("🧬 Stato interno")
+    state = get_current_state()
+    st.json(state)
+
+    st.header("🎙️ Stile comunicativo")
+    st.write(get_style())
+
+with col2:
+    st.header("🔁 Contesto recente")
+    st.write(get_recent_context())
+
+st.markdown("---")
+st.success("Dashboard aggiornata e funzionante.")
+
+## modules/dashboard/dashboard_utils.py
+def format_log_entry(module, message):
+    return f"[{module}] >>> {message}"
+
+## modules/dashboard/futuristic_gui.py
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+
+
+import streamlit as st
+from modules.voice_bridge.tts_engine import Pyttsx3TTS
+from modules.ai_kernel.agent_core import AgentCore
+from modules.dashboard.keyboard_dropdown import keyboard_input
+import base64
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🧬 STILE HOLOGRAFICO PERSONALIZZATO
+def load_custom_css():
+    with open("modules/dashboard/hud.css", "r") as f:
+        css = f"<style>{f.read()}</style>"
+        st.markdown(css, unsafe_allow_html=True)
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🧠 COMPONENTI INIZIALI
+agent = AgentCore()
+tts = Pyttsx3TTS()
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🚀 STREAMLIT GUI
+st.set_page_config(layout="wide", page_title="Mercurius∞ HUD")
+load_custom_css()
+
+st.markdown('<div class="hud-header">MERCURIUS∞ // INTERFACCIA OLOGRAFICA</div>', unsafe_allow_html=True)
+
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    st.markdown('<div class="hud-panel">🧠 STATO AGENTE</div>', unsafe_allow_html=True)
+    st.write(f"Nome: {agent.name}")
+    st.write(f"Stato: {agent.status}")
+    st.markdown("---")
+    text_input = keyboard_input()
+
+    if st.button("🗣️ Rispondi"):
+        agent.perceive(text_input)
+        decision = agent.reason()
+        agent.act(decision)
+        tts.speak(decision)
+        st.success(f"Risposta: {decision}")
+
+with col2:
+    st.markdown('<div class="hud-panel">📊 LOG</div>', unsafe_allow_html=True)
+    st.text_area("Memoria", value="\n".join(agent.memory), height=300)
+
+st.markdown('<div class="hud-footer">🛰 Mercurius∞ 2025 – Modalità Olografica Attiva</div>', unsafe_allow_html=True)
+
+## modules/dashboard/keyboard_dropdown.py
+import streamlit as st
+
+def keyboard_input():
+    st.markdown('<div class="hud-panel">⌨️ Inserimento manuale olografico</div>', unsafe_allow_html=True)
+
+    preset_options = [
+        "Avvia sequenza",
+        "Attiva modalità autonoma",
+        "Analizza input visivo",
+        "Stato del sistema",
+        "Salva log"
+    ]
+
+    selected = st.selectbox("💬 Comando predefinito:", preset_options)
+    custom_input = st.text_input("✍️ Oppure digita qui:", "")
+
+    return custom_input if custom_input.strip() else selected
+
+## modules/dashboard/mission_gui.py
+"""mission_gui.py
+GUI minimale per interagire con il Mission Controller.
+"""
+
+import streamlit as st
+from orchestrator.mission_controller import MissionController
+from modules.strategic.strategic_brain import StrategicBrain
+
+st.set_page_config(page_title="Mission Control")
+
+if "controller" not in st.session_state:
+    st.session_state.controller = MissionController()
+if "strategic" not in st.session_state:
+    st.session_state.strategic = StrategicBrain()
+
+mc = st.session_state.controller
+sb = st.session_state.strategic
+
+st.title("🚀 Mercurius∞ Mission Control")
+
+with st.form("new_workspace"):
+    name = st.text_input("Nome workspace", "workspace1")
+    prompt = st.text_area("Prompt o progetto")
+    submitted = st.form_submit_button("Crea workspace")
+    if submitted:
+        mc.create_workspace(name, prompt)
+        st.success(f"Workspace '{name}' creato")
+
+st.markdown("## 🧠 Strategic Brain")
+if st.button("Carica goals.txt"):
+    sb.load_goals("goals.txt")
+    st.success("Goals caricati")
+if sb.goal_manager.pending_goals():
+    if st.button("Esegui Strategic Brain"):
+        outputs = sb.run()
+        for out in outputs:
+            st.text(out)
+
+selected = st.selectbox("Scegli workspace", list(mc.workspaces.keys())) if mc.workspaces else None
+if selected:
+    if st.button("Esegui ciclo evolutivo"):
+        mc.run_cycle(selected)
+        st.success("Ciclo completato")
+    if st.checkbox("Mostra log" ):
+        log_path = mc.workspaces[selected]["path"] / "sandbox.log"
+        if log_path.exists():
+            st.text(log_path.read_text())
+
+
+## modules/evolution/ai2ui_adapter.py
+"""
+🎨 AI2UI Adapter – modules/evolution/ai2ui_adapter.py
+Adattatore AI → GUI per generazione interfacce da descrizioni testuali.
+"""
+
+class AI2UI:
+    def __init__(self):
+        self.name = "AI2UI"
+
+    def execute_task(self, prompt: str, context: dict = {}) -> str:
+        return f"[{self.name}] Interfaccia generata per: {prompt}"
+
+## modules/evolution/auto_gpt.py
+"""
+♻️ Auto-GPT Integration – modules/evolution/auto_gpt.py
+Modulo di esecuzione iterativa autonoma di task complessi tramite AI.
+"""
+
+class AutoGPT:
+    def __init__(self):
+        self.name = "Auto-GPT"
+
+    def execute_task(self, prompt: str, context: dict = {}) -> str:
+        return f"[{self.name}] Task iterativo gestito per: {prompt}"
+
+## modules/evolution/gpt_engineer.py
+"""
+🧠 GPT-Engineer Integration – modules/evolution/gpt_engineer.py
+Modulo per l'invocazione di GPT-Engineer come agente evolutivo di generazione software.
+"""
+
+class GPTEngineer:
+    def __init__(self):
+        self.name = "GPT-Engineer"
+
+    def execute_task(self, prompt: str, context: dict = {}) -> str:
+        # Simulazione – in produzione connettere a runtime o API di GPT-Engineer
+        return f"[{self.name}] Codice generato per: {prompt}"
+
+## modules/evolution/metagpt.py
+"""
+🤖 MetaGPT Integration – modules/evolution/metagpt.py
+Agente AI multi-ruolo (PM, Dev, QA) per sviluppo software coordinato.
+"""
+
+class MetaGPT:
+    def __init__(self):
+        self.name = "MetaGPT"
+
+    def execute_task(self, prompt: str, context: dict = {}) -> str:
+        return f"[{self.name}] Team AI coordinato ha processato: {prompt}"
+
+## modules/experience/__init__.py
+
+## modules/experience/azr_analyzer.py
+# modules/experience/azr_analyzer.py
+"""
+Modulo: azr_analyzer.py
+Descrizione: Analizzatore esperienziale per AZR – Adattamento Zero Retention.
+Combina l’analisi statistica dei profitti con la capacità di AZRAgent di
+suggerire adattamenti strategici basati su prompt di linguaggio naturale.
+"""
+
+import json
+from statistics import mean, stdev
+from typing import Any, Dict, List, Optional, Union
+
+from modules.experience.experience_memory import ExperienceMemory
+from modules.llm.azr_reasoner import AZRAgent
+
+
+class AZRAnalyzer:
+    """
+    AZRAnalyzer unisce due livelli di analisi:
+      1. Analisi statistica su profitti (mean, volatility, ed eventuale suggerimento di riduzione rischio).
+      2. Creazione di un prompt testuale per AZRAgent, che analizza il batch recente e suggerisce adattamenti.
+    """
+
+    def __init__(self, exp_memory: ExperienceMemory, config: Dict[str, Any]):
+        """
+        - exp_memory: istanza di ExperienceMemory già inizializzata (backend JSON).
+        - config: dizionario di configurazione, con possibili chiavi:
+            - "azr_profit_floor": soglia minima media dei profitti (float), default 0.5
+            - "base_trade_qty": quantità base del trade (int), default 100
+            - "use_azr": booleano che abilita l’analisi LLM (default True)
+        """
+        self.exp_memory = exp_memory
+        self.config = config
+        self.azr = AZRAgent() if config.get("use_azr", True) else None
+
+    def analyze_recent_performance(
+        self, limit: int = 20
+    ) -> Dict[str, Union[str, float, Dict[str, Any]]]:
+        """
+        Esegue un’analisi statistica sui profitti delle ultime `limit` esperienze.
+        Restituisce un dizionario contenente:
+          - "status": "no_data" o "ok"
+          - "mean_profit": media dei profitti (float)
+          - "volatility": deviazione standard (float)
+          - "decision": suggerimento generico basato sul confronto con "azr_profit_floor"
+        """
+        recent = self.exp_memory.get_recent_experiences(limit)
+        # Estrae la lista dei profitti, default a 0 se mancante
+        profits: List[float] = [
+            e.get("result", {}).get("profit", 0.0) for e in recent
+        ]
+
+        if not profits:
+            return {"status": "no_data"}
+
+        avg_profit = mean(profits)
+        vol = stdev(profits) if len(profits) > 1 else 0.0
+        decision = self._suggest_statistical(avg_profit)
+
+        return {
+            "status": "ok",
+            "mean_profit": avg_profit,
+            "volatility": vol,
+            "decision": decision,
+        }
+
+    def _suggest_statistical(self, avg_profit: float) -> Dict[str, Any]:
+        """
+        Suggerisce un’azione di tuning se la media dei profitti è inferiore a "azr_profit_floor".
+        Se avg_profit < soglia, restituisce:
+          {
+            "action": "decrease_risk",
+            "new_qty": <metà di base_trade_qty o 10, se inferiore>
+          }
+        Altrimenti restituisce {"action": "maintain"}.
+        """
+        threshold = float(self.config.get("azr_profit_floor", 0.5))
+        base_qty = int(self.config.get("base_trade_qty", 100))
+
+        if avg_profit < threshold:
+            new_qty = max(10, int(base_qty * 0.5))
+            return {"action": "decrease_risk", "new_qty": new_qty}
+
+        return {"action": "maintain"}
+
+    def apply_statistical_adaptation(self, limit: int = 20) -> Dict[str, Any]:
+        """
+        Esegue l’analisi statistica e, se viene suggerita una riduzione del rischio,
+        aggiorna `config["base_trade_qty"]`. Restituisce il risultato dell'analisi.
+        """
+        result = self.analyze_recent_performance(limit)
+        decision = result.get("decision", {})
+        if decision.get("action") == "decrease_risk":
+            self.config["base_trade_qty"] = decision["new_qty"]
+        return result
+
+    def analyze_with_azr(self, limit: int = 10) -> Optional[Dict[str, Any]]:
+        """
+        Crea un prompt testuale basato sulle ultime `limit` esperienze e lo invia ad AZRAgent,
+        che restituisce un’analisi in linguaggio naturale. Se AZRAgent suggerisce un cambiamento
+[TRONCATO]
+
+## modules/experience/experience_memory.py
+# modules/experience/experience_memory.py
+
+"""
+Modulo: experience_memory.py
+Descrizione: Memoria evolutiva esperienziale per il sistema Mercurius∞.
+Registra segnali, trade e risultati; usa internamente il backend JSON di LongTermMemory.
+"""
+
+import os
+import json
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Union
+from memory.long_term_memory import LongTermMemory
+
+
+class ExperienceMemory:
+    """
+    Strato di astrazione sopra LongTermMemory (backend JSON) con API di alto livello per il trading.
+
+    - Se config contiene la chiave "experience_file", userà quel file JSON (es. "memory/experience_log.json").
+    - Mantiene, in aggiunta, una lista self.recent in memoria con le ultime N esperienze.
+    """
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """
+        - config: dizionario di configurazione. Se config["experience_file"] è presente, verrà usato come nome del file JSON.
+        - In assenza di config, viene creato/riutilizzato “memory/experience_log.json”.
+        """
+        if config is None:
+            config = {}
+
+        # Decidiamo il percorso del file JSON: o quello fornito in config, oppure il default
+        default_path = "memory/experience_log.json"
+        self.storage_path: str = config.get("experience_file", default_path)
+
+        # Creiamo la cartella se non esiste
+        os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
+
+        # 🔥 Patch: inizializziamo il limite PRIMA di caricare la storia!
+        self._max_recent: int = config.get("max_recent", 50)
+
+        # Inizializziamo LongTermMemory in modalità JSON, usando il file indicato
+        self.store = LongTermMemory(
+            backend="json",
+            json_filename=self.storage_path
+        )
+
+        # Carichiamo la storia esistente dal file JSON, se esiste
+        self.recent: List[Dict[str, Any]] = self._load_existing_history()
+
+    def _load_existing_history(self) -> List[Dict[str, Any]]:
+        """
+        Legge il file JSON e restituisce la lista completa delle esperienze salvate.
+        Popola self.recent con gli ultimi _max_recent elementi (o meno, se il file contiene di meno).
+        """
+        try:
+            with open(self.storage_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if not isinstance(data, list):
+                    return []
+                # Manteniamo in recent solo gli ultimi max_recent elementi
+                return data[-self._max_recent :]
+        except FileNotFoundError:
+            return []
+        except json.JSONDecodeError:
+            return []
+
+    def record_experience(
+        self,
+        signal: Any,
+        trade: Any,
+        result: Any,
+        feedback: Any,
+        tags: Optional[List[str]] = None
+    ) -> None:
+        """
+        Registra una nuova esperienza di trading, composta da:
+         - signal: informazioni sul segnale (es. "BUY EURUSD a 1.1000")
+         - trade: dettagli del trade (es. numero di lotti, entry, exit)
+         - result: risultato (es. profitto/perdita)
+         - feedback: eventuali commenti o valutazioni
+         - tags: lista opzionale di stringhe per categorizzare l’esperienza (di default ["trading"])
+        """
+        if tags is None:
+            tags = ["trading"]
+
+        # Costruiamo il dizionario dell’esperienza, aggiungendo timestamp UTC
+        exp: Dict[str, Any] = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "signal": signal,
+            "trade": trade,
+            "result": result,
+            "feedback": feedback,
+            "tags": tags,
+        }
+
+        # Salviamo l’esperienza nel backend JSON di LongTermMemory
+        self.store.save_experience(exp)
+
+        # Aggiungiamo in cache
+[TRONCATO]
+
+## modules/io_modules/mobile_connect.py
+import cv2
+
+def start_note10_sync(ip_camera_url="http://192.168.0.10:8080/video",
+                      use_hotword=True,
+                      request_qr_if_fail=True):
+    print("📲 Avvio sincronizzazione con Note10+...")
+
+    try:
+        cap = cv2.VideoCapture(ip_camera_url)
+        if not cap.isOpened():
+            raise ConnectionError("⚠️ Impossibile connettersi alla camera IP")
+
+        print("✅ Stream ricevuto. Avvio visione artificiale...")
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            cv2.imshow("Note10+ Camera Feed", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+    except Exception as e:
+        print(f"❌ Errore connessione: {e}")
+        if request_qr_if_fail:
+            print("📸 Generazione QR code per pairing alternativo (simulazione)")
+
+## modules/llm/azr_reasoner.py
+# modules/llm/azr_reasoner.py
+"""
+Modulo: azr_reasoner.py
+Descrizione: Sistema di validazione logica del codice e dei pensieri AI secondo la logica AZR.
+Utilizza analisi sintattica ed esecuzione controllata per determinare la validità di frammenti di codice.
+"""
+import ast
+import traceback
+from typing import Any
+
+class AZRReasoning:
+    def __init__(self):
+        self.log = []
+
+    def validate_with_azr(self, code: str) -> bool:
+        """
+        Analizza il codice ricevuto e ne valuta la coerenza logica e l'eseguibilità.
+        """
+        self.log.append(f"🔍 Validating code:\n{code}")
+        try:
+            tree = ast.parse(code)
+            self.log.append("✅ AST parsing succeeded.")
+        except SyntaxError as e:
+            self.log.append(f"❌ Syntax Error: {e}")
+            return False
+        try:
+            compiled = compile(tree, filename="<azr_check>", mode="exec")
+            test_env: dict[str, Any] = {}
+            exec(compiled, test_env)
+            self.log.append("✅ Execution succeeded.")
+            return True
+        except Exception as e:
+            self.log.append(f"⚠️ Execution Error: {traceback.format_exc()}")
+            return False
+
+    def last_validation_log(self) -> str:
+        """Restituisce le ultime voci di log della validazione."""
+        return "\n".join(self.log[-5:])
+
+# Funzione diretta per uso esterno
+def validate_with_azr(code: str) -> bool:
+    azr = AZRReasoning()
+    return azr.validate_with_azr(code)
+
+# Agente AZR: utilizza AZRReasoning per analizzare task di debug/logica
+class AZRAgent:
+    def __init__(self):
+        self.azr = AZRReasoning()
+
+    def analyze(self, text: str, context: dict = None) -> str:
+        """
+        Analizza il testo (es. codice) con la logica AZR e restituisce un responso.
+        """
+        code_to_check = text if context is None else context.get("code", text)
+        success = self.azr.validate_with_azr(code_to_check)
+        if success:
+            return "✅ AZR: codice valido e logica consistente."
+        else:
+            # Include dettagli di errore nel risultato
+            error_log = self.azr.last_validation_log()
+            return f"❌ AZR: rilevate criticità logiche.\nLog: {error_log}"
+
+## modules/llm/chatgpt_interface.py
+"""
+Modulo: chatgpt_interface
+Descrizione: Interfaccia con ChatGPT-4 per ragionamento linguistico e conversazione.
+"""
+
+import openai
+import os
+
+class ChatGPTAgent:
+    def __init__(self, model_name="gpt-4"):
+        self.model = model_name
+        self.api_key = os.getenv("OPENAI_API_KEY")
+        openai.api_key = self.api_key
+
+    def elaborate(self, prompt: str, context: dict = {}) -> str:
+        try:
+            response = openai.ChatCompletion.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "Sei un assistente AI avanzato."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=1024
+            )
+            return response['choices'][0]['message']['content']
+        except Exception as e:
+            return f"Errore ChatGPT: {e}"
+
+## modules/llm/gpt4o_validator.py
+# modules/llm/gpt4o_validator.py
+"""
+Modulo: gpt4o_validator.py
+Descrizione: Validazione e finalizzazione di risposte tramite modello GPT-4 ottimizzato.
+"""
+import os
+import openai
+
+class GPT4oAgent:
+    def __init__(self, model_name: str = "gpt-4"):
+        self.model = model_name
+        self.api_key = os.getenv("OPENAI_API_KEY")
+        openai.api_key = self.api_key
+
+    def validate(self, prompt: str, context: dict = None) -> str:
+        """
+        Genera una risposta perfezionata/sintetizzata per il prompt fornito, utilizzando GPT-4.
+        """
+        try:
+            messages = [
+                {"role": "system", "content": "Sei un assistente esperto in sintesi e perfezionamento delle risposte."},
+                {"role": "user", "content": prompt}
+            ]
+            response = openai.ChatCompletion.create(model=self.model, messages=messages, temperature=0.7, max_tokens=1024)
+            result = response['choices'][0]['message']['content']
+            return result
+        except Exception as e:
+            return f"Errore GPT4o: {e}"
+
+## modules/llm/ollama3_interface.py
+"""
+Modulo: ollama3_interface
+Descrizione: Interfaccia con Ollama3 per generazione di codice economica e brainstorming.
+"""
+
+import requests
+
+class Ollama3Agent:
+    def __init__(self, base_url="http://localhost:11434"):
+        self.url = base_url
+
+    def generate(self, prompt: str, context: dict = {}) -> str:
+        try:
+            response = requests.post(
+                f"{self.url}/api/generate",
+                json={"model": "llama3", "prompt": prompt}
+            )
+            return response.json().get("response", "Nessuna risposta.")
+        except Exception as e:
+            return f"Errore Ollama3: {e}"
+
+## modules/local/README.md
+# 🧱 Modulo Local – Esecuzione Offline
+
+Contiene agenti AI che operano localmente senza cloud.
+
+## File
+
+- `localai_adapter.py`
+- `leon_ai_bridge.py`
+- `huggingface_tools.py`
+- `n8n_connector.py`
+
+## Scopo
+
+Permettere a Mercurius∞ di operare completamente offline, con AI locali e strumenti autonomi.
+
+## modules/local/github_sync.py
+class GitHubSync:
+    def push_changes(self, commit_msg: str = "🔄 Sync GENESIS commit"):
+        return f"[GitHubSync] Commit e push: {commit_msg}"
+
+## modules/local/huggingface_tools.py
+class HuggingFaceTools:
+    def __init__(self):
+        self.name = "HuggingFaceTools"
+
+    def execute(self, tool_name: str, args: dict) -> str:
+        return f"[{self.name}] Strumento '{tool_name}' eseguito con parametri {args}"
+
+## modules/local/leon_ai_bridge.py
+"""
+Modulo: leon_ai_bridge.py
+Descrizione: Esecuzione sicura di comandi di sistema in locale.
+Supporta Windows, Linux e Mac. Output sempre loggato.
+"""
+
+import subprocess
+import platform
+import datetime
+
+class LeonAI:
+    def __init__(self, log_file="leonai_actions.log"):
+        self.name = "LeonAI"
+        self.log_file = log_file
+
+    def run_command(self, command: str) -> str:
+        now = datetime.datetime.now().isoformat()
+        try:
+            result = subprocess.run(command, shell=True, capture_output=True, text=True)
+            output = result.stdout.strip()
+            error = result.stderr.strip()
+            msg = output if result.returncode == 0 else f"[{self.name}] ERRORE: {error}"
+            self._log_action(command, msg, now)
+            return msg
+        except Exception as e:
+            err_msg = f"[{self.name}] Errore di sistema: {e}"
+            self._log_action(command, err_msg, now)
+            return err_msg
+
+    def _log_action(self, command, result, timestamp):
+        try:
+            with open(self.log_file, "a", encoding="utf-8") as logf:
+                logf.write(f"[{timestamp}] CMD: {command}\nRES: {result}\n\n")
+        except Exception:
+            pass  # Logging silenzioso se fallisce
+
+
+## modules/local/localai_adapter.py
+"""
+Modulo: localai_adapter.py
+Descrizione: Integrazione LLM locale (es. GPT-2 HuggingFace).
+Risponde ai prompt senza cloud. Funziona offline!
+"""
+
+import os
+
+class LocalAI:
+    def __init__(self, model_name="gpt2"):
+        self.name = "LocalAI"
+        try:
+            from transformers import pipeline
+            self.generator = pipeline("text-generation", model=model_name)
+            self.online = True
+        except Exception as e:
+            self.generator = None
+            self.online = False
+            print(f"[LocalAI] Errore nel caricamento modello locale: {e}")
+
+    def execute_task(self, prompt: str) -> str:
+        if self.generator:
+            try:
+                output = self.generator(prompt, max_length=200, do_sample=True)
+                return output[0]["generated_text"]
+            except Exception as e:
+                return f"[{self.name}] Errore modello locale: {e}"
+        else:
+            return f"[{self.name}] Offline: modello non disponibile. Prompt ricevuto: '{prompt}'."
+
+## modules/local/n8n_connector.py
+class N8nConnector:
+    def __init__(self):
+        self.name = "n8n"
+
+    def trigger_flow(self, flow_id: str) -> str:
+        return f"[{self.name}] Flusso {flow_id} attivato localmente"
+
+## modules/messaging/__init__.py
+"""Utilities for internal messaging."""
+
+## modules/messaging/rabbitmq_messenger.py
+"""rabbitmq_messenger.py
+=======================
+Modulo di messaggistica basato su RabbitMQ per Mercurius∞.
+
+Fornisce funzioni semplici per pubblicare e consumare messaggi utilizzando il
+protocollo AMQP tramite la libreria ``pika``. In assenza del server RabbitMQ le
+funzioni restituiscono errori gestiti senza sollevare eccezioni critiche.
+"""
+
+from typing import Callable, Optional
+
+import pika
+from utils.logger import setup_logger
+
+logger = setup_logger("RabbitMQMessenger")
+
+
+def publish_message(queue: str, message: str, url: str = "amqp://guest:guest@localhost:5672/") -> bool:
+    """Invia un messaggio alla coda specificata.
+
+    Ritorna ``True`` se l'operazione è andata a buon fine, altrimenti ``False``.
+    """
+    try:
+        params = pika.URLParameters(url)
+        connection = pika.BlockingConnection(params)
+        channel = connection.channel()
+        channel.queue_declare(queue=queue, durable=True)
+        channel.basic_publish(exchange="", routing_key=queue, body=message)
+        connection.close()
+        logger.info(f"[RabbitMQ] Sent to {queue}: {message}")
+        return True
+    except Exception as exc:
+        logger.error(f"[RabbitMQ] publish failed: {exc}")
+        return False
+
+
+def consume_messages(queue: str, handler: Callable[[str], None], url: str = "amqp://guest:guest@localhost:5672/", limit: Optional[int] = None) -> None:
+    """Consuma messaggi dalla coda chiamando ``handler`` per ogni messaggio.
+
+    ``limit`` permette di definire quante messaggi leggere prima di chiudere la
+    connessione (``None`` per ciclo infinito).
+    """
+    try:
+        params = pika.URLParameters(url)
+        connection = pika.BlockingConnection(params)
+        channel = connection.channel()
+        channel.queue_declare(queue=queue, durable=True)
+
+        count = 0

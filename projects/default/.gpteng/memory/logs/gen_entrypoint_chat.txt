@@ -1,0 +1,383 @@
+
+2025-06-07T07:39:15.087429
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+```
+
+================================== Ai Message ==================================
+
+```bash
+#!/bin/bash
+
+# a) Install dependencies
+if [ -f "package.json" ]; then
+  npm install
+fi
+
+if [ -f "requirements.txt" ]; then
+  pip install -r requirements.txt
+fi
+
+# b) Run all necessary parts of the codebase
+# Assuming there are scripts defined in package.json for npm
+if [ -f "package.json" ]; then
+  npm run start &
+fi
+
+# Assuming there is a main Python script to run
+if [ -f "main.py" ]; then
+  python main.py &
+fi
+
+# Wait for all background processes to finish
+wait
+```
+
+2025-06-07T14:30:52.122230
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+```
+
+================================== Ai Message ==================================
+
+```bash
+#!/bin/bash
+
+# Install dependencies
+if [ -f "package.json" ]; then
+  npm install
+fi
+
+if [ -f "requirements.txt" ]; then
+  pip install -r requirements.txt
+fi
+
+# Run the codebase
+if [ -f "package.json" ]; then
+  npm start &
+fi
+
+if [ -f "main.py" ]; then
+  python main.py &
+fi
+
+wait
+```
+
+2025-06-07T16:31:22.165271
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+File: src/main.py
+1 from orchestrator import Orchestrator
+2 from agent import Agent
+3 from pipeline import DataPipeline
+4 from interface import UserInterface
+5 
+6 def main():
+7     orchestrator = Orchestrator()
+8     agent = Agent()
+9     pipeline = DataPipeline()
+10     interface = UserInterface()
+11 
+12     # Esegui il flusso principale
+13     data = interface.get_input()
+14     processed_data = pipeline.process(data)
+15     result = orchestrator.run(agent, processed_data)
+16     interface.display_output(result)
+17 
+18 if __name__ == "__main__":
+19     main()
+
+File: src/orchestrator.py
+1 class Orchestrator:
+2     def run(self, agent, data):
+3         # Logica di orchestrazione tra agenti e dati
+4         return agent.execute(data)
+
+File: src/agent.py
+1 class Agent:
+2     def execute(self, data):
+3         # Esegui il compito specifico dell'agente
+4         return f"Processed {data}"
+
+File: src/pipeline.py
+1 class DataPipeline:
+2     def process(self, data):
+3         # Esegui il pre-processing dei dati
+4         return data.lower()
+
+File: src/interface.py
+1 class UserInterface:
+2     def get_input(self):
+3         # Ottieni input dall'utente
+4         return input("Enter data: ")
+5 
+6     def display_output(self, result):
+7         # Mostra l'output all'utente
+8         print(f"Output: {result}")
+
+File: requirements.txt
+1 # Dipendenze del progetto
+
+```
+
+================================== Ai Message ==================================
+
+```bash
+#!/bin/bash
+
+# a) Install dependencies
+pip install -r requirements.txt
+
+# b) Run the main script
+python src/main.py
+```
+
+2025-06-07T16:42:16.873364
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+File: Mercurius∞
+1 mercorius/
+2 │
+3 ├── src/
+4 │   ├── main.py
+5 │   ├── orchestrator/
+6 │   │   ├── __init__.py
+7 │   │   ├── llm_orchestrator.py
+8 │   │   └── pipeline_manager.py
+9 │   ├── agents/
+10 │   │   ├── __init__.py
+11 │   │   ├── agent_base.py
+12 │   │   └── specific_agent.py
+13 │   ├── rag/
+14 │   │   ├── __init__.py
+15 │   │   ├── retrieval.py
+16 │   │   ├── embedding.py
+17 │   │   └── knowledge_base.py
+18 │   ├── finetuning/
+19 │   │   ├── __init__.py
+20 │   │   ├── finetune_manager.py
+21 │   │   └── adaptive_learning.py
+22 │   └── utils/
+23 │       ├── __init__.py
+24 │       └── helpers.py
+25 │
+26 ├── tests/
+27 │   ├── test_orchestrator.py
+28 │   ├── test_agents.py
+29 │   ├── test_rag.py
+30 │   └── test_finetuning.py
+31 │
+32 ├── requirements.txt
+33 └── README.md
+
+File: src/main.py
+1 from orchestrator.llm_orchestrator import LLMOrchestrator
+2 from agents.specific_agent import SpecificAgent
+3 
+4 def main():
+5     orchestrator = LLMOrchestrator()
+6     agent = SpecificAgent()
+7     orchestrator.run(agent)
+8 
+9 if __name__ == "__main__":
+10     main()
+
+File: src/orchestrator/llm_orchestrator.py
+1 class LLMOrchestrator:
+2     def __init__(self):
+3         # Initialize LLMs and Reasoners
+4         pass
+5 
+6     def run(self, agent):
+7         # Orchestrate the flow between LLMs and the agent
+8         pass
+
+File: src/agents/specific_agent.py
+1 class SpecificAgent:
+2     def __init__(self):
+3         # Initialize agent-specific parameters
+4         pass
+5 
+6     def execute(self):
+7         # Execute agent tasks
+8         pass
+
+File: src/rag/retrieval.py
+1 class Retrieval:
+2     def __init__(self):
+3         # Initialize retrieval mechanisms
+4         pass
+5 
+6     def retrieve(self, query):
+7         # Perform retrieval based on the query
+8         pass
+
+File: src/finetuning/finetune_manager.py
+1 class FinetuneManager:
+2     def __init__(self):
+3         # Initialize finetuning parameters
+4         pass
+5 
+6     def finetune(self, model):
+7         # Perform finetuning on the model
+8         pass
+
+File: requirements.txt
+1 openai
+2 numpy
+3 scikit-learn
+
+```
+
+================================== Ai Message ==================================
+
+```bash
+#!/bin/bash
+
+# a) Install dependencies
+pip install -r requirements.txt
+
+# b) Run all necessary parts of the codebase
+python3 src/main.py &
+wait
+```
+
+2025-06-07T17:48:59.175609
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+File: segue
+1 mercurius/
+2 │
+3 ├── main.py
+4 ├── orchestrator/
+5 │   ├── llm_orchestrator.py
+6 │   ├── agent_manager.py
+7 │   └── pipeline_controller.py
+8 │
+9 ├── rag/
+10 │   ├── retrieval.py
+11 │   ├── embedding.py
+12 │   ├── knowledge_base.py
+13 │   └── semantic_search.py
+14 │
+15 ├── finetuning/
+16 │   ├── finetune.py
+17 │   └── optimizer.py
+18 │
+19 └── utils/
+20     ├── logger.py
+21     └── config_loader.py
+
+```
+
+================================== Ai Message ==================================
+
+```bash
+#!/bin/bash
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run all necessary parts of the codebase
+python3 mercurius/orchestrator/llm_orchestrator.py &
+python3 mercurius/orchestrator/agent_manager.py &
+python3 mercurius/orchestrator/pipeline_controller.py &
+python3 mercurius/rag/retrieval.py &
+python3 mercurius/rag/embedding.py &
+python3 mercurius/rag/knowledge_base.py &
+python3 mercurius/rag/semantic_search.py &
+python3 mercurius/finetuning/finetune.py &
+python3 mercurius/finetuning/optimizer.py &
+wait
+```

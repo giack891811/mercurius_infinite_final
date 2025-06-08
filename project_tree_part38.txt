@@ -1,13 +1,98 @@
-Questa è la parte 2 di project_tree. Continua da quella precedente.
+Questa è la parte 38 di project_tree. Continua da quella precedente.
+
+        for pattern, types in self.rules.items():
+            if re.search(pattern, task, re.IGNORECASE):
+                return types
+        return ["cognitive"]
+
+    def choose_agent(self, task: str) -> str:
+        desired_types = self._match_rule(task)
+        candidates = []
+        for t in desired_types:
+            candidates.extend(self.map.agents_by_type(t))
+        # se più candidati, usa memoria di successo
+        if candidates:
+            return self.memory.suggest_best(candidates)
+        # fallback: primo agente generico
+        return next(iter(self.map.nodes))
+
+    def record_result(self, agent: str, task: str, success: bool):
+        self.memory.add_record(agent, task, success)
+
+## cognition/cognitive_map.py
+# cognition/cognitive_map.py
+"""
+Modulo: cognitive_map.py
+Descrizione: Rappresentazione dinamica della mappa mentale di Mercurius∞.
+Ogni nodo è un agente, ogni arco è una dipendenza o canale di comunicazione.
+"""
+
+from collections import defaultdict
+from typing import Dict, List
+
+
+class CognitiveMap:
+    def __init__(self):
+        # {agent: {"type": "cognitive|trading|voice", "edges": [to_agent, ...]}}
+        self.nodes: Dict[str, Dict] = defaultdict(lambda: {"type": "generic", "edges": []})
+
+    # ---------- Gestione nodi ----------
+    def add_agent(self, name: str, agent_type: str = "generic"):
+        self.nodes[name]["type"] = agent_type
+
+    def link(self, src: str, dest: str):
+        if dest not in self.nodes[src]["edges"]:
+            self.nodes[src]["edges"].append(dest)
+
+    def remove_agent(self, name: str):
+        self.nodes.pop(name, None)
+        for n in self.nodes.values():
+            if name in n["edges"]:
+                n["edges"].remove(name)
+
+    # ---------- Query ----------
+    def agents_by_type(self, agent_type: str) -> List[str]:
+        return [a for a, meta in self.nodes.items() if meta["type"] == agent_type]
+
+    def connections_of(self, name: str) -> List[str]:
+        return self.nodes[name]["edges"]
+
+    def to_dict(self):
+        return self.nodes
+
+## cognition/task_memory.py
+# cognition/task_memory.py
+"""
+Modulo: task_memory.py
+Descrizione: Salvataggio outcome dei task per apprendere preferenze di routing.
+"""
+
+from collections import deque
+from typing import Dict, Any, Deque, List
+
+
+class TaskMemory:
+    def __init__(self, maxlen: int = 2000):
+        self.records: Deque[Dict[str, Any]] = deque(maxlen=maxlen)
+
+    def add_record(self, agent: str, task: str, success: bool):
+        self.records.append({"agent": agent, "task": task, "success": success})
+
+    def agent_score(self, agent: str) -> float:
+        """Percentuale di successi dell’agente."""
+        entries = [r for r in self.records if r["agent"] == agent]
+        if not entries:
+            return 0.5
+        ok = sum(1 for e in entries if e["success"])
+        return ok / len(entries)
 
     def suggest_best(self, candidates: List[str]) -> str:
         """Ritorna l’agente col punteggio più alto tra i candidati."""
         return max(candidates, key=self.agent_score)
 
-### --- communications/__init__.py --- ###
+## communications/__init__.py
 
-
-### --- communications/email_assistant.py --- ###
+## communications/email_assistant.py
 # communications/email_assistant.py
 """
 Modulo: email_assistant.py
@@ -56,7 +141,7 @@ class EmailAssistant:
             smtp.send_message(msg)
         return True
 
-### --- config/config.yaml --- ###
+## config/config.yaml
 agents:
   enabled: ["OPENAI", "OLLAMA", "AZR"]
 
@@ -76,7 +161,7 @@ paths:
   transcripts: "memory/transcripts/"
   logs: "logs/"
 
-### --- config/config_schema.py --- ###
+## config/config_schema.py
 # config_schema.py
 CONFIG_SCHEMA = {
     "symbols": {"type": "list", "schema": {"type": "string"}},
@@ -86,7 +171,7 @@ CONFIG_SCHEMA = {
     "azr_profit_floor": {"type": "float", "min": 0}
 }
 
-### --- config/config_validator.py --- ###
+## config/config_validator.py
 # config_validator.py
 import yaml
 from cerberus import Validator
@@ -100,7 +185,7 @@ def load_and_validate_config(path="config/config.yaml"):
         raise ValueError(v.errors)
     return config
 
-### --- config/genesis_config.yaml --- ###
+## config/genesis_config.yaml
 # ⚙️ Configurazione Centrale – GENESIS_MODE
 # Questo file controlla l'attivazione e la connessione tra i moduli AI di Mercurius∞
 
@@ -150,7 +235,7 @@ communication:
 # Abilita il thinking loop
 thinking_enabled: true
 
-### --- config/prod_settings.yaml --- ###
+## config/prod_settings.yaml
 # config/prod_settings.yaml
 ---
 logging_level: INFO
@@ -169,7 +254,7 @@ communication:
   update_cycle_seconds: 30
 sleep_threshold: 300
 
-### --- config/self_profile.yaml --- ###
+## config/self_profile.yaml
 # config/self_profile.yaml
 name: Mercurius∞
 version: "1.0"
@@ -180,10 +265,9 @@ values:
 purpose: Evolvere, assistere l’utilizzatore e creare valore etico.
 created: "2025-06-01T00:00:00"
 
-### --- consciousness/__init__.py --- ###
+## consciousness/__init__.py
 
-
-### --- consciousness/core_self.py --- ###
+## consciousness/core_self.py
 # consciousness/core_self.py
 """
 Modulo: core_self.py
@@ -232,7 +316,7 @@ class CoreSelf:
     def save(self):
         yaml.safe_dump(self.profile, PROFILE_FILE.open("w", encoding="utf-8"))
 
-### --- consciousness/intention_manager.py --- ###
+## consciousness/intention_manager.py
 # consciousness/intention_manager.py
 """
 Modulo: intention_manager.py
@@ -256,7 +340,7 @@ class IntentionManager:
         self.intentions = [i for i in self.intentions if i["expires"] > now]
         return [i["desc"] for i in self.intentions]
 
-### --- consciousness/reflection_loop.py --- ###
+## consciousness/reflection_loop.py
 # consciousness/reflection_loop.py
 """
 Modulo: reflection_loop.py
@@ -298,10 +382,9 @@ class ReflectionLoop:
         file.write_text(content, encoding="utf-8")
         print(f"📝 Reflection saved → {file}")
 
-### --- core/__init__.py --- ###
+## core/__init__.py
 
-
-### --- core/auto_tester.py --- ###
+## core/auto_tester.py
 """
 auto_tester.py
 ==============
@@ -340,7 +423,7 @@ class AutoTester:
         after = self.pipeline.agent.config["base_trade_qty"]
         print(f"📉 Base quantity: {before} → {after}")
 
-### --- core/auto_updater.py --- ###
+## core/auto_updater.py
 # core/auto_updater.py
 
 """
@@ -398,7 +481,7 @@ class AutoUpdater:
         })
         self.save_log()
 
-### --- core/context_adapter.py --- ###
+## core/context_adapter.py
 # core/context_adapter.py
 
 """
@@ -433,7 +516,7 @@ class ContextAdapter:
 
         return f"{prefix} {message}"
 
-### --- core/deploy_trigger.py --- ###
+## core/deploy_trigger.py
 # core/deploy_trigger.py
 """
 Modulo: deploy_trigger.py
@@ -461,7 +544,7 @@ if __name__ == "__main__":
     health = validator.check_health()
     print("✅ Deploy OK" if tests_ok and health["status"] else "❌ Deploy issues", health)
 
-### --- core/dialogue_manager.py --- ###
+## core/dialogue_manager.py
 # core/dialog_manager.py
 
 """
@@ -559,7 +642,7 @@ class DialogManager:
         self.track_dialog_context(message, reply)
         return reply
 
-### --- core/emotion_analyzer.py --- ###
+## core/emotion_analyzer.py
 # core/emotion_analyzer.py
 
 """
@@ -617,7 +700,7 @@ class EmotionAnalyzer:
                 return emotion
         return "neutro"
 
-### --- core/executor.py --- ###
+## core/executor.py
 """
 Modulo: executor.py
 Responsabilità: Esecuzione sicura e tracciata del codice generato o modificato
@@ -661,7 +744,7 @@ class CodeExecutor:
         """
         return all(keyword.lower() in output.lower() for keyword in expected_keywords)
 
-### --- core/genesis_trigger.py --- ###
+## core/genesis_trigger.py
 # genesis_launcher.py
 
 """
@@ -734,7 +817,7 @@ if __name__ == "__main__":
         # Registra audit: comando utente e risposta data
         audit("user_command", {"input": user_input, "response": response})
 
-### --- core/learning.py --- ###
+## core/learning.py
 """
 Modulo: learning.py
 Responsabilità: Fornire capacità di apprendimento continuo al sistema Mercurius∞
@@ -827,89 +910,7 @@ class ContinuousLearner:
             "failures": sum(1 for d in data if not d["success"])
         }
 
-### --- core/orchestrator.py --- ###
+## core/orchestrator.py
 """
 🧠 core/orchestrator.py
 Modulo centrale di orchestrazione – Mercurius∞ Neural AI System
-Gestisce la rete multi-agente in modalità GENESIS con auto-adattamento.
-"""
-
-import importlib
-import yaml
-import time
-import threading
-from pathlib import Path
-import sys
-import os
-from core.self_tuner import SelfTuner
-from core.sleep_monitor import SleepMonitor
-from core.thinking_loop import ThinkingLoop
-from integrations.bridge_josch import send_command_to_pc
-from sensors.sensor_hub import capture_screen_stream, listen_microphone
-
-CONFIG_PATH = Path("config/genesis_config.yaml")
-
-class Orchestrator:
-    def __init__(self):
-        self.config = self.load_config()
-        self.agents = {}
-        self.active = False
-        self.sleep_monitor = SleepMonitor(idle_threshold=self.config.get("sleep_threshold", 300))
-        self.thinking_loop: ThinkingLoop | None = None
-        self.multisensorial_enabled = True
-
-    def load_config(self):
-        with open('config/config.yaml', encoding='utf-8') as f:
-            return yaml.safe_load(f)
-
-    def activate_genesis(self):
-        print("⚡ Attivazione modalità GENESIS...")
-        self.active = True
-        self.load_agents()
-        self.start_feedback_loop()
-        self.start_sleep_monitor()
-
-        try:
-            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-                cfg = yaml.safe_load(f)
-            if cfg.get("thinking_enabled", True):
-                self.thinking_loop = ThinkingLoop(CONFIG_PATH)
-                self.thinking_loop.start()
-                print("🧠 Thinking loop attivo.")
-        except Exception as e:
-            print(f"⚠️ Errore avvio thinking loop: {e}")
-
-        try:
-            from modules.vision_audio.note10_jarvis_bridge import start_jarvis_loop
-            threading.Thread(target=start_jarvis_loop, daemon=True).start()
-            print("📡 Note10+ Bridge attivo – In ascolto microfono e comandi vocali.")
-        except Exception as e:
-            print(f"⚠️ Errore avvio Note10+ Jarvis: {e}")
-
-        try:
-            from modules.mobile_flutter.flutter_bridge import start_mobile_ui
-            threading.Thread(target=start_mobile_ui, daemon=True).start()
-            print("📱 Mobile Jarvis UI attivo.")
-        except Exception as e:
-            print(f"⚠️ Errore avvio Mobile UI: {e}")
-
-
-
-        #REMOTE_EXEC
-        try:
-            send_command_to_pc("start vscode")
-        except Exception as e:
-            print(f"⚠️ Errore invio comando PC: {e}")
-        if self.multisensorial_enabled:
-            try:
-                capture_screen_stream()
-                listen_microphone()
-            except Exception as e:
-                print(f"⚠️ Errore avvio sensori: {e}")
-
-        print("✅ GENESIS attiva – Rete neurale in esecuzione.")
-
-    def load_agents(self):
-        print("🔌 Caricamento agenti dalla configurazione...")
-        agent_groups = self.config.get("agents", {})
-        for group, agent_list in agent_groups.items():

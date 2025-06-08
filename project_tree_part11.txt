@@ -1,0 +1,849 @@
+Questa è la parte 11 di project_tree. Continua da quella precedente.
+
+    decision = f"Analisi attivata da '{trigger}'. Contesto: {context or 'nessuno'}."
+    log_entry = {"time": timestamp, "trigger": trigger, "decision": decision}
+    save_episode(log_entry)
+    return decision
+
+def save_episode(entry):
+    with open("modules/Reasoner/episodic_memory.log", "a", encoding="utf-8") as log_file:
+        log_file.write(str(entry) + "\n")
+
+### --- modules/Reasoner/strategic/intuition_engine.py --- ###
+import random
+from datetime import datetime
+
+def predict_next_action(logs_context=None):
+    strategie = [
+        "Analisi dati recenti",
+        "Attivazione modulo visione",
+        "Proposta assistenza all’utente",
+        "Raccolta feedback vocale",
+        "Generazione mini-agente dedicato"
+    ]
+    decisione = random.choice(strategie)
+    timestamp = datetime.now().isoformat()
+    evento = f"[{timestamp}] INTUITO: {decisione}"
+    save_strategy_log(evento)
+    return decisione
+
+def save_strategy_log(evento):
+    with open("logs/self_monitoring/strategic_predictions.log", "a", encoding="utf-8") as f:
+        f.write(evento + "\n")
+
+### --- modules/__init__.py --- ###
+# modules/__init__.py
+# rende importabili i sotto‐pacchetti
+
+### --- modules/agents/organizer_core.py --- ###
+"""
+🧠 Organizer Core – modules/agents/organizer_core.py
+Coordina agenti AI organizzativi: CrewAI, SuperAGI, Autogen.
+Assegna task, raccoglie risposte, sincronizza con l’orchestratore.
+"""
+
+class AgentOrganizer:
+    def __init__(self):
+        self.agents = {
+            "CrewAI": self.run_crewai,
+            "SuperAGI": self.run_superagi,
+            "Autogen": self.run_autogen
+        }
+
+    def dispatch_task(self, task: str, meta_context: dict = {}) -> dict:
+        print("📤 Invio task a tutti gli agenti organizzativi...")
+        results = {}
+        for name, runner in self.agents.items():
+            try:
+                results[name] = runner(task, meta_context)
+            except Exception as e:
+                results[name] = f"❌ Errore: {str(e)}"
+        return results
+
+    def evaluate_outcomes(self, results: dict) -> str:
+        print("📊 Valutazione dei risultati agenti organizzativi...")
+        for agent, output in results.items():
+            print(f" - {agent}: {output[:80]}...")
+        return max(results.items(), key=lambda x: len(x[1]))[1]
+
+    def run_crewai(self, task: str, ctx: dict) -> str:
+        return f"[CrewAI] Coordinamento squadra AI per: {task}"
+
+    def run_superagi(self, task: str, ctx: dict) -> str:
+        return f"[SuperAGI] Pianificazione e autonomia su task: {task}"
+
+    def run_autogen(self, task: str, ctx: dict) -> str:
+        return f"[Autogen] Task iterativo distribuito: {task}"
+
+# Test diretto
+if __name__ == "__main__":
+    core = AgentOrganizer()
+    task = "Costruisci una roadmap AI per Mercurius∞"
+    out = core.dispatch_task(task)
+    final = core.evaluate_outcomes(out)
+    print("🎯 Strategia selezionata:")
+    print(final)
+
+### --- modules/ai_kernel/agent_core.py --- ###
+# modules/ai_kernel/agent_core.py
+"""
+Modulo: agent_core
+Descrizione: Nucleo base per agenti AI operativi e autonomi Mercurius∞.
+"""
+import time
+from modules.ai_kernel.lang_reasoner import LangReasoner
+
+class AgentCore:
+    def __init__(self, name="Agent_001"):
+        self.name = name
+        self.memory = []
+        self.status = "idle"
+        # Integrazione di un motore di ragionamento linguistico (LLM) per decisioni avanzate
+        self.reasoner = LangReasoner()
+
+    def perceive(self, input_data):
+        """Analizza i dati in ingresso e li registra nella memoria dell'agente."""
+        print(f"[{self.name}] Percezione: {input_data}")
+        self.memory.append(input_data)
+
+    def reason(self):
+        """Elabora i dati memorizzati e decide un'azione utilizzando l'LLM (se disponibile)."""
+        if not self.memory:
+            return "Nessun dato per ragionare."
+        last_input = self.memory[-1]
+        try:
+            # Utilizza il modello di linguaggio per decidere l'azione di alto livello
+            prompt = f"L'input ricevuto è: {last_input}. Decidi l'azione appropriata."
+            decision = self.reasoner.think(prompt)
+            return decision
+        except Exception as e:
+            # In caso di errore del motore LLM, fallback a logica base
+            return f"Azione basata su: {last_input}"
+
+    def act(self, decision):
+        """Esegue l'azione risultante dalla decisione elaborata."""
+        print(f"[{self.name}] Azione: {decision}")
+        self.status = "active"
+
+    def boot(self):
+        """Ciclo operativo di avvio dell'agente (demo operativo)."""
+        print(f"[{self.name}] Booting...")
+        for i in range(3):
+            self.perceive(f"input_{i}")
+            decision = self.reason()
+            self.act(decision)
+            time.sleep(1)
+        self.status = "ready"
+        print(f"[{self.name}] Pronto all'azione.")
+
+### --- modules/ai_kernel/agent_plugin.py --- ###
+"""
+Modulo: agent_plugin
+Descrizione: Plugin AI per estendere gli agenti Mercurius∞ con capacità Auto-GPT (stub).
+Autore: Mercurius∞ AI Engineer
+"""
+
+class AgentPlugin:
+    def __init__(self, agent_name="Mercurius-Auto"):
+        self.agent_name = agent_name
+
+    def plan(self, objective: str) -> list:
+        """
+        Simula una pianificazione step-by-step (tipo Auto-GPT).
+        """
+        return [
+            f"Analisi dell'obiettivo: {objective}",
+            "Raccolta informazioni",
+            "Formulazione risposte",
+            "Esecuzione azioni",
+            "Valutazione risultati"
+        ]
+
+# Esempio
+if __name__ == "__main__":
+    planner = AgentPlugin()
+    steps = planner.plan("Costruire una AI autonoma")
+    for step in steps:
+        print(f"🧭 {step}")
+
+### --- modules/ai_kernel/cognitive_integration.py --- ###
+"""
+🧠 modules/ai_kernel/cognitive_integration.py
+Modulo: Integrazione Cognitiva Neurale – GENESIS_MODE
+Gestisce il dialogo e il routing neurale tra le intelligenze esterne:
+ChatGPT-4, AZR, Ollama3, GPT-4o
+
+Funzioni:
+- Smista compiti tra i modelli AI
+- Aggrega e valuta le risposte
+- Sincronizza il ciclo di feedback con l’orchestratore
+"""
+
+from typing import Dict, List
+import random
+
+class CognitiveIntegrationNode:
+    def __init__(self):
+        # Simulazione degli endpoint AI – in produzione collegare reali API/local runtime
+        self.agents = {
+            "ChatGPT4": self.query_chatgpt4,
+            "AZR": self.query_azr,
+            "Ollama3": self.query_ollama,
+            "GPT4o": self.query_gpt4o
+        }
+
+    def route_task(self, task_description: str, context: Dict = {}) -> Dict[str, str]:
+        """
+        Smista il task a ciascun nodo cognitivo e restituisce le risposte in parallelo.
+        """
+        print(f"📡 Routing task: '{task_description}' a tutti i nodi cognitivi...")
+        responses = {}
+        for name, agent in self.agents.items():
+            try:
+                response = agent(task_description, context)
+                responses[name] = response
+            except Exception as e:
+                responses[name] = f"❌ Errore: {str(e)}"
+        return responses
+
+    def evaluate_responses(self, responses: Dict[str, str]) -> str:
+        """
+        Valuta le risposte AI e seleziona la più coerente o efficace.
+        """
+        print("🧠 Valutazione delle risposte AI...")
+        for k, v in responses.items():
+            print(f" - {k}: {v[:80]}...")
+        # Placeholder: selezione random, sostituire con logica di coerenza/validazione
+        return max(responses.items(), key=lambda x: len(x[1]))[1]
+
+    # Placeholder: metodi simulati per AI – in futuro collegare runtime o API
+    def query_chatgpt4(self, task: str, context: Dict) -> str:
+        return f"[ChatGPT-4] Risposta simulata al task: {task}"
+
+    def query_azr(self, task: str, context: Dict) -> str:
+        return f"[AZR] Logica razionale applicata al task: {task}"
+
+    def query_ollama(self, task: str, context: Dict) -> str:
+        return f"[Ollama3] Codice generato in risposta al task: {task}"
+
+    def query_gpt4o(self, task: str, context: Dict) -> str:
+        return f"[GPT-4o] Supervisione e sintesi del task: {task}"
+
+# Test diretto
+if __name__ == "__main__":
+    node = CognitiveIntegrationNode()
+    task = "Crea una funzione Python per calcolare il ROI su investimenti"
+    res = node.route_task(task)
+    final = node.evaluate_responses(res)
+    print("🎯 Output finale selezionato:")
+    print(final)
+
+### --- modules/ai_kernel/command_interpreter.py --- ###
+"""
+Modulo: command_interpreter.py
+Descrizione: Interprete testuale dei comandi vocali o input testuali.
+Autore: Mercurius∞ AI Engineer
+"""
+
+class CommandInterpreter:
+    def interpret(self, text: str) -> dict:
+        command = text.strip().lower()
+        
+        if "apri" in command:
+            return {"action": "apri_app", "context": {"app": command.replace("apri", "").strip()}}
+        
+        elif "saluta" in command:
+            return {"action": "saluta"}
+        
+        elif "mostra" in command:
+            return {"action": "mostra_dati"}
+
+        elif "analizza l'ambiente" in command:
+            return {"action": "analizza_ambiente"}
+        
+        else:
+            return {"action": "ignora", "reason": "comando non riconosciuto"}
+
+# Esempio d’uso
+if __name__ == "__main__":
+    ci = CommandInterpreter()
+    test_commands = [
+        "Apri calendario",
+        "Saluta",
+        "Mostra report",
+        "Analizza l'ambiente",
+        "Qualcosa di strano"
+    ]
+    for cmd in test_commands:
+        print(f"Input: {cmd} -> Output: {ci.interpret(cmd)}")
+
+### --- modules/ai_kernel/context_adapter.py --- ###
+"""
+Modulo: context_adapter
+Descrizione: Adatta il contesto conversazionale e ambientale per l'agente Mercurius∞.
+Autore: Mercurius∞ AI Engineer
+"""
+
+class ContextAdapter:
+    def __init__(self):
+        self.current_context = {
+            "user": "Germano",
+            "mode": "interactive",
+            "location": "desktop",
+            "language": "it",
+            "time": "giorno"
+        }
+
+    def update_context(self, key: str, value):
+        self.current_context[key] = value
+
+    def get_context(self):
+        return self.current_context
+
+    def summarize_context(self):
+        parts = [f"{k}: {v}" for k, v in self.current_context.items()]
+        return " | ".join(parts)
+
+# Test rapido
+if __name__ == "__main__":
+    ca = ContextAdapter()
+    ca.update_context("location", "Note 10+")
+    print("Contesto attuale:", ca.summarize_context())
+
+### --- modules/ai_kernel/goal_manager.py --- ###
+"""
+Modulo: goal_manager
+Descrizione: Gestione degli obiettivi e sotto-obiettivi dell'agente Mercurius∞.
+Autore: Mercurius∞ AI Engineer
+"""
+
+from datetime import datetime
+import uuid
+
+class Goal:
+    def __init__(self, description: str, priority: int = 5):
+        self.id = str(uuid.uuid4())
+        self.description = description
+        self.priority = priority
+        self.created_at = datetime.now()
+        self.completed = False
+
+    def mark_completed(self):
+        self.completed = True
+
+class GoalManager:
+    def __init__(self):
+        self.goals = []
+
+    def add_goal(self, description: str, priority: int = 5):
+        goal = Goal(description, priority)
+        self.goals.append(goal)
+        return goal
+
+    def list_active_goals(self):
+        return [g for g in self.goals if not g.completed]
+
+    def get_next_goal(self):
+        active = self.list_active_goals()
+        return sorted(active, key=lambda g: g.priority)[0] if active else None
+
+    def complete_goal(self, goal_id: str):
+        for g in self.goals:
+            if g.id == goal_id:
+                g.mark_completed()
+                return g
+        return None
+
+# Test interattivo
+if __name__ == "__main__":
+    gm = GoalManager()
+    gm.add_goal("Analizza segnali economici", 1)
+    gm.add_goal("Controlla parametri ambientali", 3)
+    gm.add_goal("Salva log missione", 7)
+
+    print("Prossimo obiettivo:", gm.get_next_goal().description)
+
+### --- modules/ai_kernel/lang_reasoner.py --- ###
+# modules/ai_kernel/lang_reasoner.py
+"""
+Modulo: lang_reasoner
+Descrizione: Wrapper base per ragionamento LLM-driven (integrazione modelli di linguaggio).
+"""
+import os
+import openai
+
+class LangReasoner:
+    def __init__(self, model_name: str = "gpt-3.5-turbo"):
+        # Inizializza il modello di linguaggio (es. OpenAI GPT) e chiave API
+        self.model = model_name
+        self.api_key = os.getenv("OPENAI_API_KEY")
+        openai.api_key = self.api_key
+
+    def think(self, query: str) -> str:
+        """
+        Genera una risposta ragionata alla query fornita utilizzando un LLM.
+        """
+        try:
+            response = openai.ChatCompletion.create(
+                model=self.model,
+                messages=[{"role": "user", "content": query}],
+                temperature=0.7,
+                max_tokens=150
+            )
+            answer = response['choices'][0]['message']['content'].strip()
+            return answer
+        except Exception as e:
+            return f"[LangReasoner Error] {e}"
+
+### --- modules/ai_kernel/strategic_coordinator.py --- ###
+"""
+Modulo: strategic_coordinator
+Descrizione: Coordina le strategie dinamiche basate su obiettivi, contesto e feedback AI.
+Autore: Mercurius∞ AI Engineer
+"""
+
+from modules.ai_kernel.goal_manager import GoalManager
+
+class StrategicCoordinator:
+    def __init__(self, goal_manager: GoalManager):
+        self.goal_manager = goal_manager
+
+    def assess_situation(self, signals: dict):
+        """Analizza i segnali in ingresso e decide se generare nuovi obiettivi"""
+        if "minaccia" in signals and signals["minaccia"] > 0.8:
+            self.goal_manager.add_goal("Esegui protocolli difensivi", priority=1)
+        if "opportunita" in signals and signals["opportunita"] > 0.6:
+            self.goal_manager.add_goal("Massimizza opportunità identificata", priority=2)
+
+    def execute_strategy(self):
+        """Restituisce il prossimo obiettivo da eseguire"""
+        goal = self.goal_manager.get_next_goal()
+        return goal.description if goal else "Nessun obiettivo attivo"
+
+# Test autonomo
+if __name__ == "__main__":
+    gm = GoalManager()
+    sc = StrategicCoordinator(gm)
+
+    sc.assess_situation({"opportunita": 0.7, "minaccia": 0.2})
+    print(sc.execute_strategy())
+
+### --- modules/autogen_chat.py --- ###
+# modules/autogen_chat.py
+
+"""
+Modulo: autogen_chat.py
+Descrizione: Implementazione simulata di chat cooperativa multi-agente tramite Microsoft Autogen.
+"""
+
+class AutoGenChat:
+    def __init__(self, agents=None):
+        if agents is None:
+            agents = ["Coder", "Planner", "Validator"]
+        self.agents = agents
+
+    def simulate_chat(self, topic: str):
+        return "\n".join([f"{agent}: Partecipo alla discussione su '{topic}'." for agent in self.agents])
+
+
+# Test
+if __name__ == "__main__":
+    chat = AutoGenChat()
+    print(chat.simulate_chat("Sviluppo modulo di visione AI"))
+
+### --- modules/chatgpt_interface.py --- ###
+"""
+Modulo: chatgpt_interface.py
+Descrizione: Interfaccia tra Mercurius∞ e ChatGPT-4 per ragionamento, validazione e supporto decisionale.
+"""
+
+import openai
+import os
+
+
+class ChatGPTInterface:
+    def __init__(self, model="gpt-4", temperature=0.4):
+        self.model = model
+        self.temperature = temperature
+        self.api_key = os.getenv("OPENAI_API_KEY", "")
+
+        if not self.api_key:
+            raise ValueError("❌ OPENAI_API_KEY non definita nell'ambiente.")
+
+        openai.api_key = self.api_key
+
+    def ask(self, prompt: str, system: str = "Agisci come supervisore AI avanzato.") -> str:
+        """
+        Invia un messaggio a ChatGPT e restituisce la risposta.
+        """
+        try:
+            response = openai.ChatCompletion.create(
+                model=self.model,
+                temperature=self.temperature,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            reply = response.choices[0].message.content.strip()
+            return reply
+        except Exception as e:
+            return f"⚠️ Errore nella richiesta a ChatGPT: {e}"
+
+    def validate_code(self, code_snippet: str) -> str:
+        """
+        Chiede a ChatGPT di validare un frammento di codice.
+        """
+        prompt = f"Valuta se il seguente codice è valido e migliorabile:\n\n{code_snippet}"
+        return self.ask(prompt, system="Sei un validatore di codice Python altamente esperto.")
+
+
+# Uso diretto
+if __name__ == "__main__":
+    gpt = ChatGPTInterface()
+    print(gpt.ask("Qual è il significato della vita secondo l'informatica?"))
+
+### --- modules/codex/codex_cli.py --- ###
+"""codex_cli.py
+==============
+Interfaccia CLI/funzionale per interagire con Codex/OpenAI.
+Esegue un prompt e restituisce codice generato.
+"""
+
+from __future__ import annotations
+
+import os
+import openai
+from utils.logger import setup_logger
+
+logger = setup_logger("CodexCLI")
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
+def generate_code(prompt: str) -> str:
+    """Invia il prompt a Codex (o modello GPT) e restituisce il codice risultante."""
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0,
+            max_tokens=1024,
+        )
+        return response["choices"][0]["message"]["content"].strip()
+    except Exception as exc:
+        logger.error(f"Errore Codex: {exc}")
+        return f"Errore Codex: {exc}"
+
+
+def run_codex(prompt: str | None = None) -> str:
+    """Esegui Codex da linea di comando o come funzione."""
+    if prompt is None:
+        prompt = input("Codex prompt> ")
+    logger.info(f"[CODEX] Invio prompt: {prompt}")
+    result = generate_code(prompt)
+    print(result)
+    return result
+
+
+if __name__ == "__main__":
+    run_codex()
+
+### --- modules/crewai_team.py --- ###
+# modules/crewai_team.py
+
+"""
+Modulo: crewai_team.py
+Descrizione: Simulazione di un team AI con ruoli definiti (coder, manager, validator) basato su CrewAI.
+"""
+
+class CrewAI:
+    def __init__(self):
+        self.members = {
+            "Project Manager": [],
+            "Senior Coder": [],
+            "Validator": []
+        }
+
+    def assign_task(self, role: str, task: str):
+        if role in self.members:
+            self.members[role].append(task)
+            return f"📌 Task assegnato a {role}: {task}"
+        else:
+            return f"❌ Ruolo non valido: {role}"
+
+    def team_report(self):
+        return "\n".join([f"{role}: {', '.join(tasks)}" if tasks else f"{role}: 🔕 Nessun task" for role, tasks in self.members.items()])
+
+
+# Test
+if __name__ == "__main__":
+    crew = CrewAI()
+    print(crew.assign_task("Senior Coder", "Sviluppare interfaccia OCR"))
+    print(crew.assign_task("Validator", "Verifica modulo vocale"))
+    print(crew.team_report())
+
+### --- modules/dashboard/__init__.py --- ###
+# Init for dashboard
+
+### --- modules/dashboard/control_center.py --- ###
+"""
+Modulo: control_center
+Descrizione: Interfaccia Streamlit per controllo agenti Mercurius∞ (stub).
+Autore: Mercurius∞ AI Engineer
+"""
+
+import streamlit as st
+
+def main():
+    st.set_page_config(page_title="Mercurius∞ Control", layout="wide")
+    st.title("🚀 Mercurius∞ Control Center")
+    st.markdown("Benvenuto nella dashboard operativa.")
+
+    with st.sidebar:
+        st.header("Controlli di Sistema")
+        st.button("Avvia Agente")
+        st.button("Ascolta Audio")
+        st.button("Elabora Ragionamento")
+    
+    st.write("🧠 Stato dell'agente:")
+    st.success("Agente attivo e in ascolto.")
+
+if __name__ == "__main__":
+    main()
+
+### --- modules/dashboard/control_panel.py --- ###
+"""Pannello di controllo AI."""
+
+import streamlit as st
+
+def render_control_panel():
+    st.sidebar.title("Pannello AI")
+    st.sidebar.button("Analizza Stato")
+
+### --- modules/dashboard/dashboard_streamlit.py --- ###
+import streamlit as st
+from modules.Neo.self_awareness import get_current_state
+from modules.Neo.context_memory import get_recent_context
+from modules.Neo.interaction_style import get_style
+
+st.set_page_config(page_title="Mercurius∞ Dashboard", layout="wide")
+
+st.title("🧠 Mercurius∞ – Interfaccia Cognitiva")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.header("🧬 Stato interno")
+    state = get_current_state()
+    st.json(state)
+
+    st.header("🎙️ Stile comunicativo")
+    st.write(get_style())
+
+with col2:
+    st.header("🔁 Contesto recente")
+    st.write(get_recent_context())
+
+st.markdown("---")
+st.success("Dashboard aggiornata e funzionante.")
+
+### --- modules/dashboard/dashboard_utils.py --- ###
+def format_log_entry(module, message):
+    return f"[{module}] >>> {message}"
+
+### --- modules/dashboard/futuristic_gui.py --- ###
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+
+
+import streamlit as st
+from modules.voice_bridge.tts_engine import Pyttsx3TTS
+from modules.ai_kernel.agent_core import AgentCore
+from modules.dashboard.keyboard_dropdown import keyboard_input
+import base64
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🧬 STILE HOLOGRAFICO PERSONALIZZATO
+def load_custom_css():
+    with open("modules/dashboard/hud.css", "r") as f:
+        css = f"<style>{f.read()}</style>"
+        st.markdown(css, unsafe_allow_html=True)
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🧠 COMPONENTI INIZIALI
+agent = AgentCore()
+tts = Pyttsx3TTS()
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🚀 STREAMLIT GUI
+st.set_page_config(layout="wide", page_title="Mercurius∞ HUD")
+load_custom_css()
+
+st.markdown('<div class="hud-header">MERCURIUS∞ // INTERFACCIA OLOGRAFICA</div>', unsafe_allow_html=True)
+
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    st.markdown('<div class="hud-panel">🧠 STATO AGENTE</div>', unsafe_allow_html=True)
+    st.write(f"Nome: {agent.name}")
+    st.write(f"Stato: {agent.status}")
+    st.markdown("---")
+    text_input = keyboard_input()
+
+    if st.button("🗣️ Rispondi"):
+        agent.perceive(text_input)
+        decision = agent.reason()
+        agent.act(decision)
+        tts.speak(decision)
+        st.success(f"Risposta: {decision}")
+
+with col2:
+    st.markdown('<div class="hud-panel">📊 LOG</div>', unsafe_allow_html=True)
+    st.text_area("Memoria", value="\n".join(agent.memory), height=300)
+
+st.markdown('<div class="hud-footer">🛰 Mercurius∞ 2025 – Modalità Olografica Attiva</div>', unsafe_allow_html=True)
+
+### --- modules/dashboard/keyboard_dropdown.py --- ###
+import streamlit as st
+
+def keyboard_input():
+    st.markdown('<div class="hud-panel">⌨️ Inserimento manuale olografico</div>', unsafe_allow_html=True)
+
+    preset_options = [
+        "Avvia sequenza",
+        "Attiva modalità autonoma",
+        "Analizza input visivo",
+        "Stato del sistema",
+        "Salva log"
+    ]
+
+    selected = st.selectbox("💬 Comando predefinito:", preset_options)
+    custom_input = st.text_input("✍️ Oppure digita qui:", "")
+
+    return custom_input if custom_input.strip() else selected
+
+### --- modules/dashboard/mission_gui.py --- ###
+"""mission_gui.py
+GUI minimale per interagire con il Mission Controller.
+"""
+
+import streamlit as st
+from orchestrator.mission_controller import MissionController
+from modules.strategic.strategic_brain import StrategicBrain
+
+st.set_page_config(page_title="Mission Control")
+
+if "controller" not in st.session_state:
+    st.session_state.controller = MissionController()
+if "strategic" not in st.session_state:
+    st.session_state.strategic = StrategicBrain()
+
+mc = st.session_state.controller
+sb = st.session_state.strategic
+
+st.title("🚀 Mercurius∞ Mission Control")
+
+with st.form("new_workspace"):
+    name = st.text_input("Nome workspace", "workspace1")
+    prompt = st.text_area("Prompt o progetto")
+    submitted = st.form_submit_button("Crea workspace")
+    if submitted:
+        mc.create_workspace(name, prompt)
+        st.success(f"Workspace '{name}' creato")
+
+st.markdown("## 🧠 Strategic Brain")
+if st.button("Carica goals.txt"):
+    sb.load_goals("goals.txt")
+    st.success("Goals caricati")
+if sb.goal_manager.pending_goals():
+    if st.button("Esegui Strategic Brain"):
+        outputs = sb.run()
+        for out in outputs:
+            st.text(out)
+
+selected = st.selectbox("Scegli workspace", list(mc.workspaces.keys())) if mc.workspaces else None
+if selected:
+    if st.button("Esegui ciclo evolutivo"):
+        mc.run_cycle(selected)
+        st.success("Ciclo completato")
+    if st.checkbox("Mostra log" ):
+        log_path = mc.workspaces[selected]["path"] / "sandbox.log"
+        if log_path.exists():
+            st.text(log_path.read_text())
+
+### --- modules/evolution/ai2ui_adapter.py --- ###
+"""
+🎨 AI2UI Adapter – modules/evolution/ai2ui_adapter.py
+Adattatore AI → GUI per generazione interfacce da descrizioni testuali.
+"""
+
+class AI2UI:
+    def __init__(self):
+        self.name = "AI2UI"
+
+    def execute_task(self, prompt: str, context: dict = {}) -> str:
+        return f"[{self.name}] Interfaccia generata per: {prompt}"
+
+### --- modules/evolution/auto_gpt.py --- ###
+"""
+♻️ Auto-GPT Integration – modules/evolution/auto_gpt.py
+Modulo di esecuzione iterativa autonoma di task complessi tramite AI.
+"""
+
+class AutoGPT:
+    def __init__(self):
+        self.name = "Auto-GPT"
+
+    def execute_task(self, prompt: str, context: dict = {}) -> str:
+        return f"[{self.name}] Task iterativo gestito per: {prompt}"
+
+### --- modules/evolution/gpt_engineer.py --- ###
+"""
+🧠 GPT-Engineer Integration – modules/evolution/gpt_engineer.py
+Modulo per l'invocazione di GPT-Engineer come agente evolutivo di generazione software.
+"""
+
+class GPTEngineer:
+    def __init__(self):
+        self.name = "GPT-Engineer"
+
+    def execute_task(self, prompt: str, context: dict = {}) -> str:
+        # Simulazione – in produzione connettere a runtime o API di GPT-Engineer
+        return f"[{self.name}] Codice generato per: {prompt}"
+
+### --- modules/evolution/metagpt.py --- ###
+"""
+🤖 MetaGPT Integration – modules/evolution/metagpt.py
+Agente AI multi-ruolo (PM, Dev, QA) per sviluppo software coordinato.
+"""
+
+class MetaGPT:
+    def __init__(self):
+        self.name = "MetaGPT"
+
+    def execute_task(self, prompt: str, context: dict = {}) -> str:
+        return f"[{self.name}] Team AI coordinato ha processato: {prompt}"
+
+### --- modules/experience/__init__.py --- ###
+
+
+### --- modules/experience/azr_analyzer.py --- ###
+# modules/experience/azr_analyzer.py
+"""
+Modulo: azr_analyzer.py
+Descrizione: Analizzatore esperienziale per AZR – Adattamento Zero Retention.
+Combina l’analisi statistica dei profitti con la capacità di AZRAgent di
+suggerire adattamenti strategici basati su prompt di linguaggio naturale.
+"""
+
+import json
+from statistics import mean, stdev
+from typing import Any, Dict, List, Optional, Union
+
+from modules.experience.experience_memory import ExperienceMemory
+from modules.llm.azr_reasoner import AZRAgent
+
+
+class AZRAnalyzer:
+    """

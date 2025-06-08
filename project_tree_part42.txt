@@ -1,0 +1,843 @@
+Questa è la parte 42 di project_tree. Continua da quella precedente.
+
+        return facts
+
+    def record_interaction(self, context: str, user_input: str, ai_response: str):
+        self.episodic.record_episode(context, user_input, ai_response)
+        self.synaptic_log.log_event("EpisodicMemory", "record_interaction", f"Input: {user_input[:30]}...")
+
+    def review_recent_episodes(self, limit: int = 5):
+        episodes = self.episodic.get_recent_episodes(limit)
+        self.synaptic_log.log_event("EpisodicMemory", "review_recent_episodes")
+        return episodes
+
+    def search_knowledge(self, keyword: str):
+        facts = self.long_term.search_memory(keyword)
+        episodes = self.episodic.search_episodes(keyword)
+        self.synaptic_log.log_event("MemoryCore", "search_knowledge", f"Keyword: {keyword}")
+        return {"facts": facts, "episodes": episodes}
+
+## memory/neural_plasticity.py
+# memory/neural_plasticity.py
+
+"""
+Estensione: Plasticità neurale dinamica di Mercurius∞
+Descrizione: Mappa adattiva della frequenza di utilizzo dei moduli e suggerimenti di rinforzo o disattivazione.
+"""
+
+import json
+import os
+from datetime import datetime
+
+class NeuralPlasticity:
+    def __init__(self, map_path="memory/plasticity_map.json"):
+        self.map_path = map_path
+        self.map = self.load_map()
+
+    def load_map(self):
+        if os.path.exists(self.map_path):
+            with open(self.map_path, "r") as f:
+                return json.load(f)
+        return {}
+
+    def save_map(self):
+        with open(self.map_path, "w") as f:
+            json.dump(self.map, f, indent=2)
+
+    def track_usage(self, module_name: str):
+        if module_name not in self.map:
+            self.map[module_name] = {"count": 0, "last_used": None}
+        self.map[module_name]["count"] += 1
+        self.map[module_name]["last_used"] = datetime.now().isoformat()
+        self.save_map()
+
+    def recommend_adaptation(self) -> list:
+        sorted_usage = sorted(self.map.items(), key=lambda x: x[1]["count"], reverse=True)
+        return [f"{mod[0]} → {mod[1]['count']} utilizzi" for mod in sorted_usage[:5]]
+
+    def strengthen_pathways(self):
+        adaptations = self.recommend_adaptation()
+        print("🔧 Rinforzo neurale per i moduli più utilizzati:")
+        for line in adaptations:
+            print(f"  ⚡ {line}")
+        return adaptations
+
+## memory/synaptic_log.py
+# memory/synaptic_log.py
+
+"""
+Modulo: synaptic_log.py
+Descrizione: Registro cronologico delle interazioni e modifiche sinaptiche della memoria cognitiva.
+Utile per analisi, debug e tracciamento evolutivo del comportamento AI.
+"""
+
+import os
+from datetime import datetime
+from typing import Optional
+
+LOG_PATH = "data/memory/synaptic_log.txt"
+
+
+class SynapticLog:
+    def __init__(self):
+        os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+        if not os.path.exists(LOG_PATH):
+            with open(LOG_PATH, "w") as f:
+                f.write("=== Synaptic Log Initialized ===\n")
+
+    def log_event(self, module: str, action: str, detail: Optional[str] = ""):
+        timestamp = datetime.now().isoformat()
+        log_entry = f"[{timestamp}] [{module}] {action}"
+        if detail:
+            log_entry += f" - {detail}"
+        with open(LOG_PATH, "a") as f:
+            f.write(log_entry + "\n")
+
+    def get_log_tail(self, lines: int = 20) -> str:
+        with open(LOG_PATH, "r") as f:
+            return "\n".join(f.readlines()[-lines:])
+
+## mercurius_infinite.egg-info/SOURCES.txt
+README.md
+pyproject.toml
+setup.py
+generated_agents/__init__.py
+mercurius_infinite.egg-info/PKG-INFO
+mercurius_infinite.egg-info/SOURCES.txt
+mercurius_infinite.egg-info/dependency_links.txt
+mercurius_infinite.egg-info/entry_points.txt
+mercurius_infinite.egg-info/top_level.txt
+tests/test_autonomia_cognitiva.py
+tests/test_end2end.py
+tests/test_multimodal.py
+tests/test_neuro_learning.py
+tests/test_orchestrator.py
+tests/test_planner.py
+tests/test_supervisione.py
+
+## mercurius_infinite.egg-info/dependency_links.txt
+
+
+## mercurius_infinite.egg-info/entry_points.txt
+[console_scripts]
+merc-start = start_fullmode:main
+
+## mercurius_infinite.egg-info/top_level.txt
+generated_agents
+
+## mobile_jarvis_ui/README.md
+# Mobile Jarvis UI
+
+Flutter-based HUD interface for Mercurius∞. The app offers voice interaction using
+`speech_to_text` and `flutter_tts`, with simple hotword detection ("Hey Mercurius"
+or "Aion attivati"). Requests are sent to the local Aion API (`/ask`) which in
+turn forwards them to the orchestrator.
+
+Build and run using the Flutter SDK on an Android device:
+
+```bash
+flutter run -d android
+```
+
+## mobile_jarvis_ui/analysis_options.yaml
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+#
+# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
+# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
+# invoked from the command line by running `flutter analyze`.
+
+# The following line activates a set of recommended lints for Flutter apps,
+# packages, and plugins designed to encourage good coding practices.
+include: package:flutter_lints/flutter.yaml
+
+
+linter:
+  # The lint rules applied to this project can be customized in the
+  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
+  # included above or to enable additional rules. A list of all available lints
+  # and their documentation is published at https://dart.dev/lints.
+  #
+  # Instead of disabling a lint rule for the entire project in the
+  # section below, it can also be suppressed for a single line of code
+  # or a specific dart file by using the `// ignore: name_of_lint` and
+  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
+  # producing the lint.
+  rules:
+    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
+    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options
+
+## mobile_jarvis_ui/pubspec.yaml
+name: mobile_jarvis_ui
+description: Jarvis-like HUD for Mercurius∞
+version: 0.1.0
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  rive: ^0.13.20
+  flutter_tts: ^4.2.3
+  flutter_sound: ^9.2.13
+  speech_to_text: ^7.0.0
+  permission_handler: ^12.0.0+1
+  connectivity_plus: ^6.1.4
+  network_info_plus: ^6.1.4
+  wifi_scan: ^0.4.0
+  animated_background: ^2.0.0
+  http: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+
+## mobile_jarvis_ui/assets/placeholder.txt
+placeholder
+
+## mobile_jarvis_ui/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
+{
+  "images" : [
+    {
+      "size" : "20x20",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-20x20@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-20x20@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-40x40@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-40x40@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "60x60",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-60x60@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "60x60",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-60x60@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-20x20@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-20x20@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-29x29@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-29x29@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-40x40@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-40x40@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "76x76",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-76x76@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "76x76",
+[TRONCATO]
+
+## mobile_jarvis_ui/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json
+{
+  "images" : [
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage.png",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage@3x.png",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
+
+## mobile_jarvis_ui/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md
+# Launch Screen Assets
+
+You can customize the launch screen with your own desired assets by replacing the image files in this directory.
+
+You can also do it by opening your Flutter project's Xcode project with `open ios/Runner.xcworkspace`, selecting `Runner/Assets.xcassets` in the Project Navigator and dropping in the desired images.
+
+## mobile_jarvis_ui/linux/CMakeLists.txt
+# Project-level configuration.
+cmake_minimum_required(VERSION 3.13)
+project(runner LANGUAGES CXX)
+
+# The name of the executable created for the application. Change this to change
+# the on-disk name of your application.
+set(BINARY_NAME "mobile_jarvis_ui")
+# The unique GTK application identifier for this application. See:
+# https://wiki.gnome.org/HowDoI/ChooseApplicationID
+set(APPLICATION_ID "com.example.mobile_jarvis_ui")
+
+# Explicitly opt in to modern CMake behaviors to avoid warnings with recent
+# versions of CMake.
+cmake_policy(SET CMP0063 NEW)
+
+# Load bundled libraries from the lib/ directory relative to the binary.
+set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
+
+# Root filesystem for cross-building.
+if(FLUTTER_TARGET_PLATFORM_SYSROOT)
+  set(CMAKE_SYSROOT ${FLUTTER_TARGET_PLATFORM_SYSROOT})
+  set(CMAKE_FIND_ROOT_PATH ${CMAKE_SYSROOT})
+  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+  set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+endif()
+
+# Define build configuration options.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE "Debug" CACHE
+    STRING "Flutter build mode" FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Profile" "Release")
+endif()
+
+# Compilation settings that should be applied to most targets.
+#
+# Be cautious about adding new options here, as plugins use this function by
+# default. In most cases, you should add new options to specific targets instead
+# of modifying this function.
+function(APPLY_STANDARD_SETTINGS TARGET)
+  target_compile_features(${TARGET} PUBLIC cxx_std_14)
+  target_compile_options(${TARGET} PRIVATE -Wall -Werror)
+  target_compile_options(${TARGET} PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-O3>")
+  target_compile_definitions(${TARGET} PRIVATE "$<$<NOT:$<CONFIG:Debug>>:NDEBUG>")
+endfunction()
+
+# Flutter library and tool build rules.
+set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
+add_subdirectory(${FLUTTER_MANAGED_DIR})
+
+# System-level dependencies.
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
+
+# Application build; see runner/CMakeLists.txt.
+add_subdirectory("runner")
+
+# Run the Flutter tool portions of the build. This must not be removed.
+add_dependencies(${BINARY_NAME} flutter_assemble)
+
+# Only the install-generated bundle's copy of the executable will launch
+# correctly, since the resources must in the right relative locations. To avoid
+# people trying to run the unbundled copy, put it in a subdirectory instead of
+# the default top-level location.
+set_target_properties(${BINARY_NAME}
+  PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/intermediates_do_not_run"
+)
+
+
+# Generated plugin build rules, which manage building the plugins and adding
+# them to the application.
+include(flutter/generated_plugins.cmake)
+
+
+# === Installation ===
+# By default, "installing" just makes a relocatable bundle in the build
+# directory.
+set(BUILD_BUNDLE_DIR "${PROJECT_BINARY_DIR}/bundle")
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)
+endif()
+
+# Start with a clean build bundle directory every time.
+install(CODE "
+  file(REMOVE_RECURSE \"${BUILD_BUNDLE_DIR}/\")
+  " COMPONENT Runtime)
+
+set(INSTALL_BUNDLE_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
+set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+
+install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  COMPONENT Runtime)
+
+install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
+  COMPONENT Runtime)
+
+install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+[TRONCATO]
+
+## mobile_jarvis_ui/linux/flutter/CMakeLists.txt
+# This file controls Flutter-level build steps. It should not be edited.
+cmake_minimum_required(VERSION 3.10)
+
+set(EPHEMERAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ephemeral")
+
+# Configuration provided via flutter tool.
+include(${EPHEMERAL_DIR}/generated_config.cmake)
+
+# TODO: Move the rest of this into files in ephemeral. See
+# https://github.com/flutter/flutter/issues/57146.
+
+# Serves the same purpose as list(TRANSFORM ... PREPEND ...),
+# which isn't available in 3.10.
+function(list_prepend LIST_NAME PREFIX)
+    set(NEW_LIST "")
+    foreach(element ${${LIST_NAME}})
+        list(APPEND NEW_LIST "${PREFIX}${element}")
+    endforeach(element)
+    set(${LIST_NAME} "${NEW_LIST}" PARENT_SCOPE)
+endfunction()
+
+# === Flutter Library ===
+# System-level dependencies.
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
+pkg_check_modules(GLIB REQUIRED IMPORTED_TARGET glib-2.0)
+pkg_check_modules(GIO REQUIRED IMPORTED_TARGET gio-2.0)
+
+set(FLUTTER_LIBRARY "${EPHEMERAL_DIR}/libflutter_linux_gtk.so")
+
+# Published to parent scope for install step.
+set(FLUTTER_LIBRARY ${FLUTTER_LIBRARY} PARENT_SCOPE)
+set(FLUTTER_ICU_DATA_FILE "${EPHEMERAL_DIR}/icudtl.dat" PARENT_SCOPE)
+set(PROJECT_BUILD_DIR "${PROJECT_DIR}/build/" PARENT_SCOPE)
+set(AOT_LIBRARY "${PROJECT_DIR}/build/lib/libapp.so" PARENT_SCOPE)
+
+list(APPEND FLUTTER_LIBRARY_HEADERS
+  "fl_basic_message_channel.h"
+  "fl_binary_codec.h"
+  "fl_binary_messenger.h"
+  "fl_dart_project.h"
+  "fl_engine.h"
+  "fl_json_message_codec.h"
+  "fl_json_method_codec.h"
+  "fl_message_codec.h"
+  "fl_method_call.h"
+  "fl_method_channel.h"
+  "fl_method_codec.h"
+  "fl_method_response.h"
+  "fl_plugin_registrar.h"
+  "fl_plugin_registry.h"
+  "fl_standard_message_codec.h"
+  "fl_standard_method_codec.h"
+  "fl_string_codec.h"
+  "fl_value.h"
+  "fl_view.h"
+  "flutter_linux.h"
+)
+list_prepend(FLUTTER_LIBRARY_HEADERS "${EPHEMERAL_DIR}/flutter_linux/")
+add_library(flutter INTERFACE)
+target_include_directories(flutter INTERFACE
+  "${EPHEMERAL_DIR}"
+)
+target_link_libraries(flutter INTERFACE "${FLUTTER_LIBRARY}")
+target_link_libraries(flutter INTERFACE
+  PkgConfig::GTK
+  PkgConfig::GLIB
+  PkgConfig::GIO
+)
+add_dependencies(flutter flutter_assemble)
+
+# === Flutter tool backend ===
+# _phony_ is a non-existent file to force this command to run every time,
+# since currently there's no way to get a full input/output list from the
+# flutter tool.
+add_custom_command(
+  OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
+    ${CMAKE_CURRENT_BINARY_DIR}/_phony_
+  COMMAND ${CMAKE_COMMAND} -E env
+    ${FLUTTER_TOOL_ENVIRONMENT}
+    "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.sh"
+      ${FLUTTER_TARGET_PLATFORM} ${CMAKE_BUILD_TYPE}
+  VERBATIM
+)
+add_custom_target(flutter_assemble DEPENDS
+  "${FLUTTER_LIBRARY}"
+  ${FLUTTER_LIBRARY_HEADERS}
+)
+
+## mobile_jarvis_ui/linux/runner/CMakeLists.txt
+cmake_minimum_required(VERSION 3.13)
+project(runner LANGUAGES CXX)
+
+# Define the application target. To change its name, change BINARY_NAME in the
+# top-level CMakeLists.txt, not the value here, or `flutter run` will no longer
+# work.
+#
+# Any new source files that you add to the application should be added here.
+add_executable(${BINARY_NAME}
+  "main.cc"
+  "my_application.cc"
+  "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
+)
+
+# Apply the standard set of build settings. This can be removed for applications
+# that need different build settings.
+apply_standard_settings(${BINARY_NAME})
+
+# Add preprocessor definitions for the application ID.
+add_definitions(-DAPPLICATION_ID="${APPLICATION_ID}")
+
+# Add dependency libraries. Add any application-specific dependencies here.
+target_link_libraries(${BINARY_NAME} PRIVATE flutter)
+target_link_libraries(${BINARY_NAME} PRIVATE PkgConfig::GTK)
+
+target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
+
+## mobile_jarvis_ui/macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
+{
+  "images" : [
+    {
+      "size" : "16x16",
+      "idiom" : "mac",
+      "filename" : "app_icon_16.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "16x16",
+      "idiom" : "mac",
+      "filename" : "app_icon_32.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "32x32",
+      "idiom" : "mac",
+      "filename" : "app_icon_32.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "32x32",
+      "idiom" : "mac",
+      "filename" : "app_icon_64.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "128x128",
+      "idiom" : "mac",
+      "filename" : "app_icon_128.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "128x128",
+      "idiom" : "mac",
+      "filename" : "app_icon_256.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "256x256",
+      "idiom" : "mac",
+      "filename" : "app_icon_256.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "256x256",
+      "idiom" : "mac",
+      "filename" : "app_icon_512.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "512x512",
+      "idiom" : "mac",
+      "filename" : "app_icon_512.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "512x512",
+      "idiom" : "mac",
+      "filename" : "app_icon_1024.png",
+      "scale" : "2x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
+
+## mobile_jarvis_ui/web/manifest.json
+{
+    "name": "mobile_jarvis_ui",
+    "short_name": "mobile_jarvis_ui",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "A new Flutter project.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
+
+## mobile_jarvis_ui/windows/CMakeLists.txt
+# Project-level configuration.
+cmake_minimum_required(VERSION 3.14)
+project(mobile_jarvis_ui LANGUAGES CXX)
+
+# The name of the executable created for the application. Change this to change
+# the on-disk name of your application.
+set(BINARY_NAME "mobile_jarvis_ui")
+
+# Explicitly opt in to modern CMake behaviors to avoid warnings with recent
+# versions of CMake.
+cmake_policy(VERSION 3.14...3.25)
+
+# Define build configuration option.
+get_property(IS_MULTICONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(IS_MULTICONFIG)
+  set(CMAKE_CONFIGURATION_TYPES "Debug;Profile;Release"
+    CACHE STRING "" FORCE)
+else()
+  if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE "Debug" CACHE
+      STRING "Flutter build mode" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+      "Debug" "Profile" "Release")
+  endif()
+endif()
+# Define settings for the Profile build mode.
+set(CMAKE_EXE_LINKER_FLAGS_PROFILE "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
+set(CMAKE_SHARED_LINKER_FLAGS_PROFILE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE}")
+set(CMAKE_C_FLAGS_PROFILE "${CMAKE_C_FLAGS_RELEASE}")
+set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE}")
+
+# Use Unicode for all projects.
+add_definitions(-DUNICODE -D_UNICODE)
+
+# Compilation settings that should be applied to most targets.
+#
+# Be cautious about adding new options here, as plugins use this function by
+# default. In most cases, you should add new options to specific targets instead
+# of modifying this function.
+function(APPLY_STANDARD_SETTINGS TARGET)
+  target_compile_features(${TARGET} PUBLIC cxx_std_17)
+  target_compile_options(${TARGET} PRIVATE /W4 /WX /wd"4100")
+  target_compile_options(${TARGET} PRIVATE /EHsc)
+  target_compile_definitions(${TARGET} PRIVATE "_HAS_EXCEPTIONS=0")
+  target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")
+endfunction()
+
+# Flutter library and tool build rules.
+set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
+add_subdirectory(${FLUTTER_MANAGED_DIR})
+
+# Application build; see runner/CMakeLists.txt.
+add_subdirectory("runner")
+
+
+# Generated plugin build rules, which manage building the plugins and adding
+# them to the application.
+include(flutter/generated_plugins.cmake)
+
+
+# === Installation ===
+# Support files are copied into place next to the executable, so that it can
+# run in place. This is done instead of making a separate bundle (as on Linux)
+# so that building and running from within Visual Studio will work.
+set(BUILD_BUNDLE_DIR "$<TARGET_FILE_DIR:${BINARY_NAME}>")
+# Make the "install" step default, as it's required to run.
+set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD 1)
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)
+endif()
+
+set(INSTALL_BUNDLE_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
+set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
+
+install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  COMPONENT Runtime)
+
+install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
+  COMPONENT Runtime)
+
+install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  COMPONENT Runtime)
+
+if(PLUGIN_BUNDLED_LIBRARIES)
+  install(FILES "${PLUGIN_BUNDLED_LIBRARIES}"
+    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+    COMPONENT Runtime)
+endif()
+
+# Copy the native assets provided by the build.dart from all packages.
+set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/windows/")
+install(DIRECTORY "${NATIVE_ASSETS_DIR}"
+   DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+   COMPONENT Runtime)
+
+# Fully re-copy the assets directory on each build to avoid having stale files
+# from a previous install.
+set(FLUTTER_ASSET_DIR_NAME "flutter_assets")
+install(CODE "
+  file(REMOVE_RECURSE \"${INSTALL_BUNDLE_DATA_DIR}/${FLUTTER_ASSET_DIR_NAME}\")
+[TRONCATO]
+
+## mobile_jarvis_ui/windows/flutter/CMakeLists.txt
+# This file controls Flutter-level build steps. It should not be edited.
+cmake_minimum_required(VERSION 3.14)
+
+set(EPHEMERAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ephemeral")
+
+# Configuration provided via flutter tool.
+include(${EPHEMERAL_DIR}/generated_config.cmake)
+
+# TODO: Move the rest of this into files in ephemeral. See
+# https://github.com/flutter/flutter/issues/57146.
+set(WRAPPER_ROOT "${EPHEMERAL_DIR}/cpp_client_wrapper")
+
+# Set fallback configurations for older versions of the flutter tool.
+if (NOT DEFINED FLUTTER_TARGET_PLATFORM)
+  set(FLUTTER_TARGET_PLATFORM "windows-x64")
+endif()
+
+# === Flutter Library ===
+set(FLUTTER_LIBRARY "${EPHEMERAL_DIR}/flutter_windows.dll")
+
+# Published to parent scope for install step.
+set(FLUTTER_LIBRARY ${FLUTTER_LIBRARY} PARENT_SCOPE)
+set(FLUTTER_ICU_DATA_FILE "${EPHEMERAL_DIR}/icudtl.dat" PARENT_SCOPE)
+set(PROJECT_BUILD_DIR "${PROJECT_DIR}/build/" PARENT_SCOPE)
+set(AOT_LIBRARY "${PROJECT_DIR}/build/windows/app.so" PARENT_SCOPE)
+
+list(APPEND FLUTTER_LIBRARY_HEADERS
+  "flutter_export.h"
+  "flutter_windows.h"
+  "flutter_messenger.h"
+  "flutter_plugin_registrar.h"
+  "flutter_texture_registrar.h"
+)
+list(TRANSFORM FLUTTER_LIBRARY_HEADERS PREPEND "${EPHEMERAL_DIR}/")
+add_library(flutter INTERFACE)
+target_include_directories(flutter INTERFACE
+  "${EPHEMERAL_DIR}"
+)
+target_link_libraries(flutter INTERFACE "${FLUTTER_LIBRARY}.lib")
+add_dependencies(flutter flutter_assemble)
+
+# === Wrapper ===
+list(APPEND CPP_WRAPPER_SOURCES_CORE
+  "core_implementations.cc"
+  "standard_codec.cc"
+)
+list(TRANSFORM CPP_WRAPPER_SOURCES_CORE PREPEND "${WRAPPER_ROOT}/")
+list(APPEND CPP_WRAPPER_SOURCES_PLUGIN
+  "plugin_registrar.cc"
+)
+list(TRANSFORM CPP_WRAPPER_SOURCES_PLUGIN PREPEND "${WRAPPER_ROOT}/")
+list(APPEND CPP_WRAPPER_SOURCES_APP
+  "flutter_engine.cc"
+  "flutter_view_controller.cc"
+)
+list(TRANSFORM CPP_WRAPPER_SOURCES_APP PREPEND "${WRAPPER_ROOT}/")
+
+# Wrapper sources needed for a plugin.
+add_library(flutter_wrapper_plugin STATIC
+  ${CPP_WRAPPER_SOURCES_CORE}
+  ${CPP_WRAPPER_SOURCES_PLUGIN}
+)
+apply_standard_settings(flutter_wrapper_plugin)
+set_target_properties(flutter_wrapper_plugin PROPERTIES
+  POSITION_INDEPENDENT_CODE ON)
+set_target_properties(flutter_wrapper_plugin PROPERTIES
+  CXX_VISIBILITY_PRESET hidden)
+target_link_libraries(flutter_wrapper_plugin PUBLIC flutter)
+target_include_directories(flutter_wrapper_plugin PUBLIC

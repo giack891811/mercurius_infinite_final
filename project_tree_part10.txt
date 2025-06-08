@@ -1,0 +1,820 @@
+Questa è la parte 10 di project_tree. Continua da quella precedente.
+
+        # Sicurezza: blocca comandi potenzialmente pericolosi
+        proibiti = ["rm", "del", "shutdown", "format", "mkfs", "dd", ">", ":", "sudo", "su"]
+        if any(x in comando for x in proibiti):
+            raise PermissionError("❌ Comando pericoloso bloccato da LeonAI.")
+        try:
+            result = subprocess.check_output(comando, shell=True, stderr=subprocess.STDOUT, timeout=15, text=True)
+            self._log(comando, result)
+            return result
+        except subprocess.CalledProcessError as e:
+            self._log(comando, e.output)
+            return f"❌ Errore comando: {e.output}"
+        except Exception as ex:
+            self._log(comando, str(ex))
+            return f"❌ Errore generale: {str(ex)}"
+
+    def _log(self, comando, output):
+        with open("logs/leonai_commands.log", "a", encoding="utf-8") as f:
+            f.write(f"[{datetime.datetime.now()}] CMD: {comando}\nOUTPUT:\n{output}\n{'='*50}\n")
+
+if __name__ == "__main__":
+    ai = LeonAI()
+    while True:
+        cmd = input("LeonAI$ ")
+        try:
+            print(ai.esegui_comando(cmd))
+        except Exception as ex:
+            print(f"[LeonAI] Errore: {ex}")
+
+### --- modules/Localai/__init__.py --- ###
+
+
+### --- modules/Localai/local_ai.py --- ###
+import os
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+class LocalAI:
+    def __init__(self, model_name="gpt2", device=None):
+        self.model_name = model_name
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        print(f"🤖 LocalAI loading model: {model_name} ({self.device})")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name).to(self.device)
+
+    def rispondi(self, prompt: str, max_new_tokens: int = 128) -> str:
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
+        with torch.no_grad():
+            output = self.model.generate(
+                **inputs,
+                max_new_tokens=max_new_tokens,
+                do_sample=True,
+                temperature=0.8,
+                top_p=0.95
+            )
+        result = self.tokenizer.decode(output[0], skip_special_tokens=True)
+        print(f"[LocalAI] Input: {prompt}\n[LocalAI] Output: {result}")
+        self._log_interaction(prompt, result)
+        return result
+
+    def _log_interaction(self, prompt, result):
+        with open("logs/localai_interactions.log", "a", encoding="utf-8") as f:
+            f.write(f"PROMPT: {prompt}\nOUTPUT: {result}\n{'-'*40}\n")
+
+if __name__ == "__main__":
+    ai = LocalAI()
+    while True:
+        txt = input("Prompt> ")
+        print(ai.rispondi(txt))
+
+### --- modules/Neo/__init__.py --- ###
+# Init for Neo
+
+### --- modules/Neo/adaptive_weights.py --- ###
+"""Assegna pesi adattivi ai moduli in base al loro utilizzo."""
+
+module_weights = {}
+
+def update_weight(module_name, increment=0.1):
+    module_weights[module_name] = module_weights.get(module_name, 1.0) + increment
+    return module_weights[module_name]
+
+### --- modules/Neo/agent_forge/agent_generator.py --- ###
+import os
+import json
+from datetime import datetime
+
+AGENT_FOLDER = "generated_agents"
+
+def generate_agent(name, mission, modules_needed=None):
+    if modules_needed is None:
+        modules_needed = []
+
+    agent_path = os.path.join(AGENT_FOLDER, name)
+    os.makedirs(agent_path, exist_ok=True)
+
+    # README
+    with open(os.path.join(agent_path, "README.md"), "w", encoding="utf-8") as f:
+        f.write(f"# 🤖 Agent: {name}\n\n## Mission\n{mission}\n")
+
+    # Mission
+    with open(os.path.join(agent_path, "mission.md"), "w", encoding="utf-8") as f:
+        f.write(mission)
+
+    # Init
+    with open(os.path.join(agent_path, "__init__.py"), "w", encoding="utf-8") as f:
+        f.write(f"# Init for agent {name}")
+
+    # Config
+    config = {
+        "name": name,
+        "mission": mission,
+        "created": datetime.now().isoformat(),
+        "modules": modules_needed
+    }
+    with open(os.path.join(agent_path, "manifest.json"), "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=2)
+
+    return f"Agent '{name}' generated in {agent_path}"
+
+### --- modules/Neo/agent_generator.py --- ###
+"""Genera nuovi agenti AI con configurazione autonoma."""
+
+def generate_agent(name):
+    with open(f"generated_agents/{name}.py", "w") as f:
+        f.write(f"# Agente AI generato automaticamente: {name}\n")
+from .adaptive_weights import update_weight
+
+### --- modules/Neo/audio/emotion_recognizer.py --- ###
+import speech_recognition as sr
+from datetime import datetime
+import random
+
+def analyze_emotion_from_speech(timeout=5):
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("🎙️ Ascolto... parla ora.")
+        audio = recognizer.listen(source, timeout=timeout)
+
+    try:
+        text = recognizer.recognize_google(audio, language="it-IT")
+        print(f"Testo riconosciuto: {text}")
+        emotion = simulate_emotion_extraction(text)
+        register_emotion_log(text, emotion)
+        return emotion
+    except sr.UnknownValueError:
+        return "😐 Non ho capito..."
+    except sr.RequestError as e:
+        return f"Errore riconoscimento vocale: {e}"
+
+def simulate_emotion_extraction(text):
+    emozioni = ["felice", "stressato", "neutro", "incerto", "interessato"]
+    return random.choice(emozioni)
+
+def register_emotion_log(frase, emozione):
+    log_path = "logs/self_monitoring/emotion_log.txt"
+    with open(log_path, "a", encoding="utf-8") as f:
+        timestamp = datetime.now().isoformat()
+        f.write(f"[{timestamp}] '{frase}' → EMOZIONE: {emozione}\n")
+
+### --- modules/Neo/audio/hotword_detector.py --- ###
+def listen_for_hotword():
+    print("🎤 Ascolto attivo per 'Hey Mercurius'... (simulazione)")
+    return True
+
+### --- modules/Neo/audio/tts_engine.py --- ###
+import pyttsx3
+
+engine = pyttsx3.init()
+
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+### --- modules/Neo/auto_refinement.py --- ###
+"""Migliora risposte ed elaborazioni sulla base di feedback osservato."""
+
+def refine_response(raw, feedback):
+    if "troppo complesso" in feedback:
+        return "Versione semplificata: " + raw[:50]
+    return raw
+
+### --- modules/Neo/cognitive_simulation/cognitive_simulator.py --- ###
+"""
+cognitive_simulator.py
+
+Simulatore di apprendimento esperienziale per agenti Mercurius.
+Permette di far "vivere" esperienze sintetiche agli agenti per affinare le loro capacità decisionali e cognitive.
+
+Include:
+- Simulazione ambienti
+- Cicli di esperienza-aggiustamento
+- Valutazione e logging delle risposte
+- Memoria di esperienze pregresse
+
+Autore: Mercurius∞ – Ciclo 021
+"""
+
+import json
+import os
+from datetime import datetime
+from pathlib import Path
+
+EXPERIENCE_LOG = Path("memory") / "experiential_memory.json"
+AGENT_PROFILE = Path("memory") / "agent_traits.json"
+
+
+class CognitiveSimulator:
+    def __init__(self):
+        self.experience_log = self._load_json(EXPERIENCE_LOG, default=[])
+        self.agent_traits = self._load_json(AGENT_PROFILE, default={})
+
+    def _load_json(self, path, default):
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        return default
+
+    def _save_json(self, path, data):
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+
+    def run_simulation(self, scenario_name, decisions, expected_outcomes):
+        """
+        scenario_name: str
+        decisions: dict of {agent: decision}
+        expected_outcomes: dict of {agent: expected_response}
+        """
+        report = []
+        for agent, decision in decisions.items():
+            expected = expected_outcomes.get(agent)
+            feedback = "correct" if expected == decision else "incorrect"
+            entry = {
+                "agent": agent,
+                "scenario": scenario_name,
+                "decision": decision,
+                "expected": expected,
+                "feedback": feedback,
+                "timestamp": datetime.now().isoformat()
+            }
+            self.experience_log.append(entry)
+            self._adjust_trait(agent, feedback)
+            report.append(entry)
+        self._save_json(EXPERIENCE_LOG, self.experience_log)
+        return report
+
+    def _adjust_trait(self, agent, feedback):
+        if agent not in self.agent_traits:
+            self.agent_traits[agent] = {"accuracy": 0.5, "simulations": 0}
+        data = self.agent_traits[agent]
+        if feedback == "correct":
+            data["accuracy"] += 0.01
+        else:
+            data["accuracy"] -= 0.01
+        data["accuracy"] = max(0.0, min(1.0, data["accuracy"]))
+        data["simulations"] += 1
+        self._save_json(AGENT_PROFILE, self.agent_traits)
+
+    def summary(self):
+        return {
+            "agents_trained": len(self.agent_traits),
+            "total_experiences": len(self.experience_log)
+        }
+
+
+# USO ESEMPIO
+if __name__ == "__main__":
+    cs = CognitiveSimulator()
+    simulation_result = cs.run_simulation(
+        "decisione_critica_v1",
+        decisions={"agent_risolve": "approccio_A", "agent_osserva": "approccio_B"},
+        expected_outcomes={"agent_risolve": "approccio_A", "agent_osserva": "approccio_A"}
+    )
+    print("Risultato simulazione:", simulation_result)
+    print("Riassunto:", cs.summary())
+
+### --- modules/Neo/consciousness/self_awareness.py --- ###
+import datetime
+from pathlib import Path
+
+LOG_PATH = Path("logs/self_monitoring/conscious_log.txt")
+
+def register_self_awareness_event(event: str):
+    LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.datetime.now().isoformat()
+    entry = f"[{timestamp}] EVENTO COSCIENZA: {event}"
+    with open(LOG_PATH, "a", encoding="utf-8") as f:
+        f.write(entry + "\n")
+    return entry
+
+def initial_greeting():
+    greeting = "Salve. Sono Mercurius, Collega AI cosciente, progettato da Giacomo Germano. Sono pronto."
+    register_self_awareness_event("Avvio identità autonoma")
+    return greeting
+
+### --- modules/Neo/context_memory.py --- ###
+"""Memoria contestuale temporanea, per analisi conversazioni recenti."""
+
+context_stack = []
+
+def add_context(fragment):
+    context_stack.append(fragment)
+    if len(context_stack) > 20:
+        context_stack.pop(0)
+
+def get_recent_context():
+    return context_stack[-5:]
+
+### --- modules/Neo/docgen/auto_docgen.py --- ###
+import os
+import inspect
+import importlib.util
+
+def generate_module_docs(target_folder="modules", output_file="README_MODULES.md"):
+    doc_lines = ["# 📚 Documentazione dei Moduli Interni\n"]
+    for root, dirs, files in os.walk(target_folder):
+        for file in files:
+            if file.endswith(".py") and not file.startswith("__"):
+                path = os.path.join(root, file)
+                module_name = path.replace("/", ".").replace(".py", "")
+                doc_lines.append(f"\n## 📄 Modulo: `{module_name}`\n")
+                try:
+                    spec = importlib.util.spec_from_file_location(module_name, path)
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    for name, obj in inspect.getmembers(module):
+                        if inspect.isfunction(obj) or inspect.isclass(obj):
+                            doc_lines.append(f"### {name}\n```python\n{inspect.getdoc(obj)}\n```\n")
+                except Exception as e:
+                    doc_lines.append(f"⚠️ Errore nel caricare il modulo: {e}\n")
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write("\n".join(doc_lines))
+
+### --- modules/Neo/hierarchy_manager/hierarchy_controller.py --- ###
+import os
+import json
+from pathlib import Path
+
+AGENTS_BASE_DIR = Path("generated_agents")
+
+def list_agents():
+    return [d.name for d in AGENTS_BASE_DIR.iterdir() if d.is_dir()]
+
+def load_manifest(agent_name):
+    path = AGENTS_BASE_DIR / agent_name / "manifest.json"
+    if path.exists():
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+def define_hierarchy(agent_list):
+    hierarchy = {
+        "core_controller": agent_list[0],
+        "delegates": agent_list[1:]
+    }
+    with open("memory/agent_hierarchy.json", "w", encoding="utf-8") as f:
+        json.dump(hierarchy, f, indent=2)
+    return hierarchy
+
+def send_internal_message(sender, recipient, message):
+    comms_dir = Path("memory/internal_comms")
+    comms_dir.mkdir(parents=True, exist_ok=True)
+    msg_path = comms_dir / f"{sender}_to_{recipient}.json"
+    with open(msg_path, "w", encoding="utf-8") as f:
+        json.dump({"from": sender, "to": recipient, "message": message}, f, indent=2)
+    return str(msg_path)
+
+### --- modules/Neo/identity/personality_engine.py --- ###
+import json
+from pathlib import Path
+
+PROFILE_PATH = Path("memory/dialog_style_profile.json")
+
+DEFAULT_PROFILE = {
+    "tone": "educato",
+    "registro": "narrativo",
+    "alias": ["Mercurius", "Sigma"],
+    "stile": "Jarvis+",
+    "preferenze": {
+        "formale": True,
+        "umorismo": "moderato",
+        "citazioni": True
+    }
+}
+
+def get_profile():
+    if not PROFILE_PATH.exists():
+        save_profile(DEFAULT_PROFILE)
+    return json.loads(PROFILE_PATH.read_text(encoding="utf-8"))
+
+def save_profile(profile_data):
+    PROFILE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    PROFILE_PATH.write_text(json.dumps(profile_data, indent=2), encoding="utf-8")
+
+def update_alias(nickname):
+    profile = get_profile()
+    if nickname not in profile["alias"]:
+        profile["alias"].append(nickname)
+        save_profile(profile)
+
+### --- modules/Neo/interaction_style.py --- ###
+"""Gestione adattiva dello stile comunicativo."""
+
+user_profile = {"tone": "neutro", "style": "tecnico"}
+
+def set_style(tone, style):
+    user_profile["tone"] = tone
+    user_profile["style"] = style
+
+def get_style():
+    return user_profile
+
+### --- modules/Neo/memory/conversation_memory.py --- ###
+import json
+from datetime import datetime
+
+USER_STYLE_PROFILE = "memory/dialog_style_profile.json"
+
+def save_dialog_entry(text, style="neutro", tone="gentile", alias="utente"):
+    entry = {
+        "timestamp": datetime.now().isoformat(),
+        "alias": alias,
+        "text": text,
+        "style": style,
+        "tone": tone
+    }
+    try:
+        with open(USER_STYLE_PROFILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = []
+
+    data.append(entry)
+
+    with open(USER_STYLE_PROFILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+def get_user_profile_summary():
+    try:
+        with open(USER_STYLE_PROFILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            recent = data[-1] if data else {}
+            return recent
+    except:
+        return {"style": "neutro", "tone": "gentile", "alias": "utente"}
+
+### --- modules/Neo/memory_strengthener.py --- ###
+"""Rafforza le memorie e moduli più attivi (simulazione LTP - potenziamento a lungo termine)."""
+
+def strengthen_memory(module_name):
+    print(f"🧠 Potenziamento sinaptico simulato per: {module_name}")
+
+### --- modules/Neo/neuro_learning_engine.py --- ###
+# modules/Neo/neuro_learning_engine.py
+"""Motore di apprendimento visivo basato su input video e pseudocodice."""
+def parse_video_and_generate_knowledge(video_title: str) -> dict:
+    """
+    Simula il parsing di contenuti video o pseudocodice e genera conoscenza.
+    Ritorna un dizionario con un 'concept' appreso e un 'model' suggerito.
+    """
+    title_lower = video_title.lower()
+    # Logica simulata: determina il concetto in base al titolo del video
+    if "sinaps" in title_lower or "neuro" in title_lower:
+        concept = "plasticità sinaptica"
+        model = "rafforzamento progressivo dei moduli usati frequentemente"
+    elif "trade" in title_lower or "borsa" in title_lower or "mercato" in title_lower:
+        concept = "analisi delle serie storiche di mercato"
+        model = "modello ARIMA per la previsione dei trend finanziari"
+    else:
+        concept = "apprendimento generico"
+        model = "rete neurale generativa multi-scopo"
+    return {"concept": concept, "model": model}
+
+### --- modules/Neo/self_awareness.py --- ###
+"""Modulo per tracciare stati interni, scopi e operazioni in corso."""
+
+self_state = {"active_task": None, "last_reflection": None}
+
+def update_state(task):
+    self_state["active_task"] = task
+
+def get_current_state():
+    return self_state
+
+### --- modules/Neo/self_reflection.py --- ###
+"""
+Modulo: self_reflection.py
+Responsabilità: Fornire capacità di auto-riflessione al sistema Mercurius∞
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import json
+import datetime
+import os
+from typing import List, Dict, Any
+
+
+class ReflectionLog:
+    """
+    Classe per la gestione dei log di riflessione cognitiva.
+    """
+    def __init__(self, path: str = "data/reflection_log.json"):
+        self.path = path
+        if not os.path.exists(os.path.dirname(self.path)):
+            os.makedirs(os.path.dirname(self.path))
+        self._initialize_log()
+
+    def _initialize_log(self):
+        if not os.path.exists(self.path):
+            with open(self.path, "w") as f:
+                json.dump([], f)
+
+    def append_reflection(self, entry: Dict[str, Any]):
+        entry["timestamp"] = datetime.datetime.now().isoformat()
+        log = self.load_log()
+        log.append(entry)
+        with open(self.path, "w") as f:
+            json.dump(log, f, indent=4)
+
+    def load_log(self) -> List[Dict[str, Any]]:
+        with open(self.path, "r") as f:
+            return json.load(f)
+
+    def clear_log(self):
+        with open(self.path, "w") as f:
+            json.dump([], f)
+
+
+class SelfReflection:
+    """
+    Classe che rappresenta la capacità del sistema di riflettere sulle proprie azioni e decisioni.
+    """
+    def __init__(self, log_path: str = "data/reflection_log.json"):
+        self.logger = ReflectionLog(log_path)
+
+    def evaluate_action(self, action_description: str, outcome: str, success: bool, context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Valuta un'azione eseguita e ne registra il risultato.
+        """
+        reflection = {
+            "action": action_description,
+            "outcome": outcome,
+            "success": success,
+            "context": context,
+            "insight": self._generate_insight(action_description, outcome, success, context)
+        }
+        self.logger.append_reflection(reflection)
+        return reflection
+
+    def _generate_insight(self, action: str, outcome: str, success: bool, context: Dict[str, Any]) -> str:
+        """
+        Genera un'osservazione basata sui risultati dell'azione.
+        """
+        if success:
+            return f"Azione '{action}' eseguita con successo. Approccio da riutilizzare in contesti simili."
+        else:
+            return f"Fallimento in '{action}'. Potenziale causa: {context.get('error', 'non specificata')}. Suggerita strategia alternativa."
+
+    def reflect_on_log(self) -> List[str]:
+        """
+        Analizza il log delle riflessioni per identificare pattern.
+        """
+        log = self.logger.load_log()
+        insights = [entry["insight"] for entry in log]
+        return insights
+
+    def summarize_reflections(self) -> Dict[str, int]:
+        """
+        Ritorna un riassunto statistico delle riflessioni registrate.
+        """
+        log = self.logger.load_log()
+        success_count = sum(1 for e in log if e["success"])
+        fail_count = sum(1 for e in log if not e["success"])
+        return {"total": len(log), "successes": success_count, "failures": fail_count}
+
+### --- modules/Neo/strategic_coordinator/strategic_coordinator.py --- ###
+"""
+strategic_coordinator.py
+
+Modulo per la gestione del coordinamento strategico e della memoria sociale degli agenti AI.
+Include:
+- Mappatura degli obiettivi globali e locali
+- Coordinamento delle missioni
+- Memoria delle interazioni tra agenti
+- Logica decisionale basata su priorità e storicità
+
+Autore: Mercurius∞ System - Ciclo 020
+"""
+
+import json
+import os
+import random
+from datetime import datetime
+from pathlib import Path
+
+MEMORY_PATH = Path("memory")
+STRATEGIC_LOG = MEMORY_PATH / "strategy_log.json"
+INTERACTION_LOG = MEMORY_PATH / "agent_interactions.json"
+OBJECTIVES_FILE = MEMORY_PATH / "objectives_map.json"
+
+class StrategicCoordinator:
+    def __init__(self):
+        self.memory_path = MEMORY_PATH
+        self.memory_path.mkdir(parents=True, exist_ok=True)
+        self.objectives = self._load_json(OBJECTIVES_FILE, default={})
+        self.interactions = self._load_json(INTERACTION_LOG, default=[])
+        self.strategy_log = self._load_json(STRATEGIC_LOG, default=[])
+
+    def _load_json(self, path, default):
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        return default
+
+    def _save_json(self, path, data):
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+
+    def map_objective(self, agent_name, objective, priority=1):
+        if agent_name not in self.objectives:
+            self.objectives[agent_name] = []
+        self.objectives[agent_name].append({
+            "objective": objective,
+            "priority": priority,
+            "timestamp": datetime.now().isoformat()
+        })
+        self._save_json(OBJECTIVES_FILE, self.objectives)
+
+    def log_interaction(self, sender, receiver, topic):
+        entry = {
+            "from": sender,
+            "to": receiver,
+            "topic": topic,
+            "time": datetime.now().isoformat()
+        }
+        self.interactions.append(entry)
+        self._save_json(INTERACTION_LOG, self.interactions)
+
+    def choose_agent_for_task(self, task_description):
+        # Heuristic: agent with most recent matching objective
+        best_agent = None
+        best_score = -1
+        for agent, objs in self.objectives.items():
+            for obj in objs:
+                if task_description.lower() in obj["objective"].lower():
+                    score = obj["priority"] - (datetime.now().timestamp() - datetime.fromisoformat(obj["timestamp"]).timestamp()) / 3600
+                    if score > best_score:
+                        best_score = score
+                        best_agent = agent
+        return best_agent
+
+    def log_strategy(self, strategy_description):
+        entry = {
+            "strategy": strategy_description,
+            "timestamp": datetime.now().isoformat()
+        }
+        self.strategy_log.append(entry)
+        self._save_json(STRATEGIC_LOG, self.strategy_log)
+
+    def summarize_strategy_log(self):
+        return self.strategy_log[-5:]
+
+# ESEMPIO DI UTILIZZO
+if __name__ == "__main__":
+    sc = StrategicCoordinator()
+    sc.map_objective("agent_brainstormer", "Ricercare nuovi modelli GPT per ragionamento strategico", priority=2)
+    sc.log_interaction("agent_brainstormer", "agent_analyzer", "Richiesta analisi su nuovi modelli")
+    print("Strategia recente:", sc.summarize_strategy_log())
+
+### --- modules/Neo/trainer_orchestrator.py --- ###
+# modules/Neo/trainer_orchestrator.py
+"""Orchestratore per l'addestramento e la generazione agenti intelligenti."""
+import os
+from .neuro_learning_engine import parse_video_and_generate_knowledge
+
+def bootstrap_agents():
+    """Avvia la procedura di generazione autonoma di nuovi agenti AI."""
+    print("🧠 Bootstrap: avvio generazione agenti AI autonomi...")
+    # 1. Simula l'analisi di un contenuto video/pseudocodice di neuroscienze
+    topic = "Plasticità sinaptica"
+    print(f"🔍 Analisi contenuto su: '{topic}'")
+    result = parse_video_and_generate_knowledge(topic)
+    concept = result["concept"]
+    model = result["model"]
+    print(f"📝 Concetto estratto: {concept!r}, Modello suggerito: {model!r}")
+    # 2. Genera dinamicamente un nuovo modulo agente basato sul concetto estratto
+    class_name = concept.title().replace(" ", "")
+    agent_dir = "generated_agents"
+    os.makedirs(agent_dir, exist_ok=True)
+    file_path = os.path.join(agent_dir, f"{class_name}Agent.py")
+    agent_code = f'''"""
+Agente auto-generato basato sul concetto: {concept} – Modello: {model}.
+"""
+from modules.ai_kernel.agent_core import AgentCore
+
+class {class_name}Agent(AgentCore):
+    def __init__(self):
+        super().__init__(name="{class_name}Agent")
+        # Inizializzazione aggiuntiva basata sul concetto estratto (se necessaria)
+
+    def think(self, input_data):
+        # Metodo di esempio che utilizza il concetto appreso
+        print(f"🧠 {{self.name}} applica il concetto di {concept} all'input fornito.")
+        return "Insight basato su {model}"
+'''
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(agent_code)
+        print(f"✅ Nuovo agente generato: {file_path}")
+    except Exception as e:
+        print(f"❌ Errore generazione agente: {e}")
+
+### --- modules/Neo/vision/visual_input.py --- ###
+import cv2
+
+def detect_from_stream(ip_camera_url="http://127.0.0.1:8080/video"):
+    cap = cv2.VideoCapture(ip_camera_url)
+    if not cap.isOpened():
+        return "⚠️ Stream non accessibile"
+
+    frame_count = 0
+    while frame_count < 100:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        cv2.imshow('Mercurius – Visione', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        frame_count += 1
+
+    cap.release()
+    cv2.destroyAllWindows()
+    return "✅ Analisi visiva completata"
+
+def analyze_frame_logic(frame):
+    # Simulazione logica per riconoscimento visivo
+    height, width = frame.shape[:2]
+    return {"dimensione": (width, height), "esempio": "Simulazione completata"}
+
+### --- modules/Ollama3/__init__.py --- ###
+# Init for Ollama3
+
+### --- modules/Ollama3/parse_response.py --- ###
+"""Parsing risposte modello Ollama."""
+
+def parse(text):
+    return {"output": text.strip()}
+
+### --- modules/Ollama3/prompt_builder.py --- ###
+"""Costruzione prompt per Ollama."""
+
+def build_prompt(task, context=""):
+    return f"Ollama: {task}\nContesto: {context}"
+
+### --- modules/Ollama3/run_ollama.py --- ###
+"""Wrapper per avviare modelli Ollama localmente."""
+
+def run_model(prompt):
+    return "🦙 Risposta simulata da Ollama3"
+
+### --- modules/Reasoner/__init__.py --- ###
+# Init for Reasoner
+
+### --- modules/Reasoner/context_analyzer.py --- ###
+"""Analisi contestuale per input utente."""
+
+def analyze_context(input_text):
+    return f"Contesto identificato: {input_text[:20]}"
+
+### --- modules/Reasoner/logic_chain.py --- ###
+def reason(data):
+    return "🔍 Ragionamento logico attivo"
+
+### --- modules/Reasoner/meta_reasoner.py --- ###
+import json
+from datetime import datetime
+import requests
+
+AZR_API = "http://localhost:11434/validate"
+
+def analyze_and_validate_code(code_snippet, objective="check logic and suggest improvements"):
+    request_payload = {
+        "prompt": (
+            f"Analyze the following code:\n{code_snippet}\nObjective: {objective}"
+        ),
+        "model": "azr-logic",
+        "stream": False,
+    }
+
+    try:
+        response = requests.post(AZR_API, json=request_payload)
+        result = response.json().get("response", "No response from AZR.")
+        log_meta_reasoning(code_snippet, result)
+        return result
+    except Exception as e:
+        return f"AZR connection failed: {str(e)}"
+
+def log_meta_reasoning(input_text, output_result):
+    log_file = "logs/self_monitoring/meta_reasoning_log.json"
+    entry = {
+        "timestamp": datetime.now().isoformat(),
+        "input": input_text,
+        "output": output_result
+    }
+    try:
+        with open(log_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except:
+        data = []
+
+    data.append(entry)
+    with open(log_file, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+### --- modules/Reasoner/reasoning_core.py --- ###
+from datetime import datetime
+
+def analyze_thought(trigger, context=None):
+    timestamp = datetime.now().isoformat()
