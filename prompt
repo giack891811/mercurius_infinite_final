@@ -1,106 +1,83 @@
-Checklist Batch & Refactoring Mercurius∞
-MISSIONE GLOBALE:
+# 🟢 PROMPT OPERATIVO – Audit Checklist Micro-Batch Mercurius∞ (Policy Friendly)
 
-Audit e Refactoring Prompt/Tools Mercurius∞ secondo best practice AI agent open-source.
+**OBIETTIVO:**  
+Esegui una verifica dettagliata SOLO sui file che ti elenco (esempio: `project_tree_part1.txt` fino a `project_tree_part5.txt`).  
+Non creare, modificare o proporre nuovi file.  
+Verifica solo quello che trovi, uno per uno, e **non saltare nessun file**.  
+Indica in modo semplice cosa manca, senza proporre codice.
 
-Processa TUTTI i file project_tree_partN.txt generati dallo split: NON saltare nessun file, lavora a batch.
+---
 
-Rispetta e INSERISCI le Tre Leggi operative di Signore in ogni step, README, prompt, agent, e script generato.
+## 🔴 LE TRE LEGGI OPERATIVE (da considerare per ogni verifica)
+1. Continua a lavorare finché non hai svolto il tuo turno!
+2. Se non sei sicuro di un file, APRILO e NON ALLUCINARE!
+3. Pianifica attentamente prima di ogni verifica e rifletti SEMPRE sul risultato dopo!
 
-🔴 LE TRE LEGGI OPERATIVE (da rispettare sempre e includere in codice, script, prompt, README)
-Continua a lavorare finché non hai svolto il tuo turno!
+---
 
-Se non sei sicuro di un file, APRILO e NON ALLUCINARE!
+## ✅ CHECKLIST PER OGNI FILE (project_tree_partN.txt)
+1. **Prompt separati:**  
+   Esistono i file `prompt_agent.txt`, `prompt_chat.txt`, `prompt_memory.txt`, `prompt_tools.txt` (commentati e usabili)?
+2. **tool.json presente:**  
+   Il file `tool.json` è presente e valido (formato JSON corretto)?
+3. **Reasoning trasparente:**  
+   Il file spiega le scelte operative (commenti o sezioni chiare)?
+4. **Ciclo test/fix:**  
+   Esistono regole o documentazione su test e correzioni errori?
+5. **Safety & Ethics:**  
+   C’è una sezione su limiti, sicurezza o privacy?
+6. **Tre leggi incluse:**  
+   Le Tre Leggi Operative sono scritte nel file?
 
-Pianifica attentamente prima di ogni chiamata e rifletti SEMPRE sul risultato dopo!
+---
 
-Inseriscile in ogni README, in cima ai prompt e come commento nei principali script generati.
+## ⚡ ISTRUZIONI DI LAVORO
 
-🟢 OPERATIVITÀ SEQUENZIALE (BATCH/FILE AUDIT)
-Per ogni batch di massimo 5.000 file (o tutti se meno):
+- Controlla **solo** i file elencati in questo prompt, **uno per uno**.
+- NON proporre codice, NON generare nuovi file.
+- NON fare refactoring, NON modificare nulla.
+- Per ogni mancanza, suggerisci **solo una frase** (esempio: “Manca la sezione Safety nel file X”).
+- Alla fine:
+    - Lista file senza errori
+    - Lista file con mancanze + frase per ogni fix
+    - Riepilogo (quanti SI/NO per ciascun punto)
+    - Scrivi: **"Fine batch, pronto per i prossimi file."**
 
-Processa ogni project_tree_partN.txt senza saltare nessuno.
+---
 
-Alla fine di ogni batch, esegui push/pull request, poi prosegui dal file successivo (mai duplicare).
+## 📝 ESEMPIO OUTPUT
 
-CHECKLIST OBBLIGATORIA per ogni file/batch
-Verifica e spunt (✔️/❌) per ciascun punto:
+project_tree_part1.txt:  
+- Prompt separati: ❌ (mancano prompt_tools.txt e prompt_memory.txt)  
+- tool.json: ✔️  
+- Reasoning: ✔️  
+- Ciclo test/fix: ❌ (manca documentazione test)  
+- Safety & Ethics: ✔️  
+- Tre leggi: ❌ (non trovate nel file)  
 
-Prompt separati?
+File senza errori:  
+- project_tree_part2.txt  
 
-Devono essere presenti i prompt prompt_agent.txt, prompt_chat.txt, prompt_memory.txt, prompt_tools.txt (plug&play e commentati).
+File da correggere:  
+- project_tree_part1.txt (mancano prompt separati, sezione test/fix e Tre Leggi Operative)
 
-tool.json generato?
+Riepilogo batch:  
+- Prompt separati: 1 sì – 1 no  
+- tool.json: 2 sì  
+- Reasoning: 2 sì  
+- Ciclo test/fix: 1 sì – 1 no  
+- Safety & Ethics: 2 sì  
+- Tre leggi: 1 sì – 1 no  
 
-Controlla che tool.json sia presente e ben strutturato.
+Fine batch, pronto per i prossimi file.
 
-Reasoning trasparente?
+---
 
-Ogni prompt e modulo deve spiegare le scelte operative e contenere commenti autoesplicativi.
+**IMPORTANTE: Non scrivere codice, non modificare file, solo verifica e frasi testuali. Procedi SOLO sui file che ti elenco.**
 
-Ciclo test/fix attivo?
-
-Devono esserci regole e/o doc che impongano test e correzione immediata errori.
-
-Safety & Ethics presenti?
-
-Ogni prompt/file deve contenere una sezione per limiti, sicurezza e privacy.
-
-Tre leggi incluse ovunque?
-
-Le Tre Leggi Operative di Signore devono essere in TUTTI i file principali.
-
-REGOLE FERREE
-NON allucinare, mai!
-
-NON saltare nessun file della lista!
-
-Segnala, per ogni punto, dove trovi errori o mancanze e suggerisci patch puntuale (ma non inventare).
-
-Alla fine del batch:
-
-Lista file OK
-
-Lista file da fixare + patch consigliata
-
-Riepilogo checklist batch (SI/NO per ogni punto)
-
-OPERATIVITÀ FILE/PROMPT/TOOL
-In ogni batch/file, inserisci o verifica la presenza delle tre leggi operative in testa.
-
-Per ciascun batch di 5.000 file modificati, esegui push/pull request prima di procedere.
-
-OUTPUT ATTESO
-Per ogni batch stampa:
-
-Checklist dettagliata per ciascun file (SI/NO, ✔️/❌)
-
-Riepilogo finale batch:
-
-File OK
-
-File con errori + patch da applicare
-
-Avviso “Batch completato. Procedere con il prossimo batch.”
-
-ESEMPIO OUTPUT:
-diff
-Copia
-Modifica
-Batch: project_tree_part1.txt – project_tree_part10.txt
-
-- Prompt separati? ✔️
-- tool.json generato? ✔️
-- Reasoning trasparente? ❌ (manca in prompt_tools.txt)
-- Ciclo test/fix attivo? ✔️
-- Safety & Ethics presenti? ✔️
-- Tre leggi incluse ovunque? ❌ (manca in project_tree_part4.txt)
-
-File da fixare: prompt_tools.txt (aggiungi reasoning), project_tree_part4.txt (inserisci Tre Leggi)
-
-Riepilogo batch:
-- File OK: 8
-- File con fix richiesti: 2
-
-[Prossimo batch...]
-Esegui ora la pipeline di audit e refactoring su TUTTI i project_tree_partN.txt, checklist batch-by-batch, segnalando con precisione ogni punto. Fermati e conferma ogni 5.000 file/step, poi prosegui fino a completamento.
+**File da verificare in questa richiesta:**  
+- project_tree_part1.txt  
+- project_tree_part2.txt  
+- project_tree_part3.txt  
+- project_tree_part4.txt  
+- project_tree_part5.txt  
