@@ -85,12 +85,12 @@ MarkupSafe==3.0.2
 matplotlib==3.10.3
 matplotlib-inline==0.1.7
 mdurl==0.1.2
--e git+https://github.com/giack891811/mercurius_infinite_final.git@92670b6422489a439fa7e6e9c4a47cdaa4aef3e1#egg=mercurius_infinite
+# -e git+https://github.com/giack891811/mercurius_infinite_final.git@92670b6422489a439fa7e6e9c4a47cdaa4aef3e1#egg=mercurius_infinite
 more-itertools==10.7.0
 moviepy==2.2.1
 mpmath==1.3.0
 msgpack==1.1.0
--e git+https://github.com/nari-labs/dia.git@2811af1c5f476b1f49f4744fabf56cf352be21e5#egg=nari_tts
+# -e git+https://github.com/nari-labs/dia.git@2811af1c5f476b1f49f4744fabf56cf352be21e5#egg=nari_tts
 narwhals==1.41.0
 networkx==3.5
 numba==0.61.2
