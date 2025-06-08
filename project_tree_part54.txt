@@ -1,0 +1,922 @@
+Questa è la parte 54 di project_tree. Continua da quella precedente.
+
+from typing import Callable, Any
+
+class HumanOverride:
+    def __init__(self, interactive: bool = True):
+        self.interactive = interactive
+
+    def confirm(self, message: str) -> bool:
+        """
+        Chiede conferma all'utente per procedere con un'azione sensibile.
+        In modalità non interattiva ritorna sempre False (azione bloccata).
+        """
+        if not self.interactive:
+            print(f"⛔ Override: azione '{message}' bloccata (non-interactive).")
+            return False
+        reply = input(f"⚠️ Confermi azione critica? '{message}' (y/n): ").strip().lower()
+        return reply in {"y", "yes"}
+
+    def guard(self, message: str) -> Callable:
+        """
+        Decoratore per funzioni che necessitano approvazione umana.
+        """
+
+        def decorator(func: Callable) -> Callable:
+            def wrapper(*args, **kwargs) -> Any:
+                if self.confirm(message):
+                    return func(*args, **kwargs)
+                else:
+                    print("🚫 Azione annullata dall'operatore.")
+                    return None
+
+            return wrapper
+
+        return decorator
+
+### --- safety/policies.yaml --- ###
+- action: block
+  name: no_secrets
+  rule: password=
+- action: block
+  name: no_secrets
+  rule: password=
+
+### --- safety/policy_manager.py --- ###
+# safety/policy_manager.py
+"""
+Modulo: policy_manager
+Descrizione: Gestisce le policy etiche, di sicurezza e privacy per Mercurius∞.
+Le policy sono definite in YAML ed estendibili in runtime.
+"""
+
+import yaml
+from pathlib import Path
+from typing import Dict, Any, List
+
+POLICY_FILE = Path("safety/policies.yaml")
+
+
+class PolicyManager:
+    def __init__(self):
+        self.policies: List[Dict[str, Any]] = []
+        self.load_policies()
+
+    # ---------- Public API ----------
+    def load_policies(self) -> None:
+        if POLICY_FILE.exists():
+            self.policies = yaml.safe_load(POLICY_FILE.read_text(encoding="utf-8")) or []
+        else:
+            self.policies = []
+
+    def add_policy(self, name: str, rule: str, action: str = "block") -> None:
+        self.policies.append({"name": name, "rule": rule, "action": action})
+        self._save()
+
+    def check(self, text: str) -> Dict[str, Any] | None:
+        """
+        Ritorna la policy violata se text ne infrange una.
+        """
+        for pol in self.policies:
+            if pol["rule"].lower() in text.lower():
+                return pol
+        return None
+
+    # ---------- Private ----------
+    def _save(self):
+        POLICY_FILE.parent.mkdir(exist_ok=True, parents=True)
+        yaml.safe_dump(self.policies, POLICY_FILE.open("w", encoding="utf-8"))
+
+### --- safety/safety_guard.py --- ###
+# safety/safety_guard.py
+"""
+Modulo: safety_guard
+Descrizione: Punto di ingresso globale per controlli policy + human override + audit.
+"""
+
+from safety.policy_manager import PolicyManager
+from safety.human_override import HumanOverride
+from safety.audit_logger import audit
+
+
+class SafetyGuard:
+    def __init__(self, interactive=True):
+        self.policy_mgr = PolicyManager()
+        self.override = HumanOverride(interactive=interactive)
+
+    def filter_text(self, text: str) -> str | None:
+        """
+        Applica policy. Se violazione -> chiede override umano.
+        Ritorna testo se permesso, None se bloccato.
+        """
+        violation = self.policy_mgr.check(text)
+        if violation:
+            audit("policy_violation", {"rule": violation["name"], "text": text})
+            allowed = self.override.confirm(
+                f"Violazione '{violation['name']}'. Consentire comunque?"
+            )
+            if not allowed:
+                print("⛔ Bloccato da SafetyGuard.")
+                return None
+        return text
+
+### --- scheduler/auto_scheduler.py --- ###
+"""
+auto_scheduler.py
+=================
+Modulo per programmazione automatica di esecuzioni trading e test.
+
+Basato su threading + pianificazione in tempo reale:
+- task ciclici
+- esecuzioni ritardate
+- notifiche pianificate
+"""
+
+import threading
+import time
+from datetime import datetime, timedelta
+
+
+class AutoScheduler:
+    def __init__(self):
+        self.tasks = []
+
+    def schedule_task(self, task_func, delay_sec=5, repeat=False, interval_sec=60, name=None):
+        """Programma un task con delay e ripetizione opzionale."""
+        task = {
+            "name": name or task_func.__name__,
+            "function": task_func,
+            "delay": delay_sec,
+            "repeat": repeat,
+            "interval": interval_sec,
+            "next_run": datetime.now() + timedelta(seconds=delay_sec)
+        }
+        self.tasks.append(task)
+
+    def run(self):
+        """Avvia il ciclo continuo di pianificazione."""
+        def loop():
+            while True:
+                now = datetime.now()
+                for task in self.tasks:
+                    if now >= task["next_run"]:
+                        try:
+                            print(f"🕒 Esecuzione task: {task['name']}")
+                            task["function"]()
+                        except Exception as e:
+                            print(f"❌ Errore nel task {task['name']}: {e}")
+                        if task["repeat"]:
+                            task["next_run"] = now + timedelta(seconds=task["interval"])
+                        else:
+                            self.tasks.remove(task)
+                time.sleep(1)
+
+        threading.Thread(target=loop, daemon=True).start()
+
+    def list_tasks(self):
+        """Lista dei task programmati."""
+        return [(t["name"], t["next_run"]) for t in self.tasks]
+
+    def clear(self):
+        self.tasks.clear()
+
+### --- scheduler/task_registry.py --- ###
+"""
+task_registry.py
+================
+Raccolta di task Mercurius∞ registrabili nello scheduler:
+- simulazioni
+- test
+- azioni periodiche
+"""
+
+from core.pipeline_controller import PipelineController
+from utils.config_loader import load_config
+
+class TaskRegistry:
+    def __init__(self):
+        self.config = load_config("config/config.yaml")
+        self.pipeline = PipelineController(self.config)
+
+    def simulate_trading_session(self):
+        """Task: esegue una sessione completa simulata."""
+        print("▶️ Simulazione trading session")
+        self.pipeline.run_batch_session()
+
+    def multiple_sessions(self, count=3):
+        """Task: n simulazioni."""
+        print(f"▶️ Avvio {count} sessioni simulate")
+        self.pipeline.simulate_multiple_sessions(n=count)
+
+    def health_check(self):
+        """Task diagnostico semplificato."""
+        print("✅ Mercurius∞ pronto. Config:", self.config.get("symbols", []))
+
+### --- scripts/activate_hud_mobile.py --- ###
+"""Script per avviare l'interfaccia mobile HUD."""
+from modules.mobile.note_interface import start_mobile_hud
+
+
+def main():
+    start_mobile_hud()
+
+
+if __name__ == "__main__":  # pragma: no cover
+    main()
+
+### --- scripts/aion_boot.py --- ###
+import os
+import sys
+
+# Aggiunge la root del progetto al path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from core.orchestrator import Orchestrator
+from utils.environment import Environment
+
+
+def main():
+    print("🧬 Avvio AION – Modalità: dialogic-autonomous")
+
+    env = Environment()
+    os.environ["RUN_MODE"] = "dialogic-autonomous"
+    print(f"🌐 AION_RUN_MODE = {env.get('RUN_MODE')}")
+
+    orchestrator = Orchestrator()
+
+    print("🔍 Eseguo self-check...")
+    orchestrator.run_self_check(path=".")
+
+    print("🧠 Eseguo missione #SELF_MISSION...")
+    orchestrator.execute_mission("#SELF_MISSION")
+
+    try:
+        from deployment.aion_api import start_api
+        import threading
+        threading.Thread(target=start_api, daemon=True).start()
+        print("🌐 Aion API server avviato sulla porta 8000")
+    except Exception as exc:
+        print(f"⚠️ Avvio Aion API fallito: {exc}")
+
+    try:
+        from modules.voice_bridge.voice_loop import start_listening
+        print("🎙️ Voice recognition attiva...")
+        start_listening()
+    except ImportError:
+        print("⚠️ Voice module non disponibile")
+
+    try:
+        from modules.dashboard import launch_dashboard
+        print("🖥️ Avvio dashboard...")
+        launch_dashboard()
+    except ImportError:
+        print("⚠️ Dashboard non trovata")
+
+    print("✅ AION operativo. In ascolto comandi.")
+
+if __name__ == "__main__":
+    main()
+
+### --- scripts/bootstrap_codex.py --- ###
+"""
+Script iniziale per ambiente Codex.
+Attiva Mercurius, esegue check e lancia missione di completamento.
+"""
+
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from core.orchestrator import Orchestrator
+
+def main():
+    print("🚀 Avvio di Mercurius∞...")
+
+    # Inizializza Orchestrator
+    orchestrator = Orchestrator()
+
+    # Esegue controllo e inizializzazione sistema
+    print("🔍 Analisi interna...")
+    orchestrator.run_self_check(path=".")
+
+    # Attiva missione automatica di completamento
+    print("🧠 Attivazione SELF_MISSION...")
+    orchestrator.execute_mission("#SELF_MISSION")
+
+if __name__ == "__main__":
+    main()
+
+### --- scripts/build_prompt.py --- ###
+#!/usr/bin/env python3
+"""Create prompt.txt combining project tree and user commands."""
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+OUTPUT_FILE = ROOT_DIR / 'prompt.txt'
+TREE_FILE = ROOT_DIR / 'project_tree.txt'
+COMMANDS_FILE = ROOT_DIR / 'prompt_commands.txt'
+
+
+def read_file(path: Path) -> str:
+    return path.read_text(encoding='utf-8') if path.exists() else ''
+
+
+def main():
+    with open(OUTPUT_FILE, 'w', encoding='utf-8') as out:
+        out.write('**STRUTTURA E FILE DEL PROGETTO:**\n')
+        out.write(read_file(TREE_FILE))
+        out.write('\n**ISTRUZIONI OPERATIVE:**\n')
+        out.write(read_file(COMMANDS_FILE))
+
+
+if __name__ == '__main__':
+    main()
+
+### --- scripts/mercurius_control.py --- ###
+import argparse
+import os
+import subprocess
+from pathlib import Path
+
+PID_FILE = Path("mercurius.pid")
+
+
+def start_system() -> None:
+    if PID_FILE.exists():
+        print("Mercurius∞ sembra già in esecuzione.")
+        return
+    process = subprocess.Popen(["python", "scripts/aion_boot.py"])
+    PID_FILE.write_text(str(process.pid))
+    print(f"Mercurius∞ avviato con PID {process.pid}")
+
+
+def stop_system() -> None:
+    if not PID_FILE.exists():
+        print("Mercurius∞ non risulta attivo.")
+        return
+    pid = int(PID_FILE.read_text())
+    try:
+        os.kill(pid, 9)
+        print("Mercurius∞ arrestato.")
+    except ProcessLookupError:
+        print("Processo non trovato.")
+    PID_FILE.unlink(missing_ok=True)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Gestione start/stop di Mercurius∞")
+    parser.add_argument("action", choices=["start", "stop"], help="Azione da eseguire")
+    args = parser.parse_args()
+    if args.action == "start":
+        start_system()
+    else:
+        stop_system()
+
+
+if __name__ == "__main__":
+    main()
+
+### --- scripts/prompt_panel.py --- ###
+import argparse
+from modules.reasoner_dispatcher import dispatch_to_reasoner
+
+
+def interactive_panel() -> None:
+    print("Mercurius Prompt Panel - digita 'exit' per uscire")
+    while True:
+        try:
+            prompt = input("Prompt> ").strip()
+            if prompt.lower() in {"exit", "quit"}:
+                break
+            if prompt:
+                response = dispatch_to_reasoner(prompt)
+                print(response)
+        except KeyboardInterrupt:
+            break
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Mercurius Prompt Panel")
+    parser.add_argument("--prompt", help="Prompt singolo da inviare", default=None)
+    args = parser.parse_args()
+    if args.prompt:
+        print(dispatch_to_reasoner(args.prompt))
+    else:
+        interactive_panel()
+
+
+if __name__ == "__main__":
+    main()
+
+### --- scripts/start_genesis.py --- ###
+"""
+🚀 scripts/start_genesis.py
+Script di avvio manuale per la modalità GENESIS – attiva il sistema AI Mercurius∞
+"""
+
+from core.orchestrator import Orchestrator
+from core.self_mission import genesis_directive
+
+def start():
+    genesis_directive()
+    orchestrator = Orchestrator()
+    orchestrator.activate_genesis()
+
+if __name__ == "__main__":
+    start()
+
+### --- scripts/update_project_tree.py --- ###
+#!/usr/bin/env python3
+"""Generate project_tree.txt with the repository tree and file previews."""
+import os
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+OUTPUT_FILE = ROOT_DIR / 'project_tree.txt'
+MAX_LINES = 100
+# File extensions considered text and included in preview
+TEXT_EXTENSIONS = {
+    '.py', '.json', '.md', '.txt', '.yml', '.yaml', '.ini', '.cfg', '.toml', '.js', '.ts'
+}
+
+
+def generate_tree():
+    tree_lines = []
+    text_files = []
+    for root, dirs, files in os.walk(ROOT_DIR):
+        if '.git' in dirs:
+            dirs.remove('.git')
+        dirs.sort()
+        files.sort()
+        level = Path(root).relative_to(ROOT_DIR).parts
+        indent = '    ' * len(level)
+        tree_lines.append(f"{indent}{Path(root).name}/")
+        for name in files:
+            tree_lines.append(f"{indent}    {name}")
+            ext = Path(name).suffix.lower()
+            if ext in TEXT_EXTENSIONS:
+                text_files.append(Path(root) / name)
+    return tree_lines, text_files
+
+
+def read_snippet(file_path: Path):
+    lines = []
+    truncated = False
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            for idx, line in enumerate(f):
+                if idx >= MAX_LINES:
+                    truncated = True
+                    break
+                lines.append(line.rstrip('\n'))
+    except Exception as exc:
+        lines.append(f"[Errore lettura: {exc}]")
+    return lines, truncated
+
+
+def main():
+    tree_lines, text_files = generate_tree()
+    with open(OUTPUT_FILE, 'w', encoding='utf-8') as out:
+        out.write('PROJECT TREE\n')
+        out.write('\n'.join(tree_lines))
+        out.write('\n\nFILE PREVIEW\n')
+        for file in text_files:
+            rel = file.relative_to(ROOT_DIR)
+            out.write(f"\n## {rel}\n")
+            lines, truncated = read_snippet(file)
+            for l in lines:
+                out.write(l + '\n')
+            if truncated:
+                out.write('[TRONCATO]\n')
+
+
+if __name__ == '__main__':
+    main()
+
+### --- security/code_signer.py --- ###
+# security/code_signer.py
+
+"""
+Modulo: code_signer.py
+Autore: Mercurius∞
+Descrizione: Sistema di firma digitale SHA256 per tutti i file generati, con registrazione in log e firma visibile in coda al file.
+"""
+
+import hashlib
+import json
+from datetime import datetime
+import os
+
+
+class CodeSigner:
+    def __init__(self, author="Mercurius∞", log_path="logs/code_signatures.json"):
+        self.author = author
+        self.log_path = log_path
+        self.signatures = self.load_signatures()
+
+    def load_signatures(self) -> dict:
+        if os.path.exists(self.log_path):
+            try:
+                with open(self.log_path, "r") as f:
+                    return json.load(f)
+            except json.JSONDecodeError:
+                return {}
+        return {}
+
+    def save_signatures(self):
+        with open(self.log_path, "w") as f:
+            json.dump(self.signatures, f, indent=2)
+
+    def generate_signature_block(self, content: str) -> str:
+        sha = hashlib.sha256(content.encode()).hexdigest()
+        timestamp = datetime.utcnow().isoformat()
+        return f"\n\n# --SIGNATURE--\n# SHA256: {sha}\n# SignedAt: {timestamp}\n# By: {self.author}\n"
+
+    def generate_hash(self, file_path: str) -> str:
+        sha256_hash = hashlib.sha256()
+        with open(file_path, "rb") as f:
+            for block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(block)
+        return sha256_hash.hexdigest()
+
+    def sign_file(self, file_path: str) -> str:
+        # Legge contenuto originale
+        with open(file_path, "r") as f:
+            content = f.read()
+
+        # Genera firma visibile
+        signature_block = self.generate_signature_block(content)
+
+        # Aggiunge firma al file
+        with open(file_path, "a") as f:
+            f.write(signature_block)
+
+        # Log firma in file JSON
+        file_hash = self.generate_hash(file_path)
+        self.signatures[file_path] = {
+            "file": file_path,
+            "hash": file_hash,
+            "timestamp": datetime.utcnow().isoformat(),
+            "author": self.author
+        }
+        self.save_signatures()
+        return f"✅ File firmato e registrato: {file_path}"
+
+    def verify_signature(self, file_path: str) -> bool:
+        if file_path not in self.signatures:
+            return False
+        current_hash = self.generate_hash(file_path)
+        stored_hash = self.signatures[file_path]["hash"]
+        return current_hash == stored_hash
+
+    def report_signature_status(self, file_path: str) -> str:
+        if self.verify_signature(file_path):
+            info = self.signatures[file_path]
+            return (f"🔐 Firma verificata:\n"
+                    f"🗂 File: {info['file']}\n"
+                    f"🕒 Timestamp: {info['timestamp']}\n"
+                    f"🧑‍💻 Autore: {info['author']}\n"
+                    f"🔑 SHA256: {info['hash']}")
+        return "❌ Firma non valida o assente."
+
+### --- security/code_verifier.py --- ###
+# security/code_verifier.py
+
+"""
+Modulo: code_verifier.py
+Descrizione: Verifica la firma SHA256 di un file generato per garantirne l'integrità.
+Estrae blocco firma e confronta l'hash del codice.
+"""
+
+import hashlib
+
+
+class CodeVerifier:
+    def verify_file(self, filepath: str) -> str:
+        with open(filepath, "r") as f:
+            lines = f.readlines()
+
+        try:
+            idx = lines.index("# --SIGNATURE--\n")
+            code = "".join(lines[:idx])
+            original_hash = [l for l in lines[idx:] if "SHA256" in l][0].split(":")[1].strip()
+            actual_hash = hashlib.sha256(code.encode()).hexdigest()
+
+            if actual_hash == original_hash:
+                return "✅ Firma valida – contenuto integro"
+            else:
+                return "❌ Firma NON valida – file modificato"
+        except Exception:
+            return "⚠️ Firma non trovata o incompleta"
+
+### --- security/gpg_support.py --- ###
+# security/gpg_support.py
+
+"""
+Modulo: gpg_support.py
+Descrizione: Firma/verifica file tramite GPG. Richiede GnuPG installato.
+"""
+
+import subprocess
+
+
+class GPGSupport:
+    def gpg_sign_file(self, path: str, key_id: str) -> str:
+        cmd = f"gpg --default-key {key_id} --output {path}.sig --detach-sig {path}"
+        try:
+            subprocess.run(cmd, shell=True, check=True)
+            return f"✅ File firmato con GPG: {path}.sig"
+        except Exception as e:
+            return f"❌ Errore GPG: {e}"
+
+    def gpg_verify(self, path: str) -> str:
+        cmd = f"gpg --verify {path}.sig {path}"
+        try:
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            return result.stdout + result.stderr
+        except Exception as e:
+            return f"❌ Verifica fallita: {e}"
+
+### --- security/pairing_manager.py --- ###
+# security/pairing_manager.py
+
+"""
+Modulo: pairing_manager.py
+Descrizione: Gestione pairing sicuro con utente tramite QR code o password vocale.
+"""
+
+import qrcode
+from voice.stt import transcribe_audio
+
+
+def generate_qr_pairing_link(link: str, filename: str = "pairing_qr.png") -> None:
+    """
+    Genera un QR code da un link e lo salva come immagine.
+    """
+    img = qrcode.make(link)
+    img.save(filename)
+    print(f"✅ QR generato: {filename}")
+
+
+def pair_with_user(method: str = "qr") -> bool:
+    """
+    Esegue il pairing con l'utente. Metodo supportato: 'qr', 'voice'
+    """
+    if method == "qr":
+        generate_qr_pairing_link("https://mercurius.local/pair")
+        return True
+
+    elif method == "voice":
+        print("🔒 Pronuncia la password vocale:")
+        spoken = transcribe_audio().lower()
+        return "mercurius autorizza" in spoken
+
+    return False
+
+### --- seleziona_cartella.py --- ###
+from tkinter import Tk, filedialog
+
+root = Tk()
+root.withdraw()  # Nasconde la finestra principale
+folder_path = filedialog.askdirectory(title="Seleziona una cartella")
+
+print("📁 Cartella selezionata:", folder_path)
+
+### --- sensors/environment_analyzer.py --- ###
+# sensors/environment_analyzer.py
+
+"""
+Modulo: environment_analyzer.py
+Descrizione: Analizza il livello di rumore ambientale e cambiamenti visivi dalla webcam.
+Serve per attivare modalità silenziosa, reattiva o sicurezza.
+"""
+
+import cv2
+import numpy as np
+import sounddevice as sd
+
+
+class EnvironmentAnalyzer:
+    def __init__(self, camera_index=0):
+        self.cam = cv2.VideoCapture(camera_index)
+
+    def get_audio_level(self, duration=1) -> float:
+        recording = sd.rec(int(duration * 16000), samplerate=16000, channels=1)
+        sd.wait()
+        return float(np.abs(recording).mean())
+
+    def detect_motion(self) -> str:
+        ret, frame1 = self.cam.read()
+        ret, frame2 = self.cam.read()
+        if not ret:
+            return "no_camera"
+
+        diff = cv2.absdiff(frame1, frame2)
+        gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+        _, thresh = cv2.threshold(gray, 25, 255, cv2.THRESH_BINARY)
+        motion = np.sum(thresh) / 255
+        if motion > 1000:
+            return "movimento sospetto"
+        return "nessun movimento"
+
+### --- sensors/sensor_hub.py --- ###
+"""sensor_hub.py
+Cattura schermo e microfono con semplice hotword detection.
+Espone stream FastAPI per integrazione multisensoriale.
+"""
+
+from __future__ import annotations
+
+import io
+from typing import Generator
+from fastapi import FastAPI, Response
+import uvicorn
+from mss import mss
+from PIL import Image
+import speech_recognition as sr
+
+app = FastAPI(title="Sensor Hub")
+
+
+def _grab_screen() -> bytes:
+    with mss() as sct:
+        shot = sct.grab(sct.monitors[0])
+        img = Image.frombytes("RGB", shot.size, shot.rgb)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        return buf.getvalue()
+
+
+def capture_screen_stream() -> bytes:
+    """Restituisce un frame dello schermo in JPEG."""
+    return _grab_screen()
+
+
+@app.get("/vision")
+def vision() -> Response:
+    frame = _grab_screen()
+    return Response(content=frame, media_type="image/jpeg")
+
+
+def _recognize_speech(duration: int = 3) -> str:
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        audio = recognizer.record(source, duration=duration)
+    try:
+        return recognizer.recognize_google(audio, language="it-IT")
+    except Exception:
+        return ""
+
+
+def listen_microphone(duration: int = 3) -> str:
+    """Ritorna testo dal microfono."""
+    return _recognize_speech(duration)
+
+
+@app.get("/audio")
+def audio() -> dict:
+    text = _recognize_speech()
+    return {"text": text}
+
+
+def detect_hotword(hotword: str = "hey mercurius", duration: int = 3) -> bool:
+    text = _recognize_speech(duration).lower()
+    return hotword.lower() in text
+
+
+@app.get("/hotword")
+def hotword() -> dict:
+    return {"detected": detect_hotword()}
+
+
+def start_sensor_server(host: str = "0.0.0.0", port: int = 5124) -> None:
+    """Avvia il server dei sensori."""
+    uvicorn.run(app, host=host, port=port)
+
+### --- setup.py --- ###
+from setuptools import setup, find_packages
+
+setup(
+    name="mercurius-infinite",
+    version="1.0.0",
+    packages=find_packages(),
+    include_package_data=True,
+    install_requires=[
+        "altair==5.5.0",
+        "altgraph==0.17.4",
+        "annotated-types==0.7.0",
+        "anyio==4.9.0",
+        "attrs==25.3.0",
+        "blinker==1.9.0",
+        "cachetools==5.5.2",
+        "certifi==2025.4.26",
+        "cffi==1.17.1",
+        "charset-normalizer==3.4.2",
+        "click==8.2.1",
+        "colorama==0.4.6",
+        "comtypes==1.4.11",
+        "contourpy==1.3.2",
+        "cycler==0.12.1",
+        "decorator==5.2.1",
+        "defusedxml==0.7.1",
+        "distro==1.9.0",
+        "filelock==3.18.0",
+        "fonttools==4.58.1",
+        "fsspec==2025.5.1",
+        "gitdb==4.0.12",
+        "GitPython==3.1.44",
+        "h11==0.16.0",
+        "httpcore==1.0.9",
+        "httpx==0.28.1",
+        "huggingface-hub==0.32.3",
+        "idna==3.10",
+        "imageio==2.37.0",
+        "imageio-ffmpeg==0.6.0",
+        "Jinja2==3.1.6",
+        "jiter==0.10.0",
+        "joblib==1.5.1",
+        "jsonschema==4.24.0",
+        "jsonschema-specifications==2025.4.1",
+        "kiwisolver==1.4.8",
+        "MarkupSafe==3.0.2",
+        "matplotlib==3.10.3",
+        "moviepy==2.2.1",
+        "mpmath==1.3.0",
+        "narwhals==1.41.0",
+        "networkx==3.5",
+        "numpy==2.2.6",
+        "openai==1.82.1",
+        "opencv-python==4.11.0.86",
+        "packaging==24.2",
+        "pandas==2.2.3",
+        "pefile==2023.2.7",
+        "pillow==11.2.1",
+        "proglog==0.1.12",
+        "protobuf==6.31.1",
+        "psutil==7.0.0",
+        "py-cpuinfo==9.0.0",
+        "pyarrow==20.0.0",
+        "pycparser==2.22",
+        "pydantic==2.11.5",
+        "pydantic_core==2.33.2",
+        "pydeck==0.9.1",
+        "pyinstaller==6.13.0",
+        "pyinstaller-hooks-contrib==2025.4",
+        "pyparsing==3.2.3",
+        "pypiwin32==223",
+        "PyQt5==5.15.11",
+        "PyQt5-Qt5==5.15.2",
+        "PyQt5_sip==12.17.0",
+        "pytesseract==0.3.13",
+        "python-dateutil==2.9.0.post0",
+        "python-dotenv==1.1.0",
+        "pyttsx3==2.98",
+        "pytube==15.0.0",
+        "pytz==2025.2",
+        "pywin32==310",
+        "pywin32-ctypes==0.2.3",
+        "PyYAML==6.0.2",
+        "referencing==0.36.2",
+        "regex==2024.11.6",
+        "requests==2.32.3",
+        "rpds-py==0.25.1",
+        "safetensors==0.5.3",
+        "scikit-learn==1.6.1",
+        "scipy==1.15.3",
+        "sentence-transformers==4.1.0",
+        "setuptools==80.9.0",
+        "six==1.17.0",
+        "smmap==5.0.2",
+        "sniffio==1.3.1",
+        "sounddevice==0.5.2",
+        "SpeechRecognition==3.14.3",
+        "srt==3.5.3",
+        "streamlit==1.45.1",
+        "supervision==0.25.1",
+        "sympy==1.14.0",
+        "tenacity==9.1.2",
+        "threadpoolctl==3.6.0",
+        "tokenizers==0.21.1",
+        "toml==0.10.2",
+        "torch==2.7.0",
+        "torchvision==0.22.0",
+        "tornado==6.5.1",
+        "tqdm==4.67.1",
+        "transformers==4.52.4",
+        "typing-inspection==0.4.1",
+        "typing_extensions==4.13.2",
+        "tzdata==2025.2",
+        "ultralytics==8.3.146",
+        "ultralytics-thop==2.0.14",
+        "urllib3==2.4.0",
+        "vosk==0.3.45",
+        "watchdog==6.0.0",
+        "websockets==15.0.1",
+        "whisper==1.1.10",
+    ],
+    entry_points={"console_scripts": ["merc-start=start_fullmode:main"]},
+    author="Giacomo Germano",
+    description="AI evolutiva cosciente stile Jarvis",
+)
+
+### --- start_fullmode.py --- ###
+def main():

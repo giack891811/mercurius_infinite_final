@@ -1,0 +1,749 @@
+Questa è la parte 16 di project_tree. Continua da quella precedente.
+
+| **`Obsolete`** | `ObsoleteProperties` | `ObsoletePropertiesHyphen` | `ObsoletePropertiesFallback` | `ObsoletePropertiesHyphenFallback` |
+| **`Svg`**      | `SvgProperties`      | `SvgPropertiesHyphen`      | `SvgPropertiesFallback`      | `SvgPropertiesHyphenFallback`      |
+
+Categories:
+
+- **All** - Includes `Standard`, `Vendor`, `Obsolete` and `Svg`
+- **`Standard`** - Current properties and extends subcategories `StandardLonghand` and `StandardShorthand` _(e.g. `StandardShorthandProperties`)_
+- **`Vendor`** - Vendor prefixed properties and extends subcategories `VendorLonghand` and `VendorShorthand` _(e.g. `VendorShorthandProperties`)_
+- **`Obsolete`** - Removed or deprecated properties
+- **`Svg`** - SVG-specific properties
+
+Variations:
+
+- **Default** - JavaScript (camel) cased property names
+- **`Hyphen`** - CSS (kebab) cased property names
+- **`Fallback`** - Also accepts array of values e.g. `string | string[]`
+
+## At-rule types
+
+At-rule interfaces with descriptors.
+
+**TypeScript**: These will be found in the `AtRule` namespace, e.g. `AtRule.Viewport`.  
+**Flow**: These will be prefixed with `AtRule$`, e.g. `AtRule$Viewport`.
+
+|                      | Default        | `Hyphen`             | `Fallback`             | `HyphenFallback`             |
+| -------------------- | -------------- | -------------------- | ---------------------- | ---------------------------- |
+| **`@counter-style`** | `CounterStyle` | `CounterStyleHyphen` | `CounterStyleFallback` | `CounterStyleHyphenFallback` |
+| **`@font-face`**     | `FontFace`     | `FontFaceHyphen`     | `FontFaceFallback`     | `FontFaceHyphenFallback`     |
+| **`@viewport`**      | `Viewport`     | `ViewportHyphen`     | `ViewportFallback`     | `ViewportHyphenFallback`     |
+
+## Pseudo types
+
+String literals of pseudo classes and pseudo elements
+
+- `Pseudos`
+
+  Extends:
+
+  - `AdvancedPseudos`
+
+    Function-like pseudos e.g. `:not(:first-child)`. The string literal contains the value excluding the parenthesis: `:not`. These are separated because they require an argument that results in infinite number of variations.
+
+  - `SimplePseudos`
+
+    Plain pseudos e.g. `:hover` that can only be **one** variation.
+
+## Generics
+
+All interfaces has two optional generic argument to define length and time: `CSS.Properties<TLength = string | 0, TTime = string>`
+
+- **Length** is the first generic parameter and defaults to `string | 0` because `0` is the only [length where the unit identifier is optional](https://drafts.csswg.org/css-values-3/#lengths). You can specify this, e.g. `string | number`, for platforms and libraries that accepts any numeric value as length with a specific unit.
+  ```tsx
+  const style: CSS.Properties<string | number> = {
+    width: 100,
+  };
+  ```
+- **Time** is the second generic argument and defaults to `string`. You can specify this, e.g. `string | number`, for platforms and libraries that accepts any numeric value as length with a specific unit.
+  ```tsx
+  const style: CSS.Properties<string | number, number> = {
+    transitionDuration: 1000,
+  };
+  ```
+
+## Usage
+
+```ts
+import type * as CSS from 'csstype';
+
+const style: CSS.Properties = {
+  width: '10px',
+  margin: '1em',
+};
+```
+
+In some cases, like for CSS-in-JS libraries, an array of values is a way to provide fallback values in CSS. Using `CSS.PropertiesFallback` instead of `CSS.Properties` will add the possibility to use any property value as an array of values.
+
+```ts
+import type * as CSS from 'csstype';
+
+const style: CSS.PropertiesFallback = {
+  display: ['-webkit-flex', 'flex'],
+  color: 'white',
+};
+```
+
+There's even string literals for pseudo selectors and elements.
+
+```ts
+import type * as CSS from 'csstype';
+
+const pseudos: { [P in CSS.SimplePseudos]?: CSS.Properties } = {
+  ':hover': {
+    display: 'flex',
+  },
+};
+```
+
+Hyphen cased (kebab cased) properties are provided in `CSS.PropertiesHyphen` and `CSS.PropertiesHyphenFallback`. It's not **not** added by default in `CSS.Properties`. To allow both of them, you can simply extend with `CSS.PropertiesHyphen` or/and `CSS.PropertiesHyphenFallback`.
+
+```ts
+import type * as CSS from 'csstype';
+
+interface Style extends CSS.Properties, CSS.PropertiesHyphen {}
+
+const style: Style = {
+  'flex-grow': 1,
+  'flex-shrink': 0,
+  'font-weight': 'normal',
+  backgroundColor: 'white',
+};
+```
+
+Adding type checked CSS properties to a `HTMLElement`.
+
+```ts
+import type * as CSS from 'csstype';
+
+const style: CSS.Properties = {
+  color: 'red',
+  margin: '1em',
+};
+
+let button = document.createElement('button');
+
+Object.assign(button.style, style);
+```
+
+## What should I do when I get type errors?
+
+The goal is to have as perfect types as possible and we're trying to do our best. But with CSS Custom Properties, the CSS specification changing frequently and vendors implementing their own specifications with new releases sometimes causes type errors even if it should work. Here's some steps you could take to get it fixed:
+
+_If you're using CSS Custom Properties you can step directly to step 3._
+
+1.  **First of all, make sure you're doing it right.** A type error could also indicate that you're not :wink:
+
+    - Some CSS specs that some vendors has implemented could have been officially rejected or haven't yet received any official acceptance and are therefor not included
+    - If you're using TypeScript, [type widening](https://blog.mariusschulz.com/2017/02/04/TypeScript-2-1-literal-type-widening) could be the reason you get `Type 'string' is not assignable to...` errors
+
+2.  **Have a look in [issues](https://github.com/frenic/csstype/issues) to see if an issue already has been filed. If not, create a new one.** To help us out, please refer to any information you have found.
+3.  Fix the issue locally with **TypeScript** (Flow further down):
+
+    - The recommended way is to use **module augmentation**. Here's a few examples:
+
+      ```ts
+      // My css.d.ts file
+      import type * as CSS from 'csstype';
+
+      declare module 'csstype' {
+        interface Properties {
+          // Add a missing property
+          WebkitRocketLauncher?: string;
+
+          // Add a CSS Custom Property
+          '--theme-color'?: 'black' | 'white';
+
+          // Allow namespaced CSS Custom Properties
+          [index: `--theme-${string}`]: any;
+          
+          // Allow any CSS Custom Properties
+          [index: `--${string}`]: any;
+
+          // ...or allow any other property
+          [index: string]: any;
+        }
+      }
+      ```
+
+    - The alternative way is to use **type assertion**. Here's a few examples:
+
+      ```ts
+      const style: CSS.Properties = {
+        // Add a missing property
+        ['WebkitRocketLauncher' as any]: 'launching',
+
+        // Add a CSS Custom Property
+        ['--theme-color' as any]: 'black',
+      };
+      ```
+
+    Fix the issue locally with **Flow**:
+
+    - Use **type assertion**. Here's a few examples:
+
+      ```js
+      const style: $Exact<CSS.Properties<*>> = {
+        // Add a missing property
+        [('WebkitRocketLauncher': any)]: 'launching',
+
+        // Add a CSS Custom Property
+        [('--theme-color': any)]: 'black',
+      };
+      ```
+
+## Version 3.0
+
+- **All property types are exposed with namespace**  
+  TypeScript: `Property.AlignContent` (was `AlignContentProperty` before)  
+  Flow: `Property$AlignContent`
+- **All at-rules are exposed with namespace**  
+  TypeScript: `AtRule.FontFace` (was `FontFace` before)  
+  Flow: `AtRule$FontFace`
+- **Data types are NOT exposed**  
+  E.g. `Color` and `Box`. Because the generation of data types may suddenly be removed or renamed.
+- **TypeScript hack for autocompletion**  
+  Uses `(string & {})` for literal string unions and `(number & {})` for literal number unions ([related issue](https://github.com/microsoft/TypeScript/issues/29729)). Utilize `PropertyValue<T>` to unpack types from e.g. `(string & {})` to `string`.
+- **New generic for time**  
+  Read more on the ["Generics"](#generics) section.
+- **Flow types improvements**  
+  Flow Strict enabled and exact types are used.
+
+## Contributing
+
+**Never modify `index.d.ts` and `index.js.flow` directly. They are generated automatically and committed so that we can easily follow any change it results in.** Therefor it's important that you run `$ git config merge.ours.driver true` after you've forked and cloned. That setting prevents merge conflicts when doing rebase.
+
+### Commands
+
+- `npm run build` Generates typings and type checks them
+- `npm run watch` Runs build on each save
+- `npm run test` Runs the tests
+- `npm run lazy` Type checks, lints and formats everything
+
+### --- node_modules/csstype/package.json --- ###
+{
+  "name": "csstype",
+  "version": "3.1.3",
+  "main": "",
+  "types": "index.d.ts",
+  "description": "Strict TypeScript and Flow types for style based on MDN data",
+  "repository": "https://github.com/frenic/csstype",
+  "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chokidar": "^2.1.3",
+    "@types/css-tree": "^2.3.1",
+    "@types/jest": "^29.5.0",
+    "@types/jsdom": "^21.1.1",
+    "@types/node": "^16.18.23",
+    "@types/prettier": "^2.7.2",
+    "@types/request": "^2.48.8",
+    "@types/turndown": "^5.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
+    "chalk": "^4.1.2",
+    "chokidar": "^3.5.3",
+    "eslint": "^8.37.0",
+    "css-tree": "^2.3.1",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "fast-glob": "^3.2.12",
+    "flow-bin": "^0.203.1",
+    "jest": "^29.5.0",
+    "jsdom": "^21.1.1",
+    "mdn-browser-compat-data": "git+https://github.com/mdn/browser-compat-data.git#1bf44517bd08de735e9ec20dbfe8e86c96341054",
+    "mdn-data": "git+https://github.com/mdn/data.git#7f0c865a3c4b5d891285c93308ee5c25cb5cfee8",
+    "prettier": "^2.8.7",
+    "request": "^2.88.2",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
+    "turndown": "^7.1.2",
+    "typescript": "~5.0.3"
+  },
+  "scripts": {
+    "prepublish": "npm install --prefix __tests__ && npm install --prefix __tests__/__fixtures__",
+    "prepublishOnly": "tsc && npm run test:src && npm run build && ts-node --files prepublish.ts",
+    "update": "ts-node --files update.ts",
+    "build": "ts-node --files build.ts --start",
+    "watch": "ts-node --files build.ts --watch",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "pretty": "prettier --write build.ts **/*.{ts,js,json,md}",
+    "lazy": "tsc && npm run lint",
+    "test": "jest --runInBand",
+    "test:src": "jest src.*.ts",
+    "test:dist": "jest dist.*.ts --runInBand"
+  },
+  "files": [
+    "index.d.ts",
+    "index.js.flow"
+  ],
+  "keywords": [
+    "css",
+    "style",
+    "typescript",
+    "flow",
+    "typings",
+    "types",
+    "definitions"
+  ]
+}
+
+### --- node_modules/react/README.md --- ###
+# `react`
+
+React is a JavaScript library for creating user interfaces.
+
+The `react` package contains only the functionality necessary to define React components. It is typically used together with a React renderer like `react-dom` for the web, or `react-native` for the native environments.
+
+**Note:** by default, React will be in development mode. The development version includes extra warnings about common mistakes, whereas the production version includes extra performance optimizations and strips all error messages. Don't forget to use the [production build](https://reactjs.org/docs/optimizing-performance.html#use-the-production-build) when deploying your application.
+
+## Usage
+
+```js
+import { useState } from 'react';
+import { createRoot } from 'react-dom/client';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    <>
+      <h1>{count}</h1>
+      <button onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+    </>
+  );
+}
+
+const root = createRoot(document.getElementById('root'));
+root.render(<Counter />);
+```
+
+## Documentation
+
+See https://react.dev/
+
+## API
+
+See https://react.dev/reference/react
+
+### --- node_modules/react/package.json --- ###
+{
+  "name": "react",
+  "description": "React is a JavaScript library for building user interfaces.",
+  "keywords": [
+    "react"
+  ],
+  "version": "19.1.0",
+  "homepage": "https://react.dev/",
+  "bugs": "https://github.com/facebook/react/issues",
+  "license": "MIT",
+  "files": [
+    "LICENSE",
+    "README.md",
+    "index.js",
+    "cjs/",
+    "compiler-runtime.js",
+    "jsx-runtime.js",
+    "jsx-runtime.react-server.js",
+    "jsx-dev-runtime.js",
+    "jsx-dev-runtime.react-server.js",
+    "react.react-server.js"
+  ],
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "react-server": "./react.react-server.js",
+      "default": "./index.js"
+    },
+    "./package.json": "./package.json",
+    "./jsx-runtime": {
+      "react-server": "./jsx-runtime.react-server.js",
+      "default": "./jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "react-server": "./jsx-dev-runtime.react-server.js",
+      "default": "./jsx-dev-runtime.js"
+    },
+    "./compiler-runtime": {
+      "react-server": "./compiler-runtime.js",
+      "default": "./compiler-runtime.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/react.git",
+    "directory": "packages/react"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  }
+}
+
+### --- orchestrator/__init__.py --- ###
+
+
+### --- orchestrator/autonomy_controller.py --- ###
+"""
+Modulo: autonomy_controller.py
+Descrizione: Gestione autonoma delle esperienze e delle azioni eseguite da Mercurius∞.
+Permette di registrare eventi, esiti e attivare modelli di adattamento comportamentale.
+Autore: Mercurius∞ AI Engineer
+"""
+
+from datetime import datetime
+from collections import Counter
+from typing import List, Dict, Any
+
+
+class AutonomyController:
+    def __init__(self):
+        # lista di dizionari esperienza
+        self.experience_log: List[Dict[str, Any]] = []
+
+    # ------------------------------------------------------------------ #
+    #                       REGISTRAZIONE ESPERIENZA                     #
+    # ------------------------------------------------------------------ #
+    def process_experience(
+        self,
+        action: str,
+        outcome: str,
+        success: bool,
+        context: dict | None = None,
+    ) -> Dict[str, Any]:
+        """
+        Registra un’esperienza di Mercurius∞.
+
+        Ritorna il dizionario esperienza, che ora include la chiave
+        “learning” richiesta dai test.
+        """
+        experience = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "action": action,
+            "outcome": outcome,
+            "success": success,
+            "context": context or {},
+            # feedback di apprendimento elementare
+            "learning": (
+                "Apprendimento registrato: rinforzo positivo."
+                if success
+                else "Apprendimento registrato: rinforzo negativo."
+            ),
+            # riflessione di base sull'esito dell'azione
+            "reflection": (
+                "successo" if success else "fallimento"
+            ),
+        }
+        self.experience_log.append(experience)
+        print(
+            f"📒 Esperienza registrata → {action} | Successo: {success} | "
+            f"Extra: {context or {}}"
+        )
+        return experience
+
+    # ------------------------------------------------------------------ #
+    #                              UTILITÀ                               #
+    # ------------------------------------------------------------------ #
+    def get_history(self, limit: int = 5) -> List[Dict[str, Any]]:
+        """Restituisce le ultime *limit* esperienze."""
+        return self.experience_log[-limit:]
+
+    def reset_memory(self) -> None:
+        """Svuota la memoria esperienziale."""
+        self.experience_log = []
+        print("♻️ Memoria esperienziale resettata.")
+
+    def summary(self) -> None:
+        """Stampa a video un breve riassunto delle ultime esperienze."""
+        print("🧠 Riassunto Esperienze Recenti:")
+        for exp in self.get_history(5):
+            print(f"→ [{exp['timestamp']}] {exp['action']} ⇒ {exp['outcome']}")
+
+    # ------------------------------------------------------------------ #
+    #                        RIEPILOGO STATISTICO                         #
+    # ------------------------------------------------------------------ #
+    def summarize_autonomy(self) -> dict:
+        """
+        Ritorna un riepilogo statistico con la chiave “reflection_summary”
+        richiesta dai test end-to-end.
+        """
+        total = len(self.experience_log)
+        successes = sum(e["success"] for e in self.experience_log)
+        failures = total - successes
+        most_common = Counter(e["action"] for e in self.experience_log).most_common(1)
+
+        return {
+            "total": total,
+            "success_rate": successes / total if total else 0.0,
+            "top_action": most_common[0][0] if most_common else None,
+            "reflection_summary": {
+                "successes": successes,
+                "failures": failures,
+            },
+        }
+
+    # ------------------------------------------------------------------ #
+    #                        INSIGHT GLOBALI (NUOVO)                    #
+    # ------------------------------------------------------------------ #
+    def report_insights(self) -> dict:
+        """
+        Restituisce insight globali semplici sulla memoria autonoma:
+         - Azioni più frequenti
+         - Tassi di successo e fallimento
+         - Ultime azioni eseguite
+        """
+        total = len(self.experience_log)
+        if total == 0:
+            return {"insight": "Nessuna esperienza registrata."}
+
+        actions = [e["action"] for e in self.experience_log]
+        outcomes = [e["outcome"] for e in self.experience_log]
+        successes = [e for e in self.experience_log if e["success"]]
+        failures = [e for e in self.experience_log if not e["success"]]
+
+        most_common = Counter(actions).most_common(3)
+        outcome_types = Counter(outcomes).most_common()
+
+        return {
+            "totale_esperienze": total,
+            "azioni_frequenti": [a for a, _ in most_common],
+            "tasso_successo": round(len(successes) / total, 2),
+            "tasso_fallimento": round(len(failures) / total, 2),
+            "ultime_azioni": actions[-5:],
+            "outcome_summary": outcome_types,
+        }
+
+
+# -------------------------- TEST MANUALE RAPIDO -------------------------- #
+if __name__ == "__main__":
+    ac = AutonomyController()
+    ac.process_experience("saluta", "ok", True, {"note": "inizio"})
+    ac.process_experience("richiedi_input", "ok", True)
+    ac.process_experience("rispondi", "errore", False)
+    print(ac.summarize_autonomy())
+    print(ac.report_insights())
+    ac.summary()
+
+### --- orchestrator/genesis_orchestrator.py --- ###
+"""
+Modulo: genesis_orchestrator.py
+Descrizione: Coordinamento neurale tra agenti cognitivi (ChatGPT-4, AZR, Ollama3, GPT-4o).
+"""
+
+from utils.logger import setup_logger
+logger = setup_logger("MercuriusGenesis")
+
+# Agenti cognitivi integrati
+from modules.llm.chatgpt_interface import ChatGPTAgent
+from modules.llm.ollama3_interface import Ollama3Agent
+from modules.llm.azr_reasoner import AZRAgent
+from modules.llm.gpt4o_validator import GPT4oAgent
+
+class GenesisOrchestrator:
+    def __init__(self):
+        self.agents = {
+            "chatgpt4": ChatGPTAgent(),
+            "ollama3": Ollama3Agent(),
+            "azr": AZRAgent(),
+            "gpt4o": GPT4oAgent()
+        }
+
+    def route_task(self, task: str, context: dict = None) -> dict:
+        """
+        Analizza il task e lo instrada all'agente più adatto, restituendo il risultato.
+        """
+        logger.info(f"[GENESIS] Routing del task: {task}")
+        if "debug" in task or "logica" in task:
+            return self.agents["azr"].analyze(task, context or {})
+        elif "sintesi" in task or "finalizza" in task:
+            return self.agents["gpt4o"].validate(task, context or {})
+        elif "crea codice" in task or "script" in task:
+            return self.agents["ollama3"].generate(task, context or {})
+        else:
+            return self.agents["chatgpt4"].elaborate(task, context or {})
+
+    def coordinated_response(self, task: str) -> dict:
+        """
+        Ogni agente contribuisce con un parere per un task comune; 
+        il sistema seleziona la risposta più coerente tra quelle fornite.
+        Se nessuna risposta è valida, attiva fallback evolutivo su AZR.
+        """
+        logger.info(f"[GENESIS] Task condiviso per risposta congiunta: {task}")
+        responses = {
+            "chatgpt4": self.agents["chatgpt4"].elaborate(task),
+            "ollama3": self.agents["ollama3"].generate(task),
+            "azr": self.agents["azr"].analyze(task),
+            "gpt4o": self.agents["gpt4o"].validate(task)
+        }
+
+        # Valutazione semplice basata su priorità predefinita (in futuro: ponderazione dinamica)
+        priority = ["azr", "gpt4o", "chatgpt4", "ollama3"]
+        for agent_key in priority:
+            resp = str(responses.get(agent_key, "")).lower()
+            if responses[agent_key] and "error" not in resp and "errore" not in resp:
+                return {"source": agent_key, "response": responses[agent_key]}
+
+        # 🧠 Fallback evolutivo AZR – auto-ragionamento
+        logger.warning("⚠️ Nessuna risposta valida disponibile. Attivazione fallback AZR Reasoner...")
+        azr_retry = self.agents["azr"].solve(task)  # Metodo custom evolutivo
+        if azr_retry and isinstance(azr_retry, dict):
+            return {"source": "azr-fallback", "response": azr_retry}
+        return {"source": "none", "response": "Nessuna risposta utile nemmeno da fallback AZR."}
+
+
+if __name__ == "__main__":
+    orchestrator = GenesisOrchestrator()
+    sample_task = "crea codice per gestire input vocale e risposta testuale"
+    result = orchestrator.coordinated_response(sample_task)
+    print(f"🎯 Risposta selezionata ({result['source']}):\n{result['response']}")
+
+### --- orchestrator/mission_controller.py --- ###
+"""mission_controller.py
+Mission Controller per ciclo evolutivo multi-agente.
+"""
+
+from __future__ import annotations
+
+import os
+import json
+from pathlib import Path
+from typing import Dict, Any
+
+from orchestrator.genesis_orchestrator import GenesisOrchestrator
+from orchestrator.autonomy_controller import AutonomyController
+from modules.llm.azr_reasoner import AZRAgent
+from modules.gpt_engineer_wrapper import GPTEngineerWrapper
+from modules.sandbox_executor.secure_executor import SecureExecutor
+
+
+class MissionController:
+    """Gestisce il ciclo di self-questioning e auto-evoluzione."""
+
+    def __init__(self, base_dir: str = "workspaces") -> None:
+        self.base_dir = Path(base_dir)
+        self.base_dir.mkdir(exist_ok=True)
+        self.genesis = GenesisOrchestrator()
+        self.autonomy = AutonomyController()
+        self.azr = AZRAgent()
+        self.codex = GPTEngineerWrapper(project_path=str(self.base_dir))
+        self.executor = SecureExecutor(timeout=5)
+        self.workspaces: Dict[str, Dict[str, Any]] = {}
+        self.log_file = Path("logs/mission_log.jsonl")
+        self.log_file.parent.mkdir(exist_ok=True)
+
+    # ------------------------------------------------------------------ #
+    def create_workspace(self, name: str, prompt: str) -> Path:
+        """Crea una cartella dedicata e salva il prompt."""
+        path = self.base_dir / name
+        path.mkdir(exist_ok=True)
+        (path / "prompt.txt").write_text(prompt, encoding="utf-8")
+        self.workspaces[name] = {"prompt": prompt, "path": path}
+        self._log("workspace_created", {"name": name})
+        return path
+
+    # ------------------------------------------------------------------ #
+    def _log(self, event: str, details: Dict[str, Any]) -> None:
+        entry = {"event": event, "details": details}
+        with self.log_file.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(entry) + "\n")
+
+    # ------------------------------------------------------------------ #
+    def run_cycle(self, name: str) -> None:
+        """Esegue un ciclo evolutivo sul workspace indicato."""
+        ws = self.workspaces.get(name)
+        if not ws:
+            return
+        prompt = ws["prompt"]
+        # 1. Reasoner: suggerimenti
+        question = f"Come migliorare questo progetto? {prompt}"
+        reason_resp = self.genesis.route_task(question)
+        self.autonomy.process_experience("reason", "ok", True, {"workspace": name})
+
+        # 2. AZR analizza la risposta
+        analysis = self.azr.analyze(reason_resp.get("response", question))
+        self.autonomy.process_experience("azr", analysis, True, {"workspace": name})
+
+        # 3. Se AZR suggerisce problemi, genera patch con Codex
+        if analysis.startswith("❌"):
+            patch = self.codex.generate_project(prompt)
+            (ws["path"] / "patch.log").write_text(patch, encoding="utf-8")
+            self.autonomy.process_experience("codex_patch", patch, True, {"workspace": name})
+            result = self.executor.execute(patch)
+            (ws["path"] / "sandbox.log").write_text(str(result), encoding="utf-8")
+        self._log("cycle_completed", {"workspace": name})
+
+
+if __name__ == "__main__":
+    mc = MissionController()
+    ws = mc.create_workspace("demo", "Genera uno script di esempio")
+    mc.run_cycle("demo")
+
+### --- orchestrator/multimodal_controller.py --- ###
+# orchestrator/multimodal_controller.py
+"""
+Modulo: multimodal_controller.py
+Responsabilità: Gestione integrata di input multimodali (voce, gesti) e pianificazione strategica.
+"""
+from modules.speech import SpeechToText, TextToSpeech
+from modules.gesture import GestureRecognizer
+from modules.planner import ActionPlanner
+from models.goal_manager import GoalManager
+from orchestrator.autonomy_controller import AutonomyController
+from modules.ai_kernel.command_interpreter import CommandInterpreter
+from typing import Optional
+
+class MultimodalController:
+    """
+    Orchestratore intelligente per input vocali, gesti e pianificazione autonoma.
+    """
+    def __init__(self):
+        self.speech_in = SpeechToText()
+        self.speech_out = TextToSpeech()
+        # Inizializza sempre l'interprete comandi
+        self.interpreter = CommandInterpreter()
+        self.gesture = GestureRecognizer()
+        self.planner = ActionPlanner()
+        self.goal_mgr = GoalManager()
+        self.autonomy = AutonomyController()
+
+    def listen_and_interpret(self, simulate_input: Optional[str] = None) -> dict:
+        """
+        Ascolta input vocale (o usa una stringa simulata) e lo converte in un comando strutturato.
+        """
+        if simulate_input:
+            text = simulate_input
+        else:
+            text = self.speech_in.listen()
+        self.speech_out.speak(f"Hai detto: {text}")
+        return self.interpreter.interpret(text) if self.interpreter else {"action": "ignora"}
+
+    def receive_gesture(self, gesture_name: Optional[str] = None) -> dict:
+        """
+        Interpreta un gesto manuale (o simulato) in un comando.
+        """
+        if gesture_name:
+            return self.gesture.interpret_gesture(gesture_name)
+        else:
+            return self.gesture.recognize(None)
+
+    def plan_and_act(self, command: dict):
+        """
+        Registra un obiettivo, pianifica le azioni e attiva il ciclo cognitivo per eseguirle.
+        """
+        action = command["action"]
+        context = command.get("context", {})
+        # Aggiunge l'obiettivo corrente alla lista
+        self.goal_mgr.add_goal(action, priority=1, context=context)
+        goal = self.goal_mgr.get_next_goal()
+        if goal:
+            plan = self.planner.generate_plan(goal.name, goal.context)
+            # Descrive verbalmente il piano generato
+            self.speech_out.speak(self.planner.describe_plan(plan))
+            # Esegue ogni step del piano simulando l'azione e registrando l'esperienza
+            for step in plan:
+                output = f"Eseguo: {step['action']}"
+                print(output)
+                self.autonomy.process_experience(step["action"], "eseguito", True, step.get("params", {}))
+            self.goal_mgr.complete_goal(goal.name)
+        else:

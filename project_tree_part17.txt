@@ -1,0 +1,1084 @@
+Questa è la parte 17 di project_tree. Continua da quella precedente.
+
+            self.speech_out.speak("Nessun obiettivo disponibile.")
+
+    def run_full_cycle(self, input_text: Optional[str] = None, gesture: Optional[str] = None):
+        """
+        Esegue un ciclo completo multimodale (voce+gesti) dall'input fino all'azione.
+        """
+        if input_text:
+            cmd = self.listen_and_interpret(simulate_input=input_text)
+        elif gesture:
+            cmd = self.receive_gesture(gesture)
+        else:
+            self.speech_out.speak("Nessun input fornito.")
+            return
+        if cmd.get("action") != "ignora":
+            self.plan_and_act(cmd)
+        else:
+            self.speech_out.speak("Non ho capito cosa fare.")
+
+### --- orchestrator/patch_scheduler.py --- ###
+# orchestrator/patch_scheduler.py
+"""
+Modulo: patch_scheduler.py
+Descrizione: Avvia periodicamente il SelfPatchEngine per evoluzione autonoma.
+"""
+
+import time
+import threading
+from analytics.self_patch_engine import SelfPatchEngine
+
+class PatchScheduler:
+    def __init__(self, interval_hours: int = 24):
+        self.engine = SelfPatchEngine()
+        self.interval = interval_hours * 3600
+        threading.Thread(target=self._loop, daemon=True).start()
+
+    def _loop(self):
+        while True:
+            try:
+                self.engine.apply_patch()
+            except Exception as e:
+                print(f"⚠️ PatchScheduler error: {e}")
+            time.sleep(self.interval)
+
+### --- orchestrator/real_life_controller.py --- ###
+# orchestrator/real_life_controller.py
+"""
+Modulo: real_life_controller.py
+Descrizione: Router comandi voce per vita reale (agenda, smart-home, finanze, email)
+"""
+
+from integrations.agenda.agenda_manager import AgendaManager
+from integrations.smart_home.home_assistant_bridge import HomeAssistantBridge
+from personal_finance.finance_tracker import FinanceTracker
+from communications.email_assistant import EmailAssistant
+from modules.ai_kernel.command_interpreter import CommandInterpreter
+from modules.voice_bridge.pyttsx3_tts import Pyttsx3TTS
+
+agenda = AgendaManager()
+home = HomeAssistantBridge()
+fin = FinanceTracker()
+mail = EmailAssistant()
+tts = Pyttsx3TTS()
+interp = CommandInterpreter()
+
+def execute(command: str):
+    cmd = interp.interpret(command)
+    act = cmd.get("action")
+    ctx = cmd.get("context", {})
+    if act == "saluta":
+        tts.speak("Ciao! Come posso aiutarti?")
+    elif act == "apri_app":
+        app = ctx.get("app")
+        tts.speak(f"Apro {app}")
+    elif act == "mostra_dati":
+        month = fin.monthly_summary()
+        tts.speak(f"Spese del mese: {month}")
+    else:
+        tts.speak("Comando non riconosciuto.")
+
+if __name__ == "__main__":
+    while True:
+        txt = input("🗣️> ")
+        execute(txt)
+
+### --- orchestrator/router_integration.py --- ###
+# orchestrator/router_integration.py
+"""
+Modulo: router_integration.py
+Descrizione: Integrazione del nuovo AgentRouter nel GenesisOrchestrator.
+"""
+
+from cognition.cognitive_map import CognitiveMap
+from cognition.task_memory import TaskMemory
+from cognition.agent_router import AgentRouter
+from orchestrator.genesis_orchestrator import GenesisOrchestrator
+
+# Crea mappa e memory globali
+c_map = CognitiveMap()
+t_memory = TaskMemory()
+
+# Registra gli agenti cognitivi principali
+for name, typ in [
+    ("ChatGPTAgent", "cognitive"),
+    ("Ollama3Agent", "cognitive"),
+    ("AZRAgent", "cognitive"),
+    ("GPT4oAgent", "cognitive"),
+    ("AdaptiveTrader", "trading"),
+]:
+    c_map.add_agent(name, typ)
+
+router = AgentRouter(c_map, t_memory)
+core = GenesisOrchestrator()
+
+
+def run_task(task: str):
+    agent_name = router.choose_agent(task)
+    print(f"🔀 Router seleziona: {agent_name} per → {task}")
+    response = core.route_task(task)
+    success = "errore" not in str(response).lower()
+    router.record_result(agent_name, task, success)
+    return response
+
+
+if __name__ == "__main__":
+    while True:
+        txt = input("Task> ")
+        print(run_task(txt))
+
+### --- orchestrator/sentient_mode.py --- ###
+# orchestrator/sentient_mode.py
+"""
+Modulo: sentient_mode.py
+Descrizione: Integrazione della modalità consapevole dentro Mercurius∞.
+Avvia ReflectionLoop e gestisce IntentionManager in background.
+"""
+
+import threading
+import time
+from consciousness.reflection_loop import ReflectionLoop
+from consciousness.intention_manager import IntentionManager
+
+class SentientMode:
+    def __init__(self, reflection_hour: int = 23):
+        self.reflection = ReflectionLoop()
+        self.intentions = IntentionManager()
+        self.reflection_hour = reflection_hour
+        # thread giornaliero
+        threading.Thread(target=self._daily_routine, daemon=True).start()
+
+    def _daily_routine(self):
+        while True:
+            now = time.gmtime()
+            if now.tm_hour == self.reflection_hour and now.tm_min == 0:
+                self.reflection.write_daily()
+                time.sleep(60)  # evita doppio trigger
+            time.sleep(30)
+
+    # API esterna
+    def add_intention(self, desc: str):
+        self.intentions.add_intention(desc)
+
+    def list_intentions(self):
+        return self.intentions.active_intentions()
+
+
+if __name__ == "__main__":
+    sm = SentientMode()
+    sm.add_intention("Migliorare la precisione del modulo trading del 5%")
+    while True:
+        time.sleep(3600)
+
+### --- package-lock.json --- ###
+{
+  "name": "mercurius_infinite_final",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "dependencies": {
+        "@types/react": "^19.1.6",
+        "react": "^19.1.0"
+      }
+    },
+    "node_modules/@types/react": {
+      "version": "19.1.6",
+      "resolved": "https://registry.npmjs.org/@types/react/-/react-19.1.6.tgz",
+      "integrity": "sha512-JeG0rEWak0N6Itr6QUx+X60uQmN+5t3j9r/OVDtWzFXKaj6kD1BwJzOksD0FF6iWxZlbE1kB0q9vtnU2ekqa1Q==",
+      "license": "MIT",
+      "dependencies": {
+        "csstype": "^3.0.2"
+      }
+    },
+    "node_modules/csstype": {
+      "version": "3.1.3",
+      "resolved": "https://registry.npmjs.org/csstype/-/csstype-3.1.3.tgz",
+      "integrity": "sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==",
+      "license": "MIT"
+    },
+    "node_modules/react": {
+      "version": "19.1.0",
+      "resolved": "https://registry.npmjs.org/react/-/react-19.1.0.tgz",
+      "integrity": "sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==",
+      "license": "MIT",
+      "engines": {
+        "node": ">=0.10.0"
+      }
+    }
+  }
+}
+
+### --- package.json --- ###
+{
+  "dependencies": {
+    "@types/react": "^19.1.6",
+    "react": "^19.1.0"
+  }
+}
+
+### --- personal_finance/__init__.py --- ###
+
+
+### --- personal_finance/finance_tracker.py --- ###
+# personal_finance/finance_tracker.py
+"""
+Modulo: finance_tracker.py
+Descrizione: Traccia spese personali da CSV/JSON e genera report mensile.
+"""
+
+import pandas as pd
+from pathlib import Path
+from datetime import datetime
+
+DATA_FILE = Path("personal_finance/expenses.csv")
+DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+class FinanceTracker:
+    def __init__(self):
+        if DATA_FILE.exists():
+            self.df = pd.read_csv(DATA_FILE)
+        else:
+            self.df = pd.DataFrame(columns=["date", "category", "amount", "note"])
+
+    def add_expense(self, amount: float, category: str, note: str = ""):
+        new = {"date": datetime.utcnow().date(), "category": category, "amount": amount, "note": note}
+        self.df = self.df.append(new, ignore_index=True)
+        self.df.to_csv(DATA_FILE, index=False)
+
+    def monthly_summary(self, month: str | None = None):
+        month = month or datetime.utcnow().strftime("%Y-%m")
+        df_month = self.df[self.df["date"].astype(str).str.startswith(month)]
+        return df_month.groupby("category")["amount"].sum().to_dict()
+
+### --- print_tree.py --- ###
+import os
+
+def print_tree(startpath, file=None):
+    for root, dirs, files in os.walk(startpath):
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * level
+        line = f"{indent}📁 {os.path.basename(root)}"
+        print(line) if file is None else print(line, file=file)
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            fline = f"{subindent}- {f}"
+            print(fline) if file is None else print(fline, file=file)
+
+if __name__ == "__main__":
+    with open("mercurius_tree.txt", "w", encoding="utf-8") as out_file:
+        print("📂 Mercurius∞ Project Structure", file=out_file)
+        print("=" * 40, file=out_file)
+        print_tree(".", file=out_file)
+
+### --- project_tree.txt --- ###
+PROJECT TREE
+mercurius_infinite_final/
+    .gitignore
+    =3.20,
+    CHANGELOG.md
+    Dockerfile
+    README.md
+    ai_launcher.py
+    dashboard.py
+    dashboard_streamlit.py
+    docker-compose.override.yml
+    docker-compose.yml
+    file_albero_locale.txt
+    goals.txt
+    install_mercurius_note.sh
+    list_files.py
+    main.py
+    package-lock.json
+    package.json
+    print_tree.py
+    prompt_commands.txt
+    pyproject.toml
+    pytest.ini
+    requirements.txt
+    seleziona_cartella.py
+    setup.py
+    start_fullmode.py
+    start_voice_interface.py
+    task_manager_cli.py
+    test_exp.json
+    .github/
+        workflows/
+            mercurius_ci.yml
+    AutoGPT/
+    agents/
+        __init__.py
+        adaptive_trader.py
+        agent_comm.py
+        agent_generator.py
+        azr.py
+        azr_server.py
+        memory_manager.py
+        ollama.py
+        openai.py
+        azr/
+            azr_supervisor.py
+    analytics/
+        __init__.py
+        behavior_logger.py
+        meta_learner.py
+        neuro_optimizer.py
+        self_patch_engine.py
+    cognition/
+        __init__.py
+        agent_router.py
+        cognitive_map.py
+        task_memory.py
+    communications/
+        __init__.py
+        email_assistant.py
+    config/
+        config.yaml
+        config_schema.py
+        config_validator.py
+        genesis_config.yaml
+        prod_settings.yaml
+        self_profile.yaml
+    consciousness/
+        __init__.py
+        core_self.py
+        intention_manager.py
+        reflection_loop.py
+    core/
+        __init__.py
+        auto_tester.py
+        auto_updater.py
+        context_adapter.py
+        deploy_trigger.py
+        dialogue_manager.py
+        emotion_analyzer.py
+        executor.py
+        genesis_trigger.py
+        learning.py
+        orchestrator.py
+        pipeline_controller.py
+        sandbox_executor.py
+        self_generator.py
+        self_mission.py
+        self_reflection.py
+        self_tuner.py
+        sensory_bus.py
+        sleep_monitor.py
+        system_bridge.py
+        thinking_loop.py
+    culture/
+        base_manifesto.md
+        culture_manager.py
+    dashboard/
+        __init__.py
+        genesis_monitor.py
+    data/
+        feature_engineering.py
+        learning_pulses.json
+        market_data_handler.py
+    deploy/
+        __init__.py
+        deployment_handler.py
+        env_checker.py
+        rollout_validator.py
+    deployment/
+        __init__.py
+        aion_api.py
+        autostart_manager.py
+        remote_access.py
+        task_scheduler.py
+        telemetry_monitor.py
+    dia/
+    docs/
+        ARCHITECTURE.md
+        USAGE_GUIDE.md
+    evolution/
+        auto_updater.py
+        behavior_simulator.py
+        logic_injector.py
+        neural_plasticity.py
+        open_evolve.py
+        openalpha_evolve.py
+        pwb_alphaevolve.py
+        web_scraper.py
+    exports/
+        README.txt
+        build_dashboard.py
+        build_mac.sh
+        build_win.bat
+    flutter/
+    generated_agents/
+        ApprendimentoGenericoAgent.py
+        __init__.py
+    genesis_core/
+        autogpt_bridge.py
+    githooks/
+        post-merge
+        post-merge.bat
+    installer/
+        package_builder.py
+    integrations/
+        README.md
+        __init__.py
+        bridge_josch.py
+        colab_linker.py
+        finviz_connector.py
+        system_control.py
+        tradingview_feed.py
+        agenda/
+            __init__.py
+            agenda_manager.py
+        smart_home/
+            __init__.py
+            home_assistant_bridge.py
+    interface/
+        dashboard_stub.py
+        genesis_bridge.py
+    interop/
+        colab_bridge.py
+        github_handler.py
+        local_controller.py
+    learning/
+        __init__.py
+        document_parser.py
+        video_learner.py
+    llm/
+        llm_router.py
+    logs/
+        README.md
+        aion_activation_report.md
+        self_tuning_report.md
+        system.log
+        thinking_feed.md
+        upgrade_status.md
+    memory/
+        __init__.py
+        dialog_style_profile.json
+        episodic_memory.py
+        genesis_memory.py
+        long_term_memory.py
+        memory_core.py
+        neural_plasticity.py
+        synaptic_log.py
+    mercurius_infinite.egg-info/
+        PKG-INFO
+        SOURCES.txt
+        dependency_links.txt
+        entry_points.txt
+        top_level.txt
+    mercurius_infinite_final/
+    mobile_jarvis_ui/
+        .gitignore
+        .metadata
+        README.md
+        analysis_options.yaml
+        pubspec.lock
+        pubspec.yaml
+        android/
+            .gitignore
+            build.gradle.kts
+            gradle.properties
+            settings.gradle.kts
+            app/
+                build.gradle.kts
+                src/
+                    debug/
+                        AndroidManifest.xml
+                    main/
+                        AndroidManifest.xml
+                        kotlin/
+                            com/
+                                example/
+                                    mobile_jarvis_ui/
+                                        MainActivity.kt
+                        res/
+                            drawable/
+                                launch_background.xml
+                            drawable-v21/
+                                launch_background.xml
+                            mipmap-hdpi/
+                                ic_launcher.png
+                            mipmap-mdpi/
+                                ic_launcher.png
+                            mipmap-xhdpi/
+                                ic_launcher.png
+                            mipmap-xxhdpi/
+                                ic_launcher.png
+                            mipmap-xxxhdpi/
+                                ic_launcher.png
+                            values/
+                                styles.xml
+                            values-night/
+                                styles.xml
+                    profile/
+                        AndroidManifest.xml
+            build/
+                reports/
+                    problems/
+                        problems-report.html
+            gradle/
+                wrapper/
+                    gradle-wrapper.properties
+        assets/
+            placeholder.txt
+        ios/
+            .gitignore
+            Flutter/
+                AppFrameworkInfo.plist
+                Debug.xcconfig
+                Release.xcconfig
+            Runner/
+                AppDelegate.swift
+                Info.plist
+                Runner-Bridging-Header.h
+                Assets.xcassets/
+                    AppIcon.appiconset/
+                        Contents.json
+                        Icon-App-1024x1024@1x.png
+                        Icon-App-20x20@1x.png
+                        Icon-App-20x20@2x.png
+                        Icon-App-20x20@3x.png
+                        Icon-App-29x29@1x.png
+                        Icon-App-29x29@2x.png
+                        Icon-App-29x29@3x.png
+                        Icon-App-40x40@1x.png
+                        Icon-App-40x40@2x.png
+                        Icon-App-40x40@3x.png
+                        Icon-App-60x60@2x.png
+                        Icon-App-60x60@3x.png
+                        Icon-App-76x76@1x.png
+                        Icon-App-76x76@2x.png
+                        Icon-App-83.5x83.5@2x.png
+                    LaunchImage.imageset/
+                        Contents.json
+                        LaunchImage.png
+                        LaunchImage@2x.png
+                        LaunchImage@3x.png
+                        README.md
+                Base.lproj/
+                    LaunchScreen.storyboard
+                    Main.storyboard
+            Runner.xcodeproj/
+                project.pbxproj
+                project.xcworkspace/
+                    contents.xcworkspacedata
+                    xcshareddata/
+                        IDEWorkspaceChecks.plist
+                        WorkspaceSettings.xcsettings
+                xcshareddata/
+                    xcschemes/
+                        Runner.xcscheme
+            Runner.xcworkspace/
+                contents.xcworkspacedata
+                xcshareddata/
+                    IDEWorkspaceChecks.plist
+                    WorkspaceSettings.xcsettings
+            RunnerTests/
+                RunnerTests.swift
+        lib/
+            main.dart
+        linux/
+            .gitignore
+            CMakeLists.txt
+            flutter/
+                CMakeLists.txt
+                generated_plugin_registrant.cc
+                generated_plugin_registrant.h
+                generated_plugins.cmake
+            runner/
+                CMakeLists.txt
+                main.cc
+                my_application.cc
+                my_application.h
+        macos/
+            .gitignore
+            Flutter/
+                Flutter-Debug.xcconfig
+                Flutter-Release.xcconfig
+                GeneratedPluginRegistrant.swift
+            Runner/
+                AppDelegate.swift
+                DebugProfile.entitlements
+                Info.plist
+                MainFlutterWindow.swift
+                Release.entitlements
+                Assets.xcassets/
+                    AppIcon.appiconset/
+                        Contents.json
+                        app_icon_1024.png
+                        app_icon_128.png
+                        app_icon_16.png
+                        app_icon_256.png
+                        app_icon_32.png
+                        app_icon_512.png
+                        app_icon_64.png
+                Base.lproj/
+                    MainMenu.xib
+                Configs/
+                    AppInfo.xcconfig
+                    Debug.xcconfig
+                    Release.xcconfig
+                    Warnings.xcconfig
+            Runner.xcodeproj/
+                project.pbxproj
+                project.xcworkspace/
+                    xcshareddata/
+                        IDEWorkspaceChecks.plist
+                xcshareddata/
+                    xcschemes/
+                        Runner.xcscheme
+            Runner.xcworkspace/
+                contents.xcworkspacedata
+                xcshareddata/
+                    IDEWorkspaceChecks.plist
+            RunnerTests/
+                RunnerTests.swift
+        test/
+            widget_test.dart
+        web/
+            favicon.png
+            index.html
+            manifest.json
+            icons/
+                Icon-192.png
+                Icon-512.png
+                Icon-maskable-192.png
+                Icon-maskable-512.png
+        windows/
+            .gitignore
+            CMakeLists.txt
+            flutter/
+                CMakeLists.txt
+                generated_plugin_registrant.cc
+                generated_plugin_registrant.h
+                generated_plugins.cmake
+            runner/
+                CMakeLists.txt
+                Runner.rc
+                flutter_window.cpp
+                flutter_window.h
+                main.cpp
+                resource.h
+                runner.exe.manifest
+                utils.cpp
+                utils.h
+                win32_window.cpp
+                win32_window.h
+                resources/
+                    app_icon.ico
+    models/
+        goal_manager.py
+        model_trainer.py
+        neo_learning.py
+        neural_network.py
+        metrics/
+            performance_metrics.py
+    modules/
+        __init__.py
+        autogen_chat.py
+        chatgpt_interface.py
+        crewai_team.py
+        feedback_loop.py
+        fingpt_analyzer.py
+        finrl_agent.py
+        freqtrade_bot.py
+        gesture.py
+        goal_manager.py
+        gpt4o_interface.py
+        gpt_engineer_wrapper.py
+        gpt_task_router.py
+        hf_tools_manager.py
+        leonai_bridge.py
+        localai_executor.py
+        meta_team_agent.py
+        n8n_connector.py
+        network_analyzer.py
+        nlp.py
+        ollama3_interface.py
+        openbb_terminal.py
+        planner.py
+        qlib_quant.py
+        reasoner_dispatcher.py
+        speech.py
+        superagi_agent.py
+        supervisor.py
+        task_manager_cli.py
+        url_learner.py
+        AZR/
+            __init__.py
+            fine_tuner.py
+            train_model.py
+        GPT/
+            __init__.py
+            gpt_runner.py
+            prompt_builder.py
+        Leonai/
+            __init__.py
+            leon_ai.py
+        Localai/
+            __init__.py
+            local_ai.py
+        Neo/
+            __init__.py
+            adaptive_weights.py
+            agent_generator.py
+            auto_refinement.py
+            context_memory.py
+            interaction_style.py
+            memory_strengthener.py
+            neuro_learning_engine.py
+            self_awareness.py
+            self_reflection.py
+            trainer_orchestrator.py
+            agent_forge/
+                agent_generator.py
+            audio/
+                emotion_recognizer.py
+                hotword_detector.py
+                tts_engine.py
+            cognitive_simulation/
+                cognitive_simulator.py
+            consciousness/
+                self_awareness.py
+            docgen/
+                auto_docgen.py
+            hierarchy_manager/
+                hierarchy_controller.py
+            identity/
+                personality_engine.py
+            memory/
+                conversation_memory.py
+            strategic_coordinator/
+                strategic_coordinator.py
+            vision/
+                visual_input.py
+        Ollama3/
+            __init__.py
+            parse_response.py
+            prompt_builder.py
+            run_ollama.py
+        Reasoner/
+            __init__.py
+            context_analyzer.py
+            logic_chain.py
+            meta_reasoner.py
+            reasoning_core.py
+            strategic/
+                intuition_engine.py
+        agents/
+            organizer_core.py
+        ai_kernel/
+            agent_core.py
+            agent_plugin.py
+            cognitive_integration.py
+            command_interpreter.py
+            context_adapter.py
+            goal_manager.py
+            lang_reasoner.py
+            strategic_coordinator.py
+        codex/
+            codex_cli.py
+        dashboard/
+            __init__.py
+            control_center.py
+            control_panel.py
+            dashboard_streamlit.py
+            dashboard_utils.py
+            futuristic_gui.py
+            hud.css
+            keyboard_dropdown.py
+            mission_gui.py
+        evolution/
+            ai2ui_adapter.py
+            auto_gpt.py
+            gpt_engineer.py
+            metagpt.py
+        experience/
+            __init__.py
+            azr_analyzer.py
+            experience_memory.py
+        io_modules/
+            mobile_connect.py
+        llm/
+            azr_reasoner.py
+            chatgpt_interface.py
+            gpt4o_validator.py
+            ollama3_interface.py
+        local/
+            README.md
+            github_sync.py
+            huggingface_tools.py
+            leon_ai_bridge.py
+            localai_adapter.py
+            n8n_connector.py
+        messaging/
+            __init__.py
+            rabbitmq_messenger.py
+        mobile/
+            note_interface.py
+        mobile_flutter/
+            __init__.py
+            flutter_bridge.py
+        optional/
+            elevenlabs_tts.py
+            huggingface_tools.py
+            n8n_connector.py
+            plugin_manager.py
+            vosk_stt.py
+        sandbox_executor/
+            secure_executor.py
+        start_fullmode/
+            initializer.py
+        strategic/
+            __init__.py
+            strategic_brain.py
+            strategic_runner.py
+        stream_vision/
+            __init__.py
+            video_pipeline.py
+        stream_voice/
+            __init__.py
+        vision_audio/
+            __init__.py
+            note10_jarvis_bridge.py
+        voice_bridge/
+            activation_hook.py
+            audio_interface.py
+            dia_model_mock.py
+            multimodal_controller.py
+            nari_dia_tts.py
+            pyttsx3_tts.py
+            speech_to_text.py
+            text_to_speech.py
+            tts_engine.py
+            voice_loop.py
+            whisper_interface.py
+    monitoring/
+        __init__.py
+        health_check.py
+        log_dashboard.py
+        metrics_exporter.py
+    node_modules/
+        .package-lock.json
+        @types/
+            react/
+                LICENSE
+                README.md
+                canary.d.ts
+                compiler-runtime.d.ts
+                experimental.d.ts
+                global.d.ts
+                index.d.ts
+                jsx-dev-runtime.d.ts
+                jsx-runtime.d.ts
+                package.json
+                ts5.0/
+                    canary.d.ts
+                    experimental.d.ts
+                    global.d.ts
+                    index.d.ts
+                    jsx-dev-runtime.d.ts
+                    jsx-runtime.d.ts
+                    v18/
+                        global.d.ts
+                        index.d.ts
+                        jsx-dev-runtime.d.ts
+                        jsx-runtime.d.ts
+                        ts5.0/
+                            global.d.ts
+                            index.d.ts
+                            jsx-dev-runtime.d.ts
+                            jsx-runtime.d.ts
+        csstype/
+            LICENSE
+            README.md
+            index.d.ts
+            index.js.flow
+            package.json
+        react/
+            LICENSE
+            README.md
+            compiler-runtime.js
+            index.js
+            jsx-dev-runtime.js
+            jsx-dev-runtime.react-server.js
+            jsx-runtime.js
+            jsx-runtime.react-server.js
+            package.json
+            react.react-server.js
+            cjs/
+                react-compiler-runtime.development.js
+                react-compiler-runtime.production.js
+                react-compiler-runtime.profiling.js
+                react-jsx-dev-runtime.development.js
+                react-jsx-dev-runtime.production.js
+                react-jsx-dev-runtime.profiling.js
+                react-jsx-dev-runtime.react-server.development.js
+                react-jsx-dev-runtime.react-server.production.js
+                react-jsx-runtime.development.js
+                react-jsx-runtime.production.js
+                react-jsx-runtime.profiling.js
+                react-jsx-runtime.react-server.development.js
+                react-jsx-runtime.react-server.production.js
+                react.development.js
+                react.production.js
+                react.react-server.development.js
+                react.react-server.production.js
+    orchestrator/
+        __init__.py
+        autonomy_controller.py
+        genesis_orchestrator.py
+        mission_controller.py
+        multimodal_controller.py
+        patch_scheduler.py
+        real_life_controller.py
+        router_integration.py
+        sentient_mode.py
+    personal_finance/
+        __init__.py
+        finance_tracker.py
+    rag/
+        insight_rag.py
+    safety/
+        __init__.py
+        audit_logger.py
+        human_override.py
+        policies.yaml
+        policy_manager.py
+        safety_guard.py
+    scheduler/
+        auto_scheduler.py
+        task_registry.py
+    scripts/
+        activate_hud_mobile.py
+        aion_boot.py
+        bootstrap_codex.py
+        build_prompt.py
+        mercurius_control.py
+        prompt_panel.py
+        start_genesis.py
+        update_project_tree.py
+    security/
+        code_signer.py
+        code_verifier.py
+        gpg_support.py
+        pairing_manager.py
+    sensors/
+        environment_analyzer.py
+        sensor_hub.py
+    src/
+        mercurius-infinite/
+    strategies/
+        strategy_executor.py
+    tests/
+        conftest.py
+        run_simulation.py
+        test_agent_core.py
+        test_audio_interface.py
+        test_autonomia_cognitiva.py
+        test_end2end.py
+        test_initializer.py
+        test_josch_bridge.py
+        test_logger.py
+        test_memory.py
+        test_messaging.py
+        test_modular_end2end.py
+        test_multimodal.py
+        test_neuro_learning.py
+        test_orchestrator.py
+        test_planner.py
+        test_policy.py
+        test_reasoner_dispatcher.py
+        test_secure_executor.py
+        test_supervisione.py
+        test_task_manager_cli.py
+        test_video_pipeline.py
+    tools/
+        conflict_inspector.py
+        console.py
+        feedback_collector.py
+        live_logger.py
+    trading/
+        fin_gpt.py
+        finrl_agent.py
+        freqtrade_agent.py
+        openbb_wrapper.py
+        qlib_adapter.py
+        trading_core.py
+    trainer/
+        self_trainer.py
+        trainer_trigger.py
+    updater/
+        __init__.py
+        auto_updater.py
+    utils/
+        config_loader.py
+        environment.py
+        logger.py
+        telemetry.py
+    vision/
+        __init__.py
+        capture.py
+        image_vision.py
+        ip_webcam_vision.py
+        object_vision.py
+        ocr_module.py
+        ocr_reader.py
+        voice_trigger.py
+        yolo_handler.py
+    voice/
+        README.md
+        __init__.py
+        coqui_tts.py
+        elevenlabs_tts.py
+        nari_tts.py
+        stt.py
+        tts.py
+        voice_bridge.py
+        voice_identity.py
+        vosk_stt.py
+        whisper_engine.py
+        whisper_stt.py
+        yolov8_engine.py
+        engine/
+            coqui_tts.py
+            elevenlabs_tts.py
+            whisper_stt.py
+
+FILE PREVIEW
+
+## CHANGELOG.md
+
+### Ciclo 019
+- Creato `hierarchy_controller.py` per definizione core-controller e comunicazioni interne tra agenti
+
+### Ciclo 020
+- Creato `strategic_coordinator.py` con mappatura obiettivi, log interazioni e scelta agenti
+
+### Ciclo 021
+- Creato modulo `cognitive_simulator.py` per apprendimento esperienziale e adattamento comportamentale
+
+## README.md
+# AION – Advanced Intelligence Of Nexus
+
+🔬 **AION** è un sistema AI evolutivo full-stack, autonomo, multimodale e cognitivamente attivo.
+Progettato per **apprendere**, **riflettere**, **generare codice** e **interagire** con ambienti complessi in tempo reale.
+
+## 🧠 Caratteristiche Principali
+
+- 🧠 **Autonomia cognitiva** – Apprende da esperienze passate, simula riflessioni e ottimizza strategie.
+- 🗺️ **Pianificazione intelligente** – Crea piani operativi e migliora tramite feedback (AZR).
+- 🎤 **Multimodalità attiva** – Supporta voce, testo, immagini e input sensoriali reali.
+- 🛠️ **Autogenerazione codice** – Scrive e modifica moduli Python in autonomia.
+- 📊 **Supervisione interna** – Telemetria cognitiva, metriche performance e logging avanzato.
+- 🧩 **Architettura modulare** – Ogni componente è plug&play e indipendente.
+
+---
+
+## 📂 Struttura del Progetto
+
+```plaintext
+├── main.py                    # Entry point principale
+├── start_fullmode.py         # Avvio completo in modalità "Jarvis+"
+├── modules/

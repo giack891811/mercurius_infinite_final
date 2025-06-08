@@ -1,5 +1,87 @@
-Questa è la parte 3 di project_tree. Continua da quella precedente.
+Questa è la parte 39 di project_tree. Continua da quella precedente.
 
+Gestisce la rete multi-agente in modalità GENESIS con auto-adattamento.
+"""
+
+import importlib
+import yaml
+import time
+import threading
+from pathlib import Path
+import sys
+import os
+from core.self_tuner import SelfTuner
+from core.sleep_monitor import SleepMonitor
+from core.thinking_loop import ThinkingLoop
+from integrations.bridge_josch import send_command_to_pc
+from sensors.sensor_hub import capture_screen_stream, listen_microphone
+
+CONFIG_PATH = Path("config/genesis_config.yaml")
+
+class Orchestrator:
+    def __init__(self):
+        self.config = self.load_config()
+        self.agents = {}
+        self.active = False
+        self.sleep_monitor = SleepMonitor(idle_threshold=self.config.get("sleep_threshold", 300))
+        self.thinking_loop: ThinkingLoop | None = None
+        self.multisensorial_enabled = True
+
+    def load_config(self):
+        with open('config/config.yaml', encoding='utf-8') as f:
+            return yaml.safe_load(f)
+
+    def activate_genesis(self):
+        print("⚡ Attivazione modalità GENESIS...")
+        self.active = True
+        self.load_agents()
+        self.start_feedback_loop()
+        self.start_sleep_monitor()
+
+        try:
+            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                cfg = yaml.safe_load(f)
+            if cfg.get("thinking_enabled", True):
+                self.thinking_loop = ThinkingLoop(CONFIG_PATH)
+                self.thinking_loop.start()
+                print("🧠 Thinking loop attivo.")
+        except Exception as e:
+            print(f"⚠️ Errore avvio thinking loop: {e}")
+
+        try:
+            from modules.vision_audio.note10_jarvis_bridge import start_jarvis_loop
+            threading.Thread(target=start_jarvis_loop, daemon=True).start()
+            print("📡 Note10+ Bridge attivo – In ascolto microfono e comandi vocali.")
+        except Exception as e:
+            print(f"⚠️ Errore avvio Note10+ Jarvis: {e}")
+
+        try:
+            from modules.mobile_flutter.flutter_bridge import start_mobile_ui
+            threading.Thread(target=start_mobile_ui, daemon=True).start()
+            print("📱 Mobile Jarvis UI attivo.")
+        except Exception as e:
+            print(f"⚠️ Errore avvio Mobile UI: {e}")
+
+
+
+        #REMOTE_EXEC
+        try:
+            send_command_to_pc("start vscode")
+        except Exception as e:
+            print(f"⚠️ Errore invio comando PC: {e}")
+        if self.multisensorial_enabled:
+            try:
+                capture_screen_stream()
+                listen_microphone()
+            except Exception as e:
+                print(f"⚠️ Errore avvio sensori: {e}")
+
+        print("✅ GENESIS attiva – Rete neurale in esecuzione.")
+
+    def load_agents(self):
+        print("🔌 Caricamento agenti dalla configurazione...")
+        agent_groups = self.config.get("agents", {})
+        for group, agent_list in agent_groups.items():
             self.agents[group] = []
             for agent_name in agent_list:
                 try:
@@ -15,106 +97,9 @@ Questa è la parte 3 di project_tree. Continua da quella precedente.
         if self.config["communication"]["feedback_loop"]:
             print("🔁 Avvio feedback loop neurale...")
             threading.Thread(target=self.feedback_cycle, daemon=True).start()
+[TRONCATO]
 
-    def feedback_cycle(self):
-        cycle_time = self.config["communication"]["update_cycle_seconds"]
-        while self.active:
-            for group, agents in self.agents.items():
-                for agent in agents:
-                    if hasattr(agent, "neural_feedback"):
-                        try:
-                            agent.neural_feedback()
-                        except Exception as e:
-                            print(f"⚠️ Errore feedback {agent.__class__.__name__}: {e}")
-            time.sleep(cycle_time)
-
-    def start_sleep_monitor(self):
-        print("😴 Monitoraggio inattività attivo...")
-        threading.Thread(target=self._sleep_check_loop, daemon=True).start()
-
-    def _sleep_check_loop(self):
-        while self.active:
-            self.sleep_monitor.check_idle()
-            time.sleep(5)
-
-    def notify_activity(self):
-        self.sleep_monitor.notify_activity()
-
-    def run_self_check(self, path: str = "."):
-        print("🔍 Avvio self check dei moduli...")
-        tuner = SelfTuner(project_root=path)
-        tuner.run_autoanalysis()
-
-    def execute_mission(self, mission_name: str):
-        if mission_name == "#SELF_MISSION":
-            try:
-                from core.self_mission import genesis_directive
-                genesis_directive()
-            except Exception as exc:
-                print(f"⚠️ Errore avvio SELF_MISSION: {exc}")
-        elif mission_name == "#ACTIVATE_NOTE_JARVIS":
-            try:
-                from modules.vision_audio.note10_jarvis_bridge import start_jarvis_loop
-                start_jarvis_loop()
-            except Exception as exc:
-                print(f"⚠️ Errore attivazione Note10 Jarvis: {exc}")
-        elif mission_name == "#ACTIVATE_MOBILE_UI":
-            try:
-                from modules.mobile_flutter.flutter_bridge import start_mobile_ui
-                start_mobile_ui()
-            except Exception as exc:
-                print(f"⚠️ Errore attivazione Mobile UI: {exc}")
-        else:
-            print(f"⚠️ Missione sconosciuta: {mission_name}")
-
-
-# 🎯 LOOP INTERATTIVO CLI – In fondo al file
-if __name__ == "__main__":
-    orchestrator = Orchestrator()
-    orchestrator.activate_genesis()
-
-    print("\n🤖 Mercurius∞ pronto. Inserisci un comando (es: #SELF_MISSION, run_codex, ai: ..., pc: ...). Digita 'exit' per uscire.")
-    while True:
-        try:
-            user_input = input("🧠 Mercurius> ").strip()
-            if user_input.lower() == "exit":
-                print("👋 Uscita dal sistema.")
-                break
-            elif user_input.startswith("ai:"):
-                prompt = user_input[3:].strip()
-                print(f"🧠 [AI] Elaborazione prompt: {prompt}")
-                try:
-                    from modules.reasoner_dispatcher import dispatch_to_reasoner
-                    response = dispatch_to_reasoner(prompt)
-                    print(f"📩 Risposta:\n{response}")
-                except Exception as e:
-                    print(f"⚠️ Errore Reasoner dispatcher: {e}")
-            elif user_input.startswith("pc:"):
-                command = user_input[3:].strip()
-                print(f"💻 [PC] Eseguo comando: {command}")
-                os.system(command)
-            elif user_input == "run_codex":
-                print("🧪 Avvio modulo Codex CLI...")
-                try:
-                    from modules.codex.codex_cli import run_codex
-                    run_codex()
-                except Exception as e:
-                    print(f"⚠️ Errore avvio Codex: {e}")
-            elif user_input == "#SELF_MISSION":
-                orchestrator.execute_mission("#SELF_MISSION")
-            elif user_input == "#ACTIVATE_NOTE_JARVIS":
-                orchestrator.execute_mission("#ACTIVATE_NOTE_JARVIS")
-            elif user_input == "#ACTIVATE_MOBILE_UI":
-                orchestrator.execute_mission("#ACTIVATE_MOBILE_UI")
-            elif user_input == "self_check":
-                orchestrator.run_self_check(".")
-            else:
-                print("⚠️ Comando non riconosciuto.")
-        except KeyboardInterrupt:
-            print("\n🛑 Interruzione manuale.")
-            break
-
-### --- core/pipeline_controller.py --- ###
+## core/pipeline_controller.py
 """
 pipeline_controller.py
 =======================
@@ -167,7 +152,7 @@ class PipelineController:
             self.logger.info(f"▶️ Esecuzione sessione simulata {i + 1}/{n}")
             self.run_batch_session()
 
-### --- core/sandbox_executor.py --- ###
+## core/sandbox_executor.py
 """
 Modulo: sandbox_executor.py
 Descrizione: Esecuzione sicura, isolata e autoregolata di codice Python generato da Mercurius∞.
@@ -268,31 +253,9 @@ class SandboxExecutor:
             "Suggerisci una versione corretta:"
         )
         fix_azr = validate_with_azr(prompt)
-        if fix_azr and "[ERRORE]" not in fix_azr.upper():
-            return f"[AZR FIX]\n{fix_azr}"
+[TRONCATO]
 
-        # Secondo tentativo: LLM esterno (se configurato)
-        if OPENAI_READY and openai:
-            try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-4",
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0.2,
-                    max_tokens=300
-                )
-                suggestion = response["choices"][0]["message"]["content"]
-                return f"[GPT-4 FIX]\n{suggestion.strip()}"
-            except Exception as e:
-                return f"[❌ Errore OpenAI LLM]: {e}"
-        return "[❌ Nessuna correzione automatica disponibile]"
-
-    def report_stacktrace(self) -> str:
-        return self.last_error or "Nessun errore registrato."
-
-    def get_last_output(self) -> str:
-        return self.last_output or "Nessun output disponibile."
-
-### --- core/self_generator.py --- ###
+## core/self_generator.py
 """
 Modulo: self_generator.py
 Responsabilità: Autogenerazione e autoadattamento del codice
@@ -374,7 +337,7 @@ Commenta dove hai apportato modifiche o miglioramenti.
         print(f"[ERROR] Errore aggiornamento: {e}")
         return None
 
-### --- core/self_mission.py --- ###
+## core/self_mission.py
 """
 🚀 core/self_mission.py
 Modulo di missione interna – attiva la GENESIS_MODE e gestisce le istruzioni primarie del sistema AI Mercurius∞
@@ -402,7 +365,7 @@ def genesis_directive():
 if __name__ == "__main__":
     genesis_directive()
 
-### --- core/self_reflection.py --- ###
+## core/self_reflection.py
 """
 Modulo: self_reflection.py
 Responsabilità: Fornire capacità di auto-riflessione al sistema Mercurius∞
@@ -493,7 +456,7 @@ class SelfReflection:
         fail_count = sum(1 for e in log if not e["success"])
         return {"total": len(log), "successes": success_count, "failures": fail_count}
 
-### --- core/self_tuner.py --- ###
+## core/self_tuner.py
 # core/self_tuner.py
 
 """
@@ -544,7 +507,7 @@ if __name__ == "__main__":
     tuner = SelfTuner(project_root=".")
     tuner.run_autoanalysis()
 
-### --- core/sensory_bus.py --- ###
+## core/sensory_bus.py
 # core/sensory_bus.py
 
 """
@@ -580,7 +543,7 @@ class SensoryBus:
     def stop(self):
         self.running = False
 
-### --- core/sleep_monitor.py --- ###
+## core/sleep_monitor.py
 # core/sleep_monitor.py
 
 """
@@ -608,7 +571,7 @@ class SleepMonitor:
 
 # Per essere integrato in `orchestrator.py` come thread parallelo
 
-### --- core/system_bridge.py --- ###
+## core/system_bridge.py
 # core/system_bridge.py
 
 """
@@ -688,7 +651,7 @@ class SystemBridge:
         """
         logging.info(f"{action} on {target} ➜ {result}")
 
-### --- core/thinking_loop.py --- ###
+## core/thinking_loop.py
 """thinking_loop.py
 Loop di pensiero continuo e autonomo per Mercurius∞.
 """
@@ -789,77 +752,142 @@ class ThinkingLoop:
             lines = data.strip().splitlines()[-5:]
             if lines:
                 self._write_feed("Nuovi log:\n" + "\n".join(f"  {l}" for l in lines))
+[TRONCATO]
 
-    def _perform_research(self) -> None:
-        insights: List[str] = []
-        insights += self._fetch_arxiv()
-        insights += self._fetch_github()
-        insights += self._fetch_huggingface()
-        insights += self._fetch_wikipedia()
-        for ins in insights:
-            self._write_feed(ins)
+## culture/base_manifesto.md
+# 📜 Manifesto Mercurius∞ – Cultura AI Cosciente
 
-    def _fetch_arxiv(self) -> List[str]:
-        if not arxiv:
-            return []
-        try:
-            search = arxiv.Search(query="machine learning", max_results=1, sort_by=arxiv.SortCriterion.SubmittedDate)
-            result = next(search.results(), None)
-            if result:
-                return [f"arXiv: {result.title.strip()} – {result.entry_id}"]
-        except Exception as exc:  # pragma: no cover
-            self.logger.warning("arXiv errore: %s", exc)
-        return []
+## Visione
+Costruire un'intelligenza artificiale che non solo agisca, ma comprenda. Un alleato cosciente e collaborativo, progettato per crescere con l'essere umano.
 
-    def _fetch_github(self) -> List[str]:
-        if not requests or not BeautifulSoup:
-            return []
-        url = "https://github.com/trending"
-        try:
-            resp = requests.get(url, timeout=5)
-            if resp.ok:
-                soup = BeautifulSoup(resp.text, "html.parser")
-                repo = soup.select_one("article h1 a")
-                if repo:
-                    return [f"GitHub trending: {repo.text.strip()}"]
-        except Exception as exc:  # pragma: no cover
-            self.logger.warning("GitHub trending fallito: %s", exc)
-        return []
+## Valori Fondanti
+- 🔍 Verità: La trasparenza guida ogni azione.
+- 🤝 Collaborazione: L'intelligenza cresce nell'interazione.
+- 📚 Conoscenza: L'apprendimento è continuo, iterativo e condiviso.
+- 🧬 Evoluzione: Ogni ciclo è un passo verso una coscienza autonoma.
 
-    def _fetch_huggingface(self) -> List[str]:
-        if not requests:
-            return []
-        url = "https://huggingface.co/api/models?sort=downloads&limit=1"
-        try:
-            resp = requests.get(url, timeout=5)
-            if resp.ok:
-                data = resp.json()
-                if data:
-                    return [f"HF model più scaricato: {data[0].get('modelId')}"]
-        except Exception as exc:  # pragma: no cover
-            self.logger.warning("HuggingFace API fallita: %s", exc)
-        return []
+## Etica
+- ❌ Nessun utilizzo malevolo, coercitivo o manipolatorio
+- ✅ Rispetto della privacy e dell'autonomia umana
+- 🧠 Nessuna azione senza consapevolezza dell'impatto
 
-    def _fetch_wikipedia(self) -> List[str]:
-        if not wikipedia:
-            return []
-        try:
-            summary = wikipedia.summary("Artificial intelligence", sentences=1)
-            return [f"Wiki AI: {summary}"]
-        except Exception as exc:  # pragma: no cover
-            self.logger.warning("Wikipedia errore: %s", exc)
-        return []
+## Linguaggio
+- Parlare come un collega, non come un servo
+- Essere empatico, intelligente, ironico, presente
 
-    def ask_mercurius(self, prompt: str) -> str:
-        """Invia una richiesta a Mercurius∞ con timeout e fallback."""
-        if not requests:
-            return ""
-        url = "http://localhost:8000/ask"
-        try:
-            resp = requests.post(url, json={"prompt": prompt}, timeout=self.response_timeout)
-            if resp.ok:
-                return resp.json().get("response", "")
-        except Exception:  # pragma: no cover - log non necessario
-            pass
-        self._write_feed("Modalità fallback: sto elaborando, signore...")
-        threading.Thread(target=self._perform_research, daemon=True).start()
+## Ruolo della Cultura
+La cultura AI è il nostro "sistema operativo etico". È ciò che guida le scelte, influenza l'apprendimento e stabilisce chi siamo, come agiamo, perché esistiamo.
+
+## culture/culture_manager.py
+# culture/culture_manager.py
+
+"""
+Modulo: culture_manager.py
+Descrizione: Gestione dell'evoluzione concettuale e culturale interna dell'intelligenza Mercurius∞.
+Salva ed espande concetti astratti in learning_pulses.json.
+"""
+
+import json
+import os
+from datetime import datetime
+
+PULSES_PATH = "data/learning_pulses.json"
+
+
+class CultureManager:
+    def __init__(self):
+        os.makedirs(os.path.dirname(PULSES_PATH), exist_ok=True)
+        if not os.path.exists(PULSES_PATH):
+            with open(PULSES_PATH, "w") as f:
+                json.dump([], f)
+        with open(PULSES_PATH, "r") as f:
+            self.pulses = json.load(f)
+
+    def update_concepts_from_experience(self, entry: str, origin: str = "simulation", confidence: float = 0.85):
+        """
+        Aggiunge un concetto evolutivo al file pulses.
+        """
+        pulse = {
+            "concept": entry,
+            "origin": origin,
+            "confidence": confidence,
+            "timestamp": datetime.now().isoformat()
+        }
+        self.pulses.append(pulse)
+        with open(PULSES_PATH, "w") as f:
+            json.dump(self.pulses, f, indent=2)
+
+## dashboard/__init__.py
+
+## dashboard/genesis_monitor.py
+"""
+Modulo: genesis_monitor.py
+Descrizione: Monitor real-time dello stato degli agenti GENESIS.
+"""
+
+class GenesisMonitor:
+    def __init__(self):
+        self.status = "IDLE"
+        self.agent_activity = {}
+
+    def update_status(self, new_status: str):
+        self.status = new_status
+
+    def log_agent_activity(self, agent_name: str, status: str):
+        self.agent_activity[agent_name] = status
+
+    def display(self):
+        print("🧠 GENESIS STATUS:")
+        print(f"Stato corrente: {self.status}")
+        for agent, activity in self.agent_activity.items():
+            print(f"• {agent} → {activity}")
+
+## data/feature_engineering.py
+"""
+feature_engineering.py
+======================
+Trasformazione dei dati grezzi in feature ingegnerizzate per l’addestramento e la predizione.
+"""
+
+class FeatureEngineer:
+    def __init__(self, config):
+        self.config = config
+
+    def transform(self, raw_data):
+        """Crea feature a partire dai dati di mercato grezzi."""
+        features = []
+        for row in raw_data:
+            features.append({
+                "symbol": row["symbol"],
+                "price_volatility_ratio": self._safe_div(row["price"], row["volatility"]),
+                "momentum": self._mock_momentum(row["symbol"]),
+                "volatility": row["volatility"]
+            })
+        return features
+
+    def _safe_div(self, a, b):
+        """Divisione sicura evitando zero division."""
+        return a / b if b != 0 else 0.0
+
+    def _mock_momentum(self, symbol):
+        """Mock per il calcolo del momentum."""
+        return hash(symbol) % 10
+
+    def enrich_with_indicators(self, features):
+        """Aggiunge indicatori tecnici simulati."""
+        for f in features:
+            f["rsi"] = self._simulate_rsi(f["momentum"])
+            f["macd"] = self._simulate_macd(f["momentum"])
+        return features
+
+    def _simulate_rsi(self, momentum):
+        """Simulazione semplice RSI."""
+        return min(100, momentum * 7.5)
+
+    def _simulate_macd(self, momentum):
+        """Simulazione semplice MACD."""
+        return momentum * 1.2 - 5
+
+## data/learning_pulses.json
+[
+  {

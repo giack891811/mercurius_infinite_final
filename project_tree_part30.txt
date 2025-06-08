@@ -1,0 +1,810 @@
+Questa è la parte 30 di project_tree. Continua da quella precedente.
+
+Modulo: health_check.py
+Descrizione: Endpoint di salute (liveness/readiness) per Mercurius∞ via FastAPI.
+Espone:
+  • GET /health → {"status": "ok", "uptime_sec": N}
+  • GET /ready  → {"ready": true|false}
+
+L'endpoint /health restituisce sempre "ok" finché il processo è in esecuzione,
+mentre /ready diventa True solo se la variabile d'ambiente MERCURIUS_READY è settata a "true",
+ad esempio quando l'orchestrator ha completato l'avvio completo di GENESIS_MODE.
+"""
+
+import os
+from datetime import datetime
+
+import uvicorn
+from fastapi import FastAPI
+
+app = FastAPI(title="Mercurius∞ HealthCheck")
+START_TIME = datetime.utcnow()
+
+
+@app.get("/health")
+def health():
+    """
+    Liveness probe:
+    Restituisce sempre {"status": "ok", "uptime_sec": N}, dove N è il numero
+    di secondi trascorsi dall'avvio di questo servizio.
+    """
+    uptime = (datetime.utcnow() - START_TIME).seconds
+    return {"status": "ok", "uptime_sec": uptime}
+
+
+@app.get("/ready")
+def ready():
+    """
+    Readiness probe:
+    Verifica se la variabile d'ambiente MERCURIUS_READY è impostata a "true".
+    Restituisce {"ready": true} solo in quel caso, altrimenti {"ready": false}.
+    Questo consente di segnalare che l'orchestrator (o il modulo GENESIS) è completamente avviato.
+    """
+    ready_flag = os.getenv("MERCURIUS_READY", "false").lower() == "true"
+    return {"ready": ready_flag}
+
+
+if __name__ == "__main__":
+    # Esegue il server FastAPI su tutte le interfacce di rete (0.0.0.0) alla porta 8080
+    uvicorn.run(app, host="0.0.0.0", port=8080)
+
+## monitoring/log_dashboard.py
+# monitoring/log_dashboard.py
+
+"""
+Modulo: log_dashboard.py
+Descrizione: Dashboard Streamlit per visualizzare in tempo reale l’Audit Log di Mercurius∞.
+Espone una tabella che mostra le ultime righe di “logs/audit_log.jsonl” e si aggiorna ogni 2 secondi.
+"""
+
+import json
+from pathlib import Path
+
+import streamlit as st
+
+# Percorso del file di log in formato JSON Lines
+LOG_FILE = Path("logs/audit_log.jsonl")
+
+# Configurazione della pagina Streamlit
+st.set_page_config(layout="wide", page_title="Mercurius∞ – Audit Log Live")
+st.title("🛡️ Mercurius∞ – Live Audit Log")
+
+# Placeholder che verrà rimpiazzato con la tabella dei log
+placeholder = st.empty()
+
+
+def tail_log(n: int = 200):
+    """
+    Legge le ultime `n` righe del file di log (se presente) e le restituisce
+    come lista di dizionari JSON. Se il file non esiste, ritorna lista vuota.
+
+    :param n: numero di righe finali da leggere (default 200)
+    :return: lista di oggetti (dict) corrispondenti alle righe JSON più recenti
+    """
+    if not LOG_FILE.exists():
+        return []
+    # Legge tutto il testo del file, lo divide per righe e ne restituisce le ultime n
+    lines = LOG_FILE.read_text(encoding="utf-8").splitlines()[-n:]
+    return [json.loads(line) for line in lines]
+
+
+# Loop infinito: ogni 2 secondi aggiorna la tabella con gli ultimi log
+while True:
+    data = tail_log()
+    placeholder.table(data)
+    st.sleep(2)
+
+## monitoring/metrics_exporter.py
+# monitoring/metrics_exporter.py
+
+"""
+Modulo: metrics_exporter.py
+Descrizione: Esporta metriche Prometheus per Mercurius∞ (HTTP 9100/metrics).
+Raccoglie l’utilizzo di CPU e memoria e le espone come metriche Prometheus.
+
+Metriche disponibili:
+  • mercurius_cpu_usage_percent  → Percentuale di utilizzo CPU
+  • mercurius_mem_usage_mb      → Memoria usata in MB
+
+Il servizio HTTP di Prometheus viene avviato sulla porta 9100 all’esecuzione dello script.
+Le metriche vengono aggiornate ogni 5 secondi.
+"""
+
+import time
+
+import psutil
+from prometheus_client import Gauge, start_http_server
+
+# Creazione dei gauge Prometheus
+CPU_USAGE = Gauge("mercurius_cpu_usage_percent", "CPU usage in percent")
+MEM_USAGE = Gauge("mercurius_mem_usage_mb", "Memory usage in MB")
+
+
+def collect_metrics():
+    """
+    Raccoglie le metriche di sistema:
+      - CPU usage percentuale (valore 0-100)
+      - Memoria usata in Megabyte (RAM utilizzata dal sistema)
+    e aggiorna i corrispondenti Gauge Prometheus.
+    """
+    CPU_USAGE.set(psutil.cpu_percent())
+    MEM_USAGE.set(psutil.virtual_memory().used / 1024 / 1024)
+
+
+if __name__ == "__main__":
+    # Avvia il server HTTP per Prometheus sulla porta 9100.
+    # L’endpoint esposto sarà accessibile su http://<host>:9100/metrics
+    start_http_server(9100)
+
+    # Loop infinito: ogni 5 secondi raccoglie e aggiorna le metriche
+    while True:
+        collect_metrics()
+        time.sleep(5)
+
+## node_modules/.package-lock.json
+{
+  "name": "mercurius_infinite_final",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "node_modules/@types/react": {
+      "version": "19.1.6",
+      "resolved": "https://registry.npmjs.org/@types/react/-/react-19.1.6.tgz",
+      "integrity": "sha512-JeG0rEWak0N6Itr6QUx+X60uQmN+5t3j9r/OVDtWzFXKaj6kD1BwJzOksD0FF6iWxZlbE1kB0q9vtnU2ekqa1Q==",
+      "license": "MIT",
+      "dependencies": {
+        "csstype": "^3.0.2"
+      }
+    },
+    "node_modules/csstype": {
+      "version": "3.1.3",
+      "resolved": "https://registry.npmjs.org/csstype/-/csstype-3.1.3.tgz",
+      "integrity": "sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==",
+      "license": "MIT"
+    },
+    "node_modules/react": {
+      "version": "19.1.0",
+      "resolved": "https://registry.npmjs.org/react/-/react-19.1.0.tgz",
+      "integrity": "sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==",
+      "license": "MIT",
+      "engines": {
+        "node": ">=0.10.0"
+      }
+    }
+  }
+}
+
+## node_modules/@types/react/README.md
+# Installation
+> `npm install --save @types/react`
+
+# Summary
+This package contains type definitions for react (https://react.dev/).
+
+# Details
+Files were exported from https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react.
+
+### Additional Details
+ * Last updated: Tue, 27 May 2025 08:02:50 GMT
+ * Dependencies: [csstype](https://npmjs.com/package/csstype)
+
+# Credits
+These definitions were written by [Asana](https://asana.com), [AssureSign](http://www.assuresign.com), [Microsoft](https://microsoft.com), [John Reilly](https://github.com/johnnyreilly), [Benoit Benezech](https://github.com/bbenezech), [Patricio Zavolinsky](https://github.com/pzavolinsky), [Eric Anderson](https://github.com/ericanderson), [Dovydas Navickas](https://github.com/DovydasNavickas), [Josh Rutherford](https://github.com/theruther4d), [Guilherme Hübner](https://github.com/guilhermehubner), [Ferdy Budhidharma](https://github.com/ferdaber), [Johann Rakotoharisoa](https://github.com/jrakotoharisoa), [Olivier Pascal](https://github.com/pascaloliv), [Martin Hochel](https://github.com/hotell), [Frank Li](https://github.com/franklixuefei), [Jessica Franco](https://github.com/Jessidhia), [Saransh Kataria](https://github.com/saranshkataria), [Kanitkorn Sujautra](https://github.com/lukyth), [Sebastian Silbermann](https://github.com/eps1lon), [Kyle Scully](https://github.com/zieka), [Cong Zhang](https://github.com/dancerphil), [Dimitri Mitropoulos](https://github.com/dimitropoulos), [JongChan Choi](https://github.com/disjukr), [Victor Magalhães](https://github.com/vhfmag), [Priyanshu Rav](https://github.com/priyanshurav), [Dmitry Semigradsky](https://github.com/Semigradsky), and [Matt Pocock](https://github.com/mattpocock).
+
+## node_modules/@types/react/canary.d.ts
+/**
+ * These are types for things that are present in the React `canary` release channel.
+ *
+ * To load the types declared here in an actual project, there are three ways. The easiest one,
+ * if your `tsconfig.json` already has a `"types"` array in the `"compilerOptions"` section,
+ * is to add `"react/canary"` to the `"types"` array.
+ *
+ * Alternatively, a specific import syntax can to be used from a typescript file.
+ * This module does not exist in reality, which is why the {} is important:
+ *
+ * ```ts
+ * import {} from 'react/canary'
+ * ```
+ *
+ * It is also possible to include it through a triple-slash reference:
+ *
+ * ```ts
+ * /// <reference types="react/canary" />
+ * ```
+ *
+ * Either the import or the reference only needs to appear once, anywhere in the project.
+ */
+
+// See https://github.com/facebook/react/blob/main/packages/react/src/React.js to see how the exports are declared,
+
+import React = require(".");
+
+export {};
+
+declare const UNDEFINED_VOID_ONLY: unique symbol;
+type VoidOrUndefinedOnly = void | { [UNDEFINED_VOID_ONLY]: never };
+
+declare module "." {
+    export function unstable_useCacheRefresh(): () => void;
+}
+
+## node_modules/@types/react/compiler-runtime.d.ts
+// Not meant to be used directly
+// Omitting all exports so that they don't appear in IDE autocomplete.
+
+export {};
+
+## node_modules/@types/react/experimental.d.ts
+/**
+ * These are types for things that are present in the `experimental` builds of React but not yet
+ * on a stable build.
+ *
+ * Once they are promoted to stable they can just be moved to the main index file.
+ *
+ * To load the types declared here in an actual project, there are three ways. The easiest one,
+ * if your `tsconfig.json` already has a `"types"` array in the `"compilerOptions"` section,
+ * is to add `"react/experimental"` to the `"types"` array.
+ *
+ * Alternatively, a specific import syntax can to be used from a typescript file.
+ * This module does not exist in reality, which is why the {} is important:
+ *
+ * ```ts
+ * import {} from 'react/experimental'
+ * ```
+ *
+ * It is also possible to include it through a triple-slash reference:
+ *
+ * ```ts
+ * /// <reference types="react/experimental" />
+ * ```
+ *
+ * Either the import or the reference only needs to appear once, anywhere in the project.
+ */
+
+// See https://github.com/facebook/react/blob/master/packages/react/src/React.js to see how the exports are declared,
+// and https://github.com/facebook/react/blob/master/packages/shared/ReactFeatureFlags.js to verify which APIs are
+// flagged experimental or not. Experimental APIs will be tagged with `__EXPERIMENTAL__`.
+//
+// For the inputs of types exported as simply a fiber tag, the `beginWork` function of ReactFiberBeginWork.js
+// is a good place to start looking for details; it generally calls prop validation functions or delegates
+// all tasks done as part of the render phase (the concurrent part of the React update cycle).
+//
+// Suspense-related handling can be found in ReactFiberThrow.js.
+
+import React = require("./canary");
+
+export {};
+
+declare const UNDEFINED_VOID_ONLY: unique symbol;
+type VoidOrUndefinedOnly = void | { [UNDEFINED_VOID_ONLY]: never };
+
+declare module "." {
+    export interface SuspenseProps {
+        /**
+         * The presence of this prop indicates that the content is computationally expensive to render.
+         * In other words, the tree is CPU bound and not I/O bound (e.g. due to fetching data).
+         * @see {@link https://github.com/facebook/react/pull/19936}
+         */
+        unstable_expectedLoadTime?: number | undefined;
+    }
+
+    export type SuspenseListRevealOrder = "forwards" | "backwards" | "together";
+    export type SuspenseListTailMode = "collapsed" | "hidden";
+
+    export interface SuspenseListCommonProps {
+        /**
+         * Note that SuspenseList require more than one child;
+         * it is a runtime warning to provide only a single child.
+         *
+         * It does, however, allow those children to be wrapped inside a single
+         * level of `<React.Fragment>`.
+         */
+        children: ReactElement | Iterable<ReactElement>;
+    }
+
+    interface DirectionalSuspenseListProps extends SuspenseListCommonProps {
+        /**
+         * Defines the order in which the `SuspenseList` children should be revealed.
+         */
+        revealOrder: "forwards" | "backwards";
+        /**
+         * Dictates how unloaded items in a SuspenseList is shown.
+         *
+         * - By default, `SuspenseList` will show all fallbacks in the list.
+         * - `collapsed` shows only the next fallback in the list.
+         * - `hidden` doesn’t show any unloaded items.
+         */
+        tail?: SuspenseListTailMode | undefined;
+    }
+
+    interface NonDirectionalSuspenseListProps extends SuspenseListCommonProps {
+        /**
+         * Defines the order in which the `SuspenseList` children should be revealed.
+         */
+        revealOrder?: Exclude<SuspenseListRevealOrder, DirectionalSuspenseListProps["revealOrder"]> | undefined;
+        /**
+         * The tail property is invalid when not using the `forwards` or `backwards` reveal orders.
+         */
+        tail?: never | undefined;
+    }
+
+    export type SuspenseListProps = DirectionalSuspenseListProps | NonDirectionalSuspenseListProps;
+
+    /**
+     * `SuspenseList` helps coordinate many components that can suspend by orchestrating the order
+     * in which these components are revealed to the user.
+     *
+     * When multiple components need to fetch data, this data may arrive in an unpredictable order.
+[TRONCATO]
+
+## node_modules/@types/react/global.d.ts
+/*
+React projects that don't include the DOM library need these interfaces to compile.
+React Native applications use React, but there is no DOM available. The JavaScript runtime
+is ES6/ES2015 only. These definitions allow such projects to compile with only `--lib ES6`.
+
+Warning: all of these interfaces are empty. If you want type definitions for various properties
+(such as HTMLInputElement.prototype.value), you need to add `--lib DOM` (via command line or tsconfig.json).
+*/
+
+interface Event {}
+interface AnimationEvent extends Event {}
+interface ClipboardEvent extends Event {}
+interface CompositionEvent extends Event {}
+interface DragEvent extends Event {}
+interface FocusEvent extends Event {}
+interface InputEvent extends Event {}
+interface KeyboardEvent extends Event {}
+interface MouseEvent extends Event {}
+interface TouchEvent extends Event {}
+interface PointerEvent extends Event {}
+interface ToggleEvent extends Event {}
+interface TransitionEvent extends Event {}
+interface UIEvent extends Event {}
+interface WheelEvent extends Event {}
+
+interface EventTarget {}
+interface Document {}
+interface DataTransfer {}
+interface StyleMedia {}
+
+interface Element {}
+interface DocumentFragment {}
+
+interface HTMLElement extends Element {}
+interface HTMLAnchorElement extends HTMLElement {}
+interface HTMLAreaElement extends HTMLElement {}
+interface HTMLAudioElement extends HTMLElement {}
+interface HTMLBaseElement extends HTMLElement {}
+interface HTMLBodyElement extends HTMLElement {}
+interface HTMLBRElement extends HTMLElement {}
+interface HTMLButtonElement extends HTMLElement {}
+interface HTMLCanvasElement extends HTMLElement {}
+interface HTMLDataElement extends HTMLElement {}
+interface HTMLDataListElement extends HTMLElement {}
+interface HTMLDetailsElement extends HTMLElement {}
+interface HTMLDialogElement extends HTMLElement {}
+interface HTMLDivElement extends HTMLElement {}
+interface HTMLDListElement extends HTMLElement {}
+interface HTMLEmbedElement extends HTMLElement {}
+interface HTMLFieldSetElement extends HTMLElement {}
+interface HTMLFormElement extends HTMLElement {}
+interface HTMLHeadingElement extends HTMLElement {}
+interface HTMLHeadElement extends HTMLElement {}
+interface HTMLHRElement extends HTMLElement {}
+interface HTMLHtmlElement extends HTMLElement {}
+interface HTMLIFrameElement extends HTMLElement {}
+interface HTMLImageElement extends HTMLElement {}
+interface HTMLInputElement extends HTMLElement {}
+interface HTMLModElement extends HTMLElement {}
+interface HTMLLabelElement extends HTMLElement {}
+interface HTMLLegendElement extends HTMLElement {}
+interface HTMLLIElement extends HTMLElement {}
+interface HTMLLinkElement extends HTMLElement {}
+interface HTMLMapElement extends HTMLElement {}
+interface HTMLMetaElement extends HTMLElement {}
+interface HTMLMeterElement extends HTMLElement {}
+interface HTMLObjectElement extends HTMLElement {}
+interface HTMLOListElement extends HTMLElement {}
+interface HTMLOptGroupElement extends HTMLElement {}
+interface HTMLOptionElement extends HTMLElement {}
+interface HTMLOutputElement extends HTMLElement {}
+interface HTMLParagraphElement extends HTMLElement {}
+interface HTMLParamElement extends HTMLElement {}
+interface HTMLPreElement extends HTMLElement {}
+interface HTMLProgressElement extends HTMLElement {}
+interface HTMLQuoteElement extends HTMLElement {}
+interface HTMLSlotElement extends HTMLElement {}
+interface HTMLScriptElement extends HTMLElement {}
+interface HTMLSelectElement extends HTMLElement {}
+interface HTMLSourceElement extends HTMLElement {}
+interface HTMLSpanElement extends HTMLElement {}
+interface HTMLStyleElement extends HTMLElement {}
+interface HTMLTableElement extends HTMLElement {}
+interface HTMLTableColElement extends HTMLElement {}
+interface HTMLTableDataCellElement extends HTMLElement {}
+interface HTMLTableHeaderCellElement extends HTMLElement {}
+interface HTMLTableRowElement extends HTMLElement {}
+interface HTMLTableSectionElement extends HTMLElement {}
+interface HTMLTemplateElement extends HTMLElement {}
+interface HTMLTextAreaElement extends HTMLElement {}
+interface HTMLTimeElement extends HTMLElement {}
+interface HTMLTitleElement extends HTMLElement {}
+interface HTMLTrackElement extends HTMLElement {}
+interface HTMLUListElement extends HTMLElement {}
+interface HTMLVideoElement extends HTMLElement {}
+interface HTMLWebViewElement extends HTMLElement {}
+
+interface SVGElement extends Element {}
+interface SVGSVGElement extends SVGElement {}
+interface SVGCircleElement extends SVGElement {}
+[TRONCATO]
+
+## node_modules/@types/react/index.d.ts
+// NOTE: Users of the `experimental` builds of React should add a reference
+// to 'react/experimental' in their project. See experimental.d.ts's top comment
+// for reference and documentation on how exactly to do it.
+
+/// <reference path="global.d.ts" />
+
+import * as CSS from "csstype";
+
+type NativeAnimationEvent = AnimationEvent;
+type NativeClipboardEvent = ClipboardEvent;
+type NativeCompositionEvent = CompositionEvent;
+type NativeDragEvent = DragEvent;
+type NativeFocusEvent = FocusEvent;
+type NativeInputEvent = InputEvent;
+type NativeKeyboardEvent = KeyboardEvent;
+type NativeMouseEvent = MouseEvent;
+type NativeTouchEvent = TouchEvent;
+type NativePointerEvent = PointerEvent;
+type NativeToggleEvent = ToggleEvent;
+type NativeTransitionEvent = TransitionEvent;
+type NativeUIEvent = UIEvent;
+type NativeWheelEvent = WheelEvent;
+
+/**
+ * Used to represent DOM API's where users can either pass
+ * true or false as a boolean or as its equivalent strings.
+ */
+type Booleanish = boolean | "true" | "false";
+
+/**
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/crossorigin MDN}
+ */
+type CrossOrigin = "anonymous" | "use-credentials" | "" | undefined;
+
+declare const UNDEFINED_VOID_ONLY: unique symbol;
+
+/**
+ * @internal Use `Awaited<ReactNode>` instead
+ */
+// Helper type to enable `Awaited<ReactNode>`.
+// Must be a copy of the non-thenables of `ReactNode`.
+type AwaitedReactNode =
+    | React.ReactElement
+    | string
+    | number
+    | bigint
+    | Iterable<React.ReactNode>
+    | React.ReactPortal
+    | boolean
+    | null
+    | undefined
+    | React.DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_REACT_NODES[
+        keyof React.DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_REACT_NODES
+    ];
+
+/**
+ * The function returned from an effect passed to {@link React.useEffect useEffect},
+ * which can be used to clean up the effect when the component unmounts.
+ *
+ * @see {@link https://react.dev/reference/react/useEffect React Docs}
+ */
+type Destructor = () => void | { [UNDEFINED_VOID_ONLY]: never };
+type VoidOrUndefinedOnly = void | { [UNDEFINED_VOID_ONLY]: never };
+
+// eslint-disable-next-line @definitelytyped/export-just-namespace
+export = React;
+export as namespace React;
+
+declare namespace React {
+    //
+    // React Elements
+    // ----------------------------------------------------------------------
+
+    /**
+     * Used to retrieve the possible components which accept a given set of props.
+     *
+     * Can be passed no type parameters to get a union of all possible components
+     * and tags.
+     *
+     * Is a superset of {@link ComponentType}.
+     *
+     * @template P The props to match against. If not passed, defaults to any.
+     * @template Tag An optional tag to match against. If not passed, attempts to match against all possible tags.
+     *
+     * @example
+     *
+     * ```tsx
+     * // All components and tags (img, embed etc.)
+     * // which accept `src`
+     * type SrcComponents = ElementType<{ src: any }>;
+     * ```
+     *
+     * @example
+     *
+     * ```tsx
+     * // All components
+     * type AllComponents = ElementType;
+     * ```
+     *
+     * @example
+[TRONCATO]
+
+## node_modules/@types/react/jsx-dev-runtime.d.ts
+import * as React from "./";
+export { Fragment } from "./";
+
+export namespace JSX {
+    type ElementType = React.JSX.ElementType;
+    interface Element extends React.JSX.Element {}
+    interface ElementClass extends React.JSX.ElementClass {}
+    interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
+    interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
+    type LibraryManagedAttributes<C, P> = React.JSX.LibraryManagedAttributes<C, P>;
+    interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
+    interface IntrinsicClassAttributes<T> extends React.JSX.IntrinsicClassAttributes<T> {}
+    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+}
+
+export interface JSXSource {
+    /**
+     * The source file where the element originates from.
+     */
+    fileName?: string | undefined;
+
+    /**
+     * The line number where the element was created.
+     */
+    lineNumber?: number | undefined;
+
+    /**
+     * The column number where the element was created.
+     */
+    columnNumber?: number | undefined;
+}
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsxDEV(
+    type: React.ElementType,
+    props: unknown,
+    key: React.Key | undefined,
+    isStatic: boolean,
+    source?: JSXSource,
+    self?: unknown,
+): React.ReactElement;
+
+## node_modules/@types/react/jsx-runtime.d.ts
+import * as React from "./";
+export { Fragment } from "./";
+
+export namespace JSX {
+    type ElementType = React.JSX.ElementType;
+    interface Element extends React.JSX.Element {}
+    interface ElementClass extends React.JSX.ElementClass {}
+    interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
+    interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
+    type LibraryManagedAttributes<C, P> = React.JSX.LibraryManagedAttributes<C, P>;
+    interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
+    interface IntrinsicClassAttributes<T> extends React.JSX.IntrinsicClassAttributes<T> {}
+    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+}
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsx(
+    type: React.ElementType,
+    props: unknown,
+    key?: React.Key,
+): React.ReactElement;
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsxs(
+    type: React.ElementType,
+    props: unknown,
+    key?: React.Key,
+): React.ReactElement;
+
+## node_modules/@types/react/package.json
+{
+    "name": "@types/react",
+    "version": "19.1.6",
+    "description": "TypeScript definitions for react",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Asana",
+            "url": "https://asana.com"
+        },
+        {
+            "name": "AssureSign",
+            "url": "http://www.assuresign.com"
+        },
+        {
+            "name": "Microsoft",
+            "url": "https://microsoft.com"
+        },
+        {
+            "name": "John Reilly",
+            "githubUsername": "johnnyreilly",
+            "url": "https://github.com/johnnyreilly"
+        },
+        {
+            "name": "Benoit Benezech",
+            "githubUsername": "bbenezech",
+            "url": "https://github.com/bbenezech"
+        },
+        {
+            "name": "Patricio Zavolinsky",
+            "githubUsername": "pzavolinsky",
+            "url": "https://github.com/pzavolinsky"
+        },
+        {
+            "name": "Eric Anderson",
+            "githubUsername": "ericanderson",
+            "url": "https://github.com/ericanderson"
+        },
+        {
+            "name": "Dovydas Navickas",
+            "githubUsername": "DovydasNavickas",
+            "url": "https://github.com/DovydasNavickas"
+        },
+        {
+            "name": "Josh Rutherford",
+            "githubUsername": "theruther4d",
+            "url": "https://github.com/theruther4d"
+        },
+        {
+            "name": "Guilherme Hübner",
+            "githubUsername": "guilhermehubner",
+            "url": "https://github.com/guilhermehubner"
+        },
+        {
+            "name": "Ferdy Budhidharma",
+            "githubUsername": "ferdaber",
+            "url": "https://github.com/ferdaber"
+        },
+        {
+            "name": "Johann Rakotoharisoa",
+            "githubUsername": "jrakotoharisoa",
+            "url": "https://github.com/jrakotoharisoa"
+        },
+        {
+            "name": "Olivier Pascal",
+            "githubUsername": "pascaloliv",
+            "url": "https://github.com/pascaloliv"
+        },
+        {
+            "name": "Martin Hochel",
+            "githubUsername": "hotell",
+            "url": "https://github.com/hotell"
+        },
+        {
+            "name": "Frank Li",
+            "githubUsername": "franklixuefei",
+            "url": "https://github.com/franklixuefei"
+        },
+        {
+            "name": "Jessica Franco",
+            "githubUsername": "Jessidhia",
+            "url": "https://github.com/Jessidhia"
+        },
+        {
+            "name": "Saransh Kataria",
+            "githubUsername": "saranshkataria",
+            "url": "https://github.com/saranshkataria"
+        },
+        {
+            "name": "Kanitkorn Sujautra",
+            "githubUsername": "lukyth",
+            "url": "https://github.com/lukyth"
+        },
+        {
+            "name": "Sebastian Silbermann",
+            "githubUsername": "eps1lon",
+            "url": "https://github.com/eps1lon"
+        },
+        {
+[TRONCATO]
+
+## node_modules/@types/react/ts5.0/canary.d.ts
+/**
+ * These are types for things that are present in the React `canary` release channel.
+ *
+ * To load the types declared here in an actual project, there are three ways. The easiest one,
+ * if your `tsconfig.json` already has a `"types"` array in the `"compilerOptions"` section,
+ * is to add `"react/canary"` to the `"types"` array.
+ *
+ * Alternatively, a specific import syntax can to be used from a typescript file.
+ * This module does not exist in reality, which is why the {} is important:
+ *
+ * ```ts
+ * import {} from 'react/canary'
+ * ```
+ *
+ * It is also possible to include it through a triple-slash reference:
+ *
+ * ```ts
+ * /// <reference types="react/canary" />
+ * ```
+ *
+ * Either the import or the reference only needs to appear once, anywhere in the project.
+ */
+
+// See https://github.com/facebook/react/blob/main/packages/react/src/React.js to see how the exports are declared,
+
+import React = require(".");
+
+export {};
+
+declare const UNDEFINED_VOID_ONLY: unique symbol;
+type VoidOrUndefinedOnly = void | { [UNDEFINED_VOID_ONLY]: never };
+
+declare module "." {
+    export function unstable_useCacheRefresh(): () => void;
+}
+
+## node_modules/@types/react/ts5.0/experimental.d.ts
+/**
+ * These are types for things that are present in the `experimental` builds of React but not yet
+ * on a stable build.
+ *
+ * Once they are promoted to stable they can just be moved to the main index file.
+ *
+ * To load the types declared here in an actual project, there are three ways. The easiest one,
+ * if your `tsconfig.json` already has a `"types"` array in the `"compilerOptions"` section,
+ * is to add `"react/experimental"` to the `"types"` array.
+ *
+ * Alternatively, a specific import syntax can to be used from a typescript file.
+ * This module does not exist in reality, which is why the {} is important:
+ *
+ * ```ts
+ * import {} from 'react/experimental'
+ * ```
+ *
+ * It is also possible to include it through a triple-slash reference:
+ *
+ * ```ts
+ * /// <reference types="react/experimental" />
+ * ```
+ *
+ * Either the import or the reference only needs to appear once, anywhere in the project.
+ */
+
+// See https://github.com/facebook/react/blob/master/packages/react/src/React.js to see how the exports are declared,
+// and https://github.com/facebook/react/blob/master/packages/shared/ReactFeatureFlags.js to verify which APIs are
+// flagged experimental or not. Experimental APIs will be tagged with `__EXPERIMENTAL__`.
+//
+// For the inputs of types exported as simply a fiber tag, the `beginWork` function of ReactFiberBeginWork.js
+// is a good place to start looking for details; it generally calls prop validation functions or delegates
+// all tasks done as part of the render phase (the concurrent part of the React update cycle).
+//
+// Suspense-related handling can be found in ReactFiberThrow.js.
+
+import React = require("./canary");
+
+export {};

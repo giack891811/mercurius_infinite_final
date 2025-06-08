@@ -1,0 +1,1082 @@
+Questa è la parte 35 di project_tree. Continua da quella precedente.
+
+        """
+        Placeholder per estensione con modello YOLO/Vision per rilevamento oggetti.
+        """
+        return ["[analisi visiva non implementata]"]
+
+## vision/ip_webcam_vision.py
+"""YOLO based detection from IP webcam stream."""
+import cv2
+from vision.object_vision import ObjectVision
+
+class IPWebcamVision(ObjectVision):
+    def start_stream(self, ip_url: str):
+        cap = cv2.VideoCapture(ip_url)
+        if not cap.isOpened():
+            raise RuntimeError("Cannot open IP camera")
+        print("📡 Streaming IP webcam... press 'q' to quit")
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            results = self.model(frame, verbose=False)[0]
+            annotated = self.box_annotator.annotate(
+                scene=frame,
+                detections=results.boxes
+            )
+            cv2.imshow("Mercurius∞ IP Cam", annotated)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        cap.release()
+        cv2.destroyAllWindows()
+
+## vision/object_vision.py
+# vision/object_vision.py
+
+"""
+Modulo: object_vision.py
+Descrizione: Riconoscimento oggetti in tempo reale da webcam con YOLOv8.
+"""
+
+import cv2
+import supervision as sv
+from ultralytics import YOLO
+
+
+class ObjectVision:
+    def __init__(self, model_path="yolov8n.pt"):
+        self.model = YOLO(model_path)
+        self.box_annotator = sv.BoxAnnotator(thickness=2, text_thickness=1, text_scale=0.5)
+
+    def start_detection(self, camera_index=0):
+        cap = cv2.VideoCapture(camera_index)
+        if not cap.isOpened():
+            raise RuntimeError("Camera non accessibile.")
+
+        print("🎥 Avvio rilevamento oggetti YOLOv8... Premi 'q' per uscire.")
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            results = self.model(frame, verbose=False)[0]
+            detections = sv.Detections.from_ultralytics(results)
+            labels = [f"{c} {s:.2f}" for c, s in zip(results.names.values(), results.boxes.conf.cpu().numpy())]
+
+            annotated = self.box_annotator.annotate(scene=frame, detections=detections, labels=labels)
+            cv2.imshow("Mercurius∞ Vision", annotated)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+    def contextual_reaction(self, detected_items: list) -> str:
+        if "person" in detected_items:
+            return "👁️ Persona rilevata. Inizio monitoraggio ambientale."
+        elif "keyboard" in detected_items:
+            return "⌨️ Attività utente rilevata. Modalità lavoro attiva."
+        else:
+            return "🔍 Nessun oggetto prioritario rilevato."
+
+## vision/ocr_module.py
+"""
+Modulo: ocr_module.py
+Descrizione: Estrae testo da immagini tramite OCR (Tesseract o alternativa).
+"""
+
+try:
+    import pytesseract
+    from PIL import Image
+except ImportError:
+    raise ImportError("Modulo OCR non installato: usa `pip install pytesseract pillow`")
+
+def extract_text_from_image(image_path: str) -> str:
+    """
+    Estrae il testo da un'immagine (jpg, png) usando OCR.
+    """
+    try:
+        img = Image.open(image_path)
+        text = pytesseract.image_to_string(img, lang='ita')  # o 'eng' se preferisci
+        return text.strip()
+    except Exception as e:
+        return f"[❌ Errore OCR]: {str(e)}"
+
+## vision/ocr_reader.py
+# vision/ocr_reader.py
+
+"""
+Modulo: ocr_reader.py
+Descrizione: Estrazione testi da immagini o webcam tramite OCR (Tesseract).
+Supporta JPEG, PNG, flussi video.
+"""
+
+import pytesseract
+import cv2
+
+
+class OCRReader:
+    def __init__(self):
+        pass
+
+    def read_text_from_image(self, path: str) -> str:
+        img = cv2.imread(path)
+        return pytesseract.image_to_string(img, lang="ita+eng")
+
+    def read_from_camera(self, camera_index=0):
+        cap = cv2.VideoCapture(camera_index)
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            text = pytesseract.image_to_string(frame)
+            print(f"[OCR] {text.strip()}")
+            cv2.imshow("OCR Live", frame)
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+        cap.release()
+        cv2.destroyAllWindows()
+
+## vision/voice_trigger.py
+# voice/voice_trigger.py
+
+"""
+Modulo: voice_trigger.py
+Descrizione: Attivazione vocale tramite parola chiave "Hey Mercurius" utilizzando STT.
+"""
+
+import speech_recognition as sr
+
+
+def listen_for_trigger(trigger_word: str = "hey mercurius") -> bool:
+    """
+    Ascolta il microfono per attivazione vocale.
+    """
+    recognizer = sr.Recognizer()
+    mic = sr.Microphone()
+
+    with mic as source:
+        print("🎙️ Ascolto in corso... (parola chiave: 'Hey Mercurius')")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+
+    try:
+        text = recognizer.recognize_google(audio).lower()
+        print(f"🗣️ Rilevato: {text}")
+        return trigger_word in text
+    except sr.UnknownValueError:
+        print("⚠️ Audio non riconosciuto.")
+    except sr.RequestError:
+        print("❌ Errore nel servizio di riconoscimento.")
+
+    return False
+
+## vision/yolo_handler.py
+# vision/yolo_handler.py
+
+"""
+Modulo: yolo_handler.py
+Descrizione: Riconoscimento oggetti con YOLOv5/YOLOv8 tramite OpenCV per Mercurius∞.
+"""
+
+from typing import List
+import torch
+import numpy as np
+
+# Caricamento modello YOLO (richiede modello pre-addestrato disponibile localmente)
+try:
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', trust_repo=True)
+except Exception as e:
+    print("⚠️ Errore nel caricamento del modello YOLO:", e)
+    model = None
+
+
+def detect_objects(image: np.ndarray) -> List[str]:
+    """
+    Rileva oggetti in un'immagine e restituisce le etichette.
+    """
+    if model is None:
+        return []
+
+    results = model(image)
+    labels = results.pandas().xyxy[0]['name'].tolist()
+    return labels
+
+## voice/README.md
+# 🎙️ Modulo Vocale – Attivazione
+
+Gestisce input vocali e hotword per l'attivazione GENESIS.
+
+## Componenti
+
+- `activation_hook.py`: listener per "Hey Mercurius, attiva GENESIS"
+
+## voice/__init__.py
+
+## voice/coqui_tts.py
+# voice/coqui_tts.py
+
+"""
+Modulo: coqui_tts.py
+Descrizione: Sintesi vocale offline con Coqui TTS.
+"""
+
+
+
+
+
+## voice/elevenlabs_tts.py
+# voice/elevenlabs_tts.py
+
+"""
+Modulo: elevenlabs_tts.py
+Descrizione: Voce naturale con API ElevenLabs – stile Jarvis.
+"""
+
+import requests
+import os
+
+class ElevenLabsTTS:
+    def __init__(self, api_key=None):
+        self.api_key = api_key or os.getenv("ELEVENLABS_API_KEY")
+
+    def speak(self, text: str, voice_id="EXAVITQu4vr4xnSDxMaL"):
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+        headers = {
+            "xi-api-key": self.api_key,
+            "Content-Type": "application/json"
+        }
+        json_data = {
+            "text": text,
+            "model_id": "eleven_monolingual_v1",
+            "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}
+        }
+        response = requests.post(url, json=json_data, headers=headers)
+        with open("output_11labs.wav", "wb") as f:
+            f.write(response.content)
+
+## voice/nari_tts.py
+# voice/nari_tts.py
+
+"""
+Modulo: nari_tts.py
+Descrizione: Sintesi vocale con il modello Nari Dia TTS.
+"""
+
+import soundfile as sf
+from dia.model import Dia
+
+class NariDiaTTS:
+    def __init__(self, model_name="nari-labs/Dia-1.6B"):
+        self.model = Dia.from_pretrained(model_name)
+
+    def speak(self, text: str, output_path="output.wav"):
+        output = self.model.generate(text)
+        sf.write(output_path, output, 44100)
+
+## voice/stt.py
+# voice/stt.py
+
+"""
+Modulo: stt.py
+Descrizione: Riconoscimento vocale da microfono in testo utilizzando SpeechRecognition (Google STT).
+"""
+
+import speech_recognition as sr
+
+
+def transcribe_audio() -> str:
+    """
+    Converte l'audio acquisito da microfono in testo.
+    """
+    recognizer = sr.Recognizer()
+    mic = sr.Microphone()
+
+    with mic as source:
+        print("🎧 In ascolto...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+
+    try:
+        text = recognizer.recognize_google(audio, language="it-IT")
+        print(f"📝 Riconosciuto: {text}")
+        return text
+    except sr.UnknownValueError:
+        return "[Voce non riconosciuta]"
+    except sr.RequestError:
+        return "[Errore nel riconoscimento vocale]"
+
+## voice/tts.py
+# voice/tts.py (aggiornato)
+
+"""
+Modulo: tts.py
+Descrizione: Sintesi vocale con fallback a gTTS se pyttsx3 non disponibile.
+"""
+
+try:
+    import pyttsx3
+    ENGINE = pyttsx3.init()
+    USE_PYTTS = True
+except ImportError:
+    from gtts import gTTS
+    import os
+    USE_PYTTS = False
+
+
+def speak(text: str):
+    if USE_PYTTS:
+        ENGINE.say(text)
+        ENGINE.runAndWait()
+    else:
+        tts = gTTS(text=text, lang="it")
+        file_path = "temp_audio.mp3"
+        tts.save(file_path)
+        os.system(f"start {file_path}" if os.name == "nt" else f"xdg-open {file_path}")
+
+## voice/voice_bridge.py
+"""voice_bridge.py
+Output vocale tramite engine TTS locale.
+"""
+
+from __future__ import annotations
+
+import pyttsx3
+
+_engine = pyttsx3.init()
+
+
+def speak(text: str) -> None:
+    """Riproduce testo tramite sintesi vocale."""
+    _engine.say(text)
+    _engine.runAndWait()
+
+## voice/voice_identity.py
+# voice/voice_identity.py
+
+"""
+Modulo: voice_identity.py
+Descrizione: Riconoscimento vocale degli speaker e saluti personalizzati.
+"""
+
+import os
+import speech_recognition as sr
+import json
+from datetime import datetime
+import hashlib
+
+
+class VoiceIdentityManager:
+    def __init__(self, db_path="logs/voice_profiles.json"):
+        self.db_path = db_path
+        if not os.path.exists(self.db_path):
+            with open(self.db_path, "w") as f:
+                json.dump({}, f)
+        self.db = self._load_db()
+
+    def _load_db(self):
+        with open(self.db_path, "r") as f:
+            return json.load(f)
+
+    def identify_speaker(self, audio: sr.AudioData, recognizer: sr.Recognizer) -> str:
+        try:
+            text = recognizer.recognize_google(audio, language="it-IT")
+            voice_id = self._voice_hash(audio)
+            if voice_id in self.db:
+                return f"🎙️ Bentornato {self.db[voice_id]['titolo']} {self.db[voice_id]['nome']}!"
+            else:
+                print("Voce non riconosciuta. Chi sei?")
+                return self.register_new_voice(voice_id, text)
+        except Exception:
+            return "❌ Voce non comprensibile."
+
+    def register_new_voice(self, voice_id: str, input_text: str) -> str:
+        name = input_text.strip().split()[-1].capitalize()
+        titolo = "Signor" if name[-1] not in "aeiou" else "Signora"
+        self.db[voice_id] = {"nome": name, "titolo": titolo, "registrato": datetime.now().isoformat()}
+        with open(self.db_path, "w") as f:
+            json.dump(self.db, f, indent=2)
+        return f"🎙️ Piacere {titolo} {name}, registrazione completata."
+
+    def _voice_hash(self, audio: sr.AudioData) -> str:
+        return hashlib.sha256(audio.get_raw_data()).hexdigest()[:16]
+
+## voice/vosk_stt.py
+# voice/vosk_stt.py
+
+"""
+Modulo: vosk_stt.py
+Descrizione: Riconoscimento vocale locale con Vosk.
+"""
+
+import sounddevice as sd
+import queue
+import vosk
+import json
+
+class VoskSTT:
+    def __init__(self, model_path="model"):
+        self.model = vosk.Model(model_path)
+        self.q = queue.Queue()
+
+    def listen(self, duration=5, fs=16000):
+        def callback(indata, frames, time, status):
+            self.q.put(bytes(indata))
+        with sd.RawInputStream(samplerate=fs, blocksize=8000, dtype="int16", channels=1, callback=callback):
+            rec = vosk.KaldiRecognizer(self.model, fs)
+            for _ in range(int(duration * fs / 8000)):
+                data = self.q.get()
+                if rec.AcceptWaveform(data):
+                    res = json.loads(rec.Result())
+                    return res.get("text", "")
+            return ""
+
+## voice/whisper_engine.py
+# voice/whisper_engine.py
+
+"""
+Modulo: whisper_engine.py
+Descrizione: Sintesi vocale inversa (STT) ad alta precisione con Whisper v3.
+Supporta più lingue e trascrizione offline tramite modelli locali o OpenAI API.
+"""
+
+import os
+import tempfile
+import whisper
+
+
+class WhisperSTT:
+    def __init__(self, model_name="large-v3"):
+        self.model = whisper.load_model(model_name)
+
+    def transcribe_audio_file(self, audio_path: str, language: str = "it") -> str:
+        result = self.model.transcribe(audio_path, language=language)
+        return result.get("text", "[Nessun testo estratto]")
+
+    def transcribe_microphone(self, duration=5, tmp_format="micro_input.wav") -> str:
+        import sounddevice as sd
+        import scipy.io.wavfile
+
+        samplerate = 16000
+        recording = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1)
+        sd.wait()
+
+        tmp_path = os.path.join(tempfile.gettempdir(), tmp_format)
+        scipy.io.wavfile.write(tmp_path, samplerate, recording)
+        return self.transcribe_audio_file(tmp_path)
+
+## voice/whisper_stt.py
+# voice/whisper_stt.py
+
+"""
+Modulo: whisper_stt.py
+Descrizione: Trascrizione vocale avanzata multilingua tramite Whisper Large-V3.
+"""
+
+import whisper
+import sounddevice as sd
+import numpy as np
+import tempfile
+import wave
+
+class WhisperSTT:
+    def __init__(self, model_name="large-v3"):
+        self.model = whisper.load_model(model_name)
+
+    def record_audio(self, duration=5, fs=16000, device_index=None) -> str:
+        audio = sd.rec(int(duration * fs), samplerate=fs, channels=1, device=device_index)
+        sd.wait()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
+            wav_file = f.name
+            with wave.open(wav_file, "wb") as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(fs)
+                wf.writeframes((audio * 32767).astype(np.int16).tobytes())
+        return wav_file
+
+    def transcribe_live_audio(self, duration=5, device_index=None) -> str:
+        file_path = self.record_audio(duration, device_index=device_index)
+        return self.transcribe_file(file_path)
+
+    def transcribe_file(self, file_path: str) -> str:
+        result = self.model.transcribe(file_path)
+        return result["text"]
+
+## voice/yolov8_engine.py
+# vision/yolov8_engine.py
+
+"""
+Modulo: yolov8_engine.py
+Descrizione: Riconoscimento in tempo reale di oggetti, volti e gesti con YOLOv8.
+Supporta flussi da webcam o video file.
+"""
+
+import cv2
+from ultralytics import YOLO
+
+
+class VisionAI:
+    def __init__(self, model_path="yolov8n.pt"):
+        self.model = YOLO(model_path)
+
+    def detect_from_image(self, image_path: str) -> list:
+        results = self.model(image_path)
+        return results[0].names
+
+    def detect_from_webcam(self, camera_index=0):
+        cap = cv2.VideoCapture(camera_index)
+        while cap.isOpened():
+            success, frame = cap.read()
+            if not success:
+                break
+            results = self.model(frame)
+            annotated = results[0].plot()
+            cv2.imshow("Mercurius Vision", annotated)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        cap.release()
+        cv2.destroyAllWindows()
+
+## voice/engine/coqui_tts.py
+class CoquiTTS:
+    def __init__(self):
+        self.name = "CoquiTTS"
+
+    def speak(self, phrase: str) -> str:
+        return f"[{self.name}] Audio generato per: {phrase}"
+
+## voice/engine/elevenlabs_tts.py
+class ElevenLabsTTS:
+    def __init__(self):
+        self.name = "ElevenLabs"
+
+    def synthesize(self, text: str, voice: str = "Jarvis") -> str:
+        return f"[{self.name}] Sintesi vocale: '{text}' con voce {voice}"
+
+## voice/engine/whisper_stt.py
+class WhisperSTT:
+    def __init__(self):
+        self.name = "Whisper"
+
+    def transcribe(self, audio_path: str) -> str:
+        return f"[{self.name}] Trascrizione simulata del file: {audio_path}"
+
+### --- prompt.txt --- ###
+**STRUTTURA E FILE DEL PROGETTO:**
+PROJECT TREE
+mercurius_infinite_final/
+    .gitignore
+    =3.20,
+    CHANGELOG.md
+    Dockerfile
+    README.md
+    ai_launcher.py
+    dashboard.py
+    dashboard_streamlit.py
+    docker-compose.override.yml
+    docker-compose.yml
+    file_albero_locale.txt
+    goals.txt
+    install_mercurius_note.sh
+    list_files.py
+    main.py
+    package-lock.json
+    package.json
+    print_tree.py
+    prompt_commands.txt
+    pyproject.toml
+    pytest.ini
+    requirements.txt
+    seleziona_cartella.py
+    setup.py
+    start_fullmode.py
+    start_voice_interface.py
+    task_manager_cli.py
+    test_exp.json
+    .github/
+        workflows/
+            mercurius_ci.yml
+    AutoGPT/
+    agents/
+        __init__.py
+        adaptive_trader.py
+        agent_comm.py
+        agent_generator.py
+        azr.py
+        azr_server.py
+        memory_manager.py
+        ollama.py
+        openai.py
+        azr/
+            azr_supervisor.py
+    analytics/
+        __init__.py
+        behavior_logger.py
+        meta_learner.py
+        neuro_optimizer.py
+        self_patch_engine.py
+    cognition/
+        __init__.py
+        agent_router.py
+        cognitive_map.py
+        task_memory.py
+    communications/
+        __init__.py
+        email_assistant.py
+    config/
+        config.yaml
+        config_schema.py
+        config_validator.py
+        genesis_config.yaml
+        prod_settings.yaml
+        self_profile.yaml
+    consciousness/
+        __init__.py
+        core_self.py
+        intention_manager.py
+        reflection_loop.py
+    core/
+        __init__.py
+        auto_tester.py
+        auto_updater.py
+        context_adapter.py
+        deploy_trigger.py
+        dialogue_manager.py
+        emotion_analyzer.py
+        executor.py
+        genesis_trigger.py
+        learning.py
+        orchestrator.py
+        pipeline_controller.py
+        sandbox_executor.py
+        self_generator.py
+        self_mission.py
+        self_reflection.py
+        self_tuner.py
+        sensory_bus.py
+        sleep_monitor.py
+        system_bridge.py
+        thinking_loop.py
+    culture/
+        base_manifesto.md
+        culture_manager.py
+    dashboard/
+        __init__.py
+        genesis_monitor.py
+    data/
+        feature_engineering.py
+        learning_pulses.json
+        market_data_handler.py
+    deploy/
+        __init__.py
+        deployment_handler.py
+        env_checker.py
+        rollout_validator.py
+    deployment/
+        __init__.py
+        aion_api.py
+        autostart_manager.py
+        remote_access.py
+        task_scheduler.py
+        telemetry_monitor.py
+    dia/
+    docs/
+        ARCHITECTURE.md
+        USAGE_GUIDE.md
+    evolution/
+        auto_updater.py
+        behavior_simulator.py
+        logic_injector.py
+        neural_plasticity.py
+        open_evolve.py
+        openalpha_evolve.py
+        pwb_alphaevolve.py
+        web_scraper.py
+    exports/
+        README.txt
+        build_dashboard.py
+        build_mac.sh
+        build_win.bat
+    flutter/
+    generated_agents/
+        ApprendimentoGenericoAgent.py
+        __init__.py
+    genesis_core/
+        autogpt_bridge.py
+    githooks/
+        post-merge
+        post-merge.bat
+    installer/
+        package_builder.py
+    integrations/
+        README.md
+        __init__.py
+        bridge_josch.py
+        colab_linker.py
+        finviz_connector.py
+        system_control.py
+        tradingview_feed.py
+        agenda/
+            __init__.py
+            agenda_manager.py
+        smart_home/
+            __init__.py
+            home_assistant_bridge.py
+    interface/
+        dashboard_stub.py
+        genesis_bridge.py
+    interop/
+        colab_bridge.py
+        github_handler.py
+        local_controller.py
+    learning/
+        __init__.py
+        document_parser.py
+        video_learner.py
+    llm/
+        llm_router.py
+    logs/
+        README.md
+        aion_activation_report.md
+        self_tuning_report.md
+        system.log
+        thinking_feed.md
+        upgrade_status.md
+    memory/
+        __init__.py
+        dialog_style_profile.json
+        episodic_memory.py
+        genesis_memory.py
+        long_term_memory.py
+        memory_core.py
+        neural_plasticity.py
+        synaptic_log.py
+    mercurius_infinite.egg-info/
+        PKG-INFO
+        SOURCES.txt
+        dependency_links.txt
+        entry_points.txt
+        top_level.txt
+    mercurius_infinite_final/
+    mobile_jarvis_ui/
+        .gitignore
+        .metadata
+        README.md
+        analysis_options.yaml
+        pubspec.lock
+        pubspec.yaml
+        android/
+            .gitignore
+            build.gradle.kts
+            gradle.properties
+            settings.gradle.kts
+            app/
+                build.gradle.kts
+                src/
+                    debug/
+                        AndroidManifest.xml
+                    main/
+                        AndroidManifest.xml
+                        kotlin/
+                            com/
+                                example/
+                                    mobile_jarvis_ui/
+                                        MainActivity.kt
+                        res/
+                            drawable/
+                                launch_background.xml
+                            drawable-v21/
+                                launch_background.xml
+                            mipmap-hdpi/
+                                ic_launcher.png
+                            mipmap-mdpi/
+                                ic_launcher.png
+                            mipmap-xhdpi/
+                                ic_launcher.png
+                            mipmap-xxhdpi/
+                                ic_launcher.png
+                            mipmap-xxxhdpi/
+                                ic_launcher.png
+                            values/
+                                styles.xml
+                            values-night/
+                                styles.xml
+                    profile/
+                        AndroidManifest.xml
+            build/
+                reports/
+                    problems/
+                        problems-report.html
+            gradle/
+                wrapper/
+                    gradle-wrapper.properties
+        assets/
+            placeholder.txt
+        ios/
+            .gitignore
+            Flutter/
+                AppFrameworkInfo.plist
+                Debug.xcconfig
+                Release.xcconfig
+            Runner/
+                AppDelegate.swift
+                Info.plist
+                Runner-Bridging-Header.h
+                Assets.xcassets/
+                    AppIcon.appiconset/
+                        Contents.json
+                        Icon-App-1024x1024@1x.png
+                        Icon-App-20x20@1x.png
+                        Icon-App-20x20@2x.png
+                        Icon-App-20x20@3x.png
+                        Icon-App-29x29@1x.png
+                        Icon-App-29x29@2x.png
+                        Icon-App-29x29@3x.png
+                        Icon-App-40x40@1x.png
+                        Icon-App-40x40@2x.png
+                        Icon-App-40x40@3x.png
+                        Icon-App-60x60@2x.png
+                        Icon-App-60x60@3x.png
+                        Icon-App-76x76@1x.png
+                        Icon-App-76x76@2x.png
+                        Icon-App-83.5x83.5@2x.png
+                    LaunchImage.imageset/
+                        Contents.json
+                        LaunchImage.png
+                        LaunchImage@2x.png
+                        LaunchImage@3x.png
+                        README.md
+                Base.lproj/
+                    LaunchScreen.storyboard
+                    Main.storyboard
+            Runner.xcodeproj/
+                project.pbxproj
+                project.xcworkspace/
+                    contents.xcworkspacedata
+                    xcshareddata/
+                        IDEWorkspaceChecks.plist
+                        WorkspaceSettings.xcsettings
+                xcshareddata/
+                    xcschemes/
+                        Runner.xcscheme
+            Runner.xcworkspace/
+                contents.xcworkspacedata
+                xcshareddata/
+                    IDEWorkspaceChecks.plist
+                    WorkspaceSettings.xcsettings
+            RunnerTests/
+                RunnerTests.swift
+        lib/
+            main.dart
+        linux/
+            .gitignore
+            CMakeLists.txt
+            flutter/
+                CMakeLists.txt
+                generated_plugin_registrant.cc
+                generated_plugin_registrant.h
+                generated_plugins.cmake
+            runner/
+                CMakeLists.txt
+                main.cc
+                my_application.cc
+                my_application.h
+        macos/
+            .gitignore
+            Flutter/
+                Flutter-Debug.xcconfig
+                Flutter-Release.xcconfig
+                GeneratedPluginRegistrant.swift
+            Runner/
+                AppDelegate.swift
+                DebugProfile.entitlements
+                Info.plist
+                MainFlutterWindow.swift
+                Release.entitlements
+                Assets.xcassets/
+                    AppIcon.appiconset/
+                        Contents.json
+                        app_icon_1024.png
+                        app_icon_128.png
+                        app_icon_16.png
+                        app_icon_256.png
+                        app_icon_32.png
+                        app_icon_512.png
+                        app_icon_64.png
+                Base.lproj/
+                    MainMenu.xib
+                Configs/
+                    AppInfo.xcconfig
+                    Debug.xcconfig
+                    Release.xcconfig
+                    Warnings.xcconfig
+            Runner.xcodeproj/
+                project.pbxproj
+                project.xcworkspace/
+                    xcshareddata/
+                        IDEWorkspaceChecks.plist
+                xcshareddata/
+                    xcschemes/
+                        Runner.xcscheme
+            Runner.xcworkspace/
+                contents.xcworkspacedata
+                xcshareddata/
+                    IDEWorkspaceChecks.plist
+            RunnerTests/
+                RunnerTests.swift
+        test/
+            widget_test.dart
+        web/
+            favicon.png
+            index.html
+            manifest.json
+            icons/
+                Icon-192.png
+                Icon-512.png
+                Icon-maskable-192.png
+                Icon-maskable-512.png
+        windows/
+            .gitignore
+            CMakeLists.txt
+            flutter/
+                CMakeLists.txt
+                generated_plugin_registrant.cc
+                generated_plugin_registrant.h
+                generated_plugins.cmake
+            runner/
+                CMakeLists.txt
+                Runner.rc
+                flutter_window.cpp
+                flutter_window.h
+                main.cpp
+                resource.h
+                runner.exe.manifest
+                utils.cpp
+                utils.h
+                win32_window.cpp
+                win32_window.h
+                resources/
+                    app_icon.ico
+    models/
+        goal_manager.py
+        model_trainer.py
+        neo_learning.py
+        neural_network.py
+        metrics/
+            performance_metrics.py
+    modules/
+        __init__.py
+        autogen_chat.py
+        chatgpt_interface.py
+        crewai_team.py
+        feedback_loop.py
+        fingpt_analyzer.py
+        finrl_agent.py
+        freqtrade_bot.py
+        gesture.py
+        goal_manager.py
+        gpt4o_interface.py
+        gpt_engineer_wrapper.py
+        gpt_task_router.py
+        hf_tools_manager.py
+        leonai_bridge.py
+        localai_executor.py
+        meta_team_agent.py
+        n8n_connector.py
+        network_analyzer.py
+        nlp.py
+        ollama3_interface.py
+        openbb_terminal.py
+        planner.py
+        qlib_quant.py
+        reasoner_dispatcher.py
+        speech.py
+        superagi_agent.py
+        supervisor.py
+        task_manager_cli.py
+        url_learner.py
+        AZR/
+            __init__.py
+            fine_tuner.py
+            train_model.py
+        GPT/
+            __init__.py
+            gpt_runner.py
+            prompt_builder.py
+        Leonai/
+            __init__.py
+            leon_ai.py
+        Localai/
+            __init__.py
+            local_ai.py
+        Neo/
+            __init__.py
+            adaptive_weights.py
+            agent_generator.py
+            auto_refinement.py
+            context_memory.py
+            interaction_style.py
+            memory_strengthener.py
+            neuro_learning_engine.py
+            self_awareness.py
+            self_reflection.py
+            trainer_orchestrator.py
+            agent_forge/
+                agent_generator.py
+            audio/
+                emotion_recognizer.py
+                hotword_detector.py
+                tts_engine.py
+            cognitive_simulation/
+                cognitive_simulator.py
+            consciousness/
+                self_awareness.py
+            docgen/
+                auto_docgen.py
+            hierarchy_manager/
+                hierarchy_controller.py
+            identity/
+                personality_engine.py
+            memory/
+                conversation_memory.py
+            strategic_coordinator/
+                strategic_coordinator.py
+            vision/
+                visual_input.py
+        Ollama3/
+            __init__.py
+            parse_response.py
+            prompt_builder.py
+            run_ollama.py
+        Reasoner/
+            __init__.py
+            context_analyzer.py
+            logic_chain.py
+            meta_reasoner.py
+            reasoning_core.py
+            strategic/
+                intuition_engine.py
+        agents/
+            organizer_core.py
+        ai_kernel/
+            agent_core.py
+            agent_plugin.py
+            cognitive_integration.py
+            command_interpreter.py
+            context_adapter.py
+            goal_manager.py
+            lang_reasoner.py
+            strategic_coordinator.py
+        codex/
+            codex_cli.py
+        dashboard/
+            __init__.py
+            control_center.py
+            control_panel.py
+            dashboard_streamlit.py
+            dashboard_utils.py
+            futuristic_gui.py

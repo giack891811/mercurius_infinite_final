@@ -1,0 +1,2700 @@
+Questa è la parte 49 di project_tree. Continua da quella precedente.
+
+    lineNumber?: number | undefined;
+
+    /**
+     * The column number where the element was created.
+     */
+    columnNumber?: number | undefined;
+}
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsxDEV(
+    type: React.ElementType,
+    props: unknown,
+    key: React.Key | undefined,
+    isStatic: boolean,
+    source?: JSXSource,
+    self?: unknown,
+): React.ReactElement;
+
+## node_modules/@types/react/jsx-runtime.d.ts
+import * as React from "./";
+export { Fragment } from "./";
+
+export namespace JSX {
+    type ElementType = React.JSX.ElementType;
+    interface Element extends React.JSX.Element {}
+    interface ElementClass extends React.JSX.ElementClass {}
+    interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
+    interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
+    type LibraryManagedAttributes<C, P> = React.JSX.LibraryManagedAttributes<C, P>;
+    interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
+    interface IntrinsicClassAttributes<T> extends React.JSX.IntrinsicClassAttributes<T> {}
+    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+}
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsx(
+    type: React.ElementType,
+    props: unknown,
+    key?: React.Key,
+): React.ReactElement;
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsxs(
+    type: React.ElementType,
+    props: unknown,
+    key?: React.Key,
+): React.ReactElement;
+
+## node_modules/@types/react/package.json
+{
+    "name": "@types/react",
+    "version": "19.1.6",
+    "description": "TypeScript definitions for react",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Asana",
+            "url": "https://asana.com"
+        },
+        {
+            "name": "AssureSign",
+            "url": "http://www.assuresign.com"
+        },
+        {
+            "name": "Microsoft",
+            "url": "https://microsoft.com"
+        },
+        {
+            "name": "John Reilly",
+            "githubUsername": "johnnyreilly",
+            "url": "https://github.com/johnnyreilly"
+        },
+        {
+            "name": "Benoit Benezech",
+            "githubUsername": "bbenezech",
+            "url": "https://github.com/bbenezech"
+        },
+        {
+            "name": "Patricio Zavolinsky",
+            "githubUsername": "pzavolinsky",
+            "url": "https://github.com/pzavolinsky"
+        },
+        {
+            "name": "Eric Anderson",
+            "githubUsername": "ericanderson",
+            "url": "https://github.com/ericanderson"
+        },
+        {
+            "name": "Dovydas Navickas",
+            "githubUsername": "DovydasNavickas",
+            "url": "https://github.com/DovydasNavickas"
+        },
+        {
+            "name": "Josh Rutherford",
+            "githubUsername": "theruther4d",
+            "url": "https://github.com/theruther4d"
+        },
+        {
+            "name": "Guilherme Hübner",
+            "githubUsername": "guilhermehubner",
+            "url": "https://github.com/guilhermehubner"
+        },
+        {
+            "name": "Ferdy Budhidharma",
+            "githubUsername": "ferdaber",
+            "url": "https://github.com/ferdaber"
+        },
+        {
+            "name": "Johann Rakotoharisoa",
+            "githubUsername": "jrakotoharisoa",
+            "url": "https://github.com/jrakotoharisoa"
+        },
+        {
+            "name": "Olivier Pascal",
+            "githubUsername": "pascaloliv",
+            "url": "https://github.com/pascaloliv"
+        },
+        {
+            "name": "Martin Hochel",
+            "githubUsername": "hotell",
+            "url": "https://github.com/hotell"
+        },
+        {
+            "name": "Frank Li",
+            "githubUsername": "franklixuefei",
+            "url": "https://github.com/franklixuefei"
+        },
+        {
+            "name": "Jessica Franco",
+            "githubUsername": "Jessidhia",
+            "url": "https://github.com/Jessidhia"
+        },
+        {
+            "name": "Saransh Kataria",
+            "githubUsername": "saranshkataria",
+            "url": "https://github.com/saranshkataria"
+        },
+        {
+            "name": "Kanitkorn Sujautra",
+            "githubUsername": "lukyth",
+            "url": "https://github.com/lukyth"
+        },
+        {
+            "name": "Sebastian Silbermann",
+            "githubUsername": "eps1lon",
+            "url": "https://github.com/eps1lon"
+        },
+        {
+[TRONCATO]
+
+## node_modules/@types/react/ts5.0/canary.d.ts
+/**
+ * These are types for things that are present in the React `canary` release channel.
+ *
+ * To load the types declared here in an actual project, there are three ways. The easiest one,
+ * if your `tsconfig.json` already has a `"types"` array in the `"compilerOptions"` section,
+ * is to add `"react/canary"` to the `"types"` array.
+ *
+ * Alternatively, a specific import syntax can to be used from a typescript file.
+ * This module does not exist in reality, which is why the {} is important:
+ *
+ * ```ts
+ * import {} from 'react/canary'
+ * ```
+ *
+ * It is also possible to include it through a triple-slash reference:
+ *
+ * ```ts
+ * /// <reference types="react/canary" />
+ * ```
+ *
+ * Either the import or the reference only needs to appear once, anywhere in the project.
+ */
+
+// See https://github.com/facebook/react/blob/main/packages/react/src/React.js to see how the exports are declared,
+
+import React = require(".");
+
+export {};
+
+declare const UNDEFINED_VOID_ONLY: unique symbol;
+type VoidOrUndefinedOnly = void | { [UNDEFINED_VOID_ONLY]: never };
+
+declare module "." {
+    export function unstable_useCacheRefresh(): () => void;
+}
+
+## node_modules/@types/react/ts5.0/experimental.d.ts
+/**
+ * These are types for things that are present in the `experimental` builds of React but not yet
+ * on a stable build.
+ *
+ * Once they are promoted to stable they can just be moved to the main index file.
+ *
+ * To load the types declared here in an actual project, there are three ways. The easiest one,
+ * if your `tsconfig.json` already has a `"types"` array in the `"compilerOptions"` section,
+ * is to add `"react/experimental"` to the `"types"` array.
+ *
+ * Alternatively, a specific import syntax can to be used from a typescript file.
+ * This module does not exist in reality, which is why the {} is important:
+ *
+ * ```ts
+ * import {} from 'react/experimental'
+ * ```
+ *
+ * It is also possible to include it through a triple-slash reference:
+ *
+ * ```ts
+ * /// <reference types="react/experimental" />
+ * ```
+ *
+ * Either the import or the reference only needs to appear once, anywhere in the project.
+ */
+
+// See https://github.com/facebook/react/blob/master/packages/react/src/React.js to see how the exports are declared,
+// and https://github.com/facebook/react/blob/master/packages/shared/ReactFeatureFlags.js to verify which APIs are
+// flagged experimental or not. Experimental APIs will be tagged with `__EXPERIMENTAL__`.
+//
+// For the inputs of types exported as simply a fiber tag, the `beginWork` function of ReactFiberBeginWork.js
+// is a good place to start looking for details; it generally calls prop validation functions or delegates
+// all tasks done as part of the render phase (the concurrent part of the React update cycle).
+//
+// Suspense-related handling can be found in ReactFiberThrow.js.
+
+import React = require("./canary");
+
+export {};
+
+declare const UNDEFINED_VOID_ONLY: unique symbol;
+type VoidOrUndefinedOnly = void | { [UNDEFINED_VOID_ONLY]: never };
+
+declare module "." {
+    export interface SuspenseProps {
+        /**
+         * The presence of this prop indicates that the content is computationally expensive to render.
+         * In other words, the tree is CPU bound and not I/O bound (e.g. due to fetching data).
+         * @see {@link https://github.com/facebook/react/pull/19936}
+         */
+        unstable_expectedLoadTime?: number | undefined;
+    }
+
+    export type SuspenseListRevealOrder = "forwards" | "backwards" | "together";
+    export type SuspenseListTailMode = "collapsed" | "hidden";
+
+    export interface SuspenseListCommonProps {
+        /**
+         * Note that SuspenseList require more than one child;
+         * it is a runtime warning to provide only a single child.
+         *
+         * It does, however, allow those children to be wrapped inside a single
+         * level of `<React.Fragment>`.
+         */
+        children: ReactElement | Iterable<ReactElement>;
+    }
+
+    interface DirectionalSuspenseListProps extends SuspenseListCommonProps {
+        /**
+         * Defines the order in which the `SuspenseList` children should be revealed.
+         */
+        revealOrder: "forwards" | "backwards";
+        /**
+         * Dictates how unloaded items in a SuspenseList is shown.
+         *
+         * - By default, `SuspenseList` will show all fallbacks in the list.
+         * - `collapsed` shows only the next fallback in the list.
+         * - `hidden` doesn’t show any unloaded items.
+         */
+        tail?: SuspenseListTailMode | undefined;
+    }
+
+    interface NonDirectionalSuspenseListProps extends SuspenseListCommonProps {
+        /**
+         * Defines the order in which the `SuspenseList` children should be revealed.
+         */
+        revealOrder?: Exclude<SuspenseListRevealOrder, DirectionalSuspenseListProps["revealOrder"]> | undefined;
+        /**
+         * The tail property is invalid when not using the `forwards` or `backwards` reveal orders.
+         */
+        tail?: never | undefined;
+    }
+
+    export type SuspenseListProps = DirectionalSuspenseListProps | NonDirectionalSuspenseListProps;
+
+    /**
+     * `SuspenseList` helps coordinate many components that can suspend by orchestrating the order
+     * in which these components are revealed to the user.
+     *
+     * When multiple components need to fetch data, this data may arrive in an unpredictable order.
+[TRONCATO]
+
+## node_modules/@types/react/ts5.0/global.d.ts
+/*
+React projects that don't include the DOM library need these interfaces to compile.
+React Native applications use React, but there is no DOM available. The JavaScript runtime
+is ES6/ES2015 only. These definitions allow such projects to compile with only `--lib ES6`.
+
+Warning: all of these interfaces are empty. If you want type definitions for various properties
+(such as HTMLInputElement.prototype.value), you need to add `--lib DOM` (via command line or tsconfig.json).
+*/
+
+interface Event {}
+interface AnimationEvent extends Event {}
+interface ClipboardEvent extends Event {}
+interface CompositionEvent extends Event {}
+interface DragEvent extends Event {}
+interface FocusEvent extends Event {}
+interface InputEvent extends Event {}
+interface KeyboardEvent extends Event {}
+interface MouseEvent extends Event {}
+interface TouchEvent extends Event {}
+interface PointerEvent extends Event {}
+interface ToggleEvent extends Event {}
+interface TransitionEvent extends Event {}
+interface UIEvent extends Event {}
+interface WheelEvent extends Event {}
+
+interface EventTarget {}
+interface Document {}
+interface DataTransfer {}
+interface StyleMedia {}
+
+interface Element {}
+interface DocumentFragment {}
+
+interface HTMLElement extends Element {}
+interface HTMLAnchorElement extends HTMLElement {}
+interface HTMLAreaElement extends HTMLElement {}
+interface HTMLAudioElement extends HTMLElement {}
+interface HTMLBaseElement extends HTMLElement {}
+interface HTMLBodyElement extends HTMLElement {}
+interface HTMLBRElement extends HTMLElement {}
+interface HTMLButtonElement extends HTMLElement {}
+interface HTMLCanvasElement extends HTMLElement {}
+interface HTMLDataElement extends HTMLElement {}
+interface HTMLDataListElement extends HTMLElement {}
+interface HTMLDetailsElement extends HTMLElement {}
+interface HTMLDialogElement extends HTMLElement {}
+interface HTMLDivElement extends HTMLElement {}
+interface HTMLDListElement extends HTMLElement {}
+interface HTMLEmbedElement extends HTMLElement {}
+interface HTMLFieldSetElement extends HTMLElement {}
+interface HTMLFormElement extends HTMLElement {}
+interface HTMLHeadingElement extends HTMLElement {}
+interface HTMLHeadElement extends HTMLElement {}
+interface HTMLHRElement extends HTMLElement {}
+interface HTMLHtmlElement extends HTMLElement {}
+interface HTMLIFrameElement extends HTMLElement {}
+interface HTMLImageElement extends HTMLElement {}
+interface HTMLInputElement extends HTMLElement {}
+interface HTMLModElement extends HTMLElement {}
+interface HTMLLabelElement extends HTMLElement {}
+interface HTMLLegendElement extends HTMLElement {}
+interface HTMLLIElement extends HTMLElement {}
+interface HTMLLinkElement extends HTMLElement {}
+interface HTMLMapElement extends HTMLElement {}
+interface HTMLMetaElement extends HTMLElement {}
+interface HTMLMeterElement extends HTMLElement {}
+interface HTMLObjectElement extends HTMLElement {}
+interface HTMLOListElement extends HTMLElement {}
+interface HTMLOptGroupElement extends HTMLElement {}
+interface HTMLOptionElement extends HTMLElement {}
+interface HTMLOutputElement extends HTMLElement {}
+interface HTMLParagraphElement extends HTMLElement {}
+interface HTMLParamElement extends HTMLElement {}
+interface HTMLPreElement extends HTMLElement {}
+interface HTMLProgressElement extends HTMLElement {}
+interface HTMLQuoteElement extends HTMLElement {}
+interface HTMLSlotElement extends HTMLElement {}
+interface HTMLScriptElement extends HTMLElement {}
+interface HTMLSelectElement extends HTMLElement {}
+interface HTMLSourceElement extends HTMLElement {}
+interface HTMLSpanElement extends HTMLElement {}
+interface HTMLStyleElement extends HTMLElement {}
+interface HTMLTableElement extends HTMLElement {}
+interface HTMLTableColElement extends HTMLElement {}
+interface HTMLTableDataCellElement extends HTMLElement {}
+interface HTMLTableHeaderCellElement extends HTMLElement {}
+interface HTMLTableRowElement extends HTMLElement {}
+interface HTMLTableSectionElement extends HTMLElement {}
+interface HTMLTemplateElement extends HTMLElement {}
+interface HTMLTextAreaElement extends HTMLElement {}
+interface HTMLTimeElement extends HTMLElement {}
+interface HTMLTitleElement extends HTMLElement {}
+interface HTMLTrackElement extends HTMLElement {}
+interface HTMLUListElement extends HTMLElement {}
+interface HTMLVideoElement extends HTMLElement {}
+interface HTMLWebViewElement extends HTMLElement {}
+
+interface SVGElement extends Element {}
+interface SVGSVGElement extends SVGElement {}
+interface SVGCircleElement extends SVGElement {}
+[TRONCATO]
+
+## node_modules/@types/react/ts5.0/index.d.ts
+// NOTE: Users of the `experimental` builds of React should add a reference
+// to 'react/experimental' in their project. See experimental.d.ts's top comment
+// for reference and documentation on how exactly to do it.
+
+/// <reference path="global.d.ts" />
+
+import * as CSS from "csstype";
+
+type NativeAnimationEvent = AnimationEvent;
+type NativeClipboardEvent = ClipboardEvent;
+type NativeCompositionEvent = CompositionEvent;
+type NativeDragEvent = DragEvent;
+type NativeFocusEvent = FocusEvent;
+type NativeInputEvent = InputEvent;
+type NativeKeyboardEvent = KeyboardEvent;
+type NativeMouseEvent = MouseEvent;
+type NativeTouchEvent = TouchEvent;
+type NativePointerEvent = PointerEvent;
+type NativeToggleEvent = ToggleEvent;
+type NativeTransitionEvent = TransitionEvent;
+type NativeUIEvent = UIEvent;
+type NativeWheelEvent = WheelEvent;
+
+/**
+ * Used to represent DOM API's where users can either pass
+ * true or false as a boolean or as its equivalent strings.
+ */
+type Booleanish = boolean | "true" | "false";
+
+/**
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/crossorigin MDN}
+ */
+type CrossOrigin = "anonymous" | "use-credentials" | "" | undefined;
+
+declare const UNDEFINED_VOID_ONLY: unique symbol;
+
+/**
+ * @internal Use `Awaited<ReactNode>` instead
+ */
+// Helper type to enable `Awaited<ReactNode>`.
+// Must be a copy of the non-thenables of `ReactNode`.
+type AwaitedReactNode =
+    | React.ReactElement
+    | string
+    | number
+    | bigint
+    | Iterable<React.ReactNode>
+    | React.ReactPortal
+    | boolean
+    | null
+    | undefined
+    | React.DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_REACT_NODES[
+        keyof React.DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_REACT_NODES
+    ];
+
+/**
+ * The function returned from an effect passed to {@link React.useEffect useEffect},
+ * which can be used to clean up the effect when the component unmounts.
+ *
+ * @see {@link https://react.dev/reference/react/useEffect React Docs}
+ */
+type Destructor = () => void | { [UNDEFINED_VOID_ONLY]: never };
+type VoidOrUndefinedOnly = void | { [UNDEFINED_VOID_ONLY]: never };
+
+// eslint-disable-next-line @definitelytyped/export-just-namespace
+export = React;
+export as namespace React;
+
+declare namespace React {
+    //
+    // React Elements
+    // ----------------------------------------------------------------------
+
+    /**
+     * Used to retrieve the possible components which accept a given set of props.
+     *
+     * Can be passed no type parameters to get a union of all possible components
+     * and tags.
+     *
+     * Is a superset of {@link ComponentType}.
+     *
+     * @template P The props to match against. If not passed, defaults to any.
+     * @template Tag An optional tag to match against. If not passed, attempts to match against all possible tags.
+     *
+     * @example
+     *
+     * ```tsx
+     * // All components and tags (img, embed etc.)
+     * // which accept `src`
+     * type SrcComponents = ElementType<{ src: any }>;
+     * ```
+     *
+     * @example
+     *
+     * ```tsx
+     * // All components
+     * type AllComponents = ElementType;
+     * ```
+     *
+     * @example
+[TRONCATO]
+
+## node_modules/@types/react/ts5.0/jsx-dev-runtime.d.ts
+import * as React from "./";
+export { Fragment } from "./";
+
+export namespace JSX {
+    interface Element extends React.JSX.Element {}
+    interface ElementClass extends React.JSX.ElementClass {}
+    interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
+    interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
+    type LibraryManagedAttributes<C, P> = React.JSX.LibraryManagedAttributes<C, P>;
+    interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
+    interface IntrinsicClassAttributes<T> extends React.JSX.IntrinsicClassAttributes<T> {}
+    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+}
+
+export interface JSXSource {
+    /**
+     * The source file where the element originates from.
+     */
+    fileName?: string | undefined;
+
+    /**
+     * The line number where the element was created.
+     */
+    lineNumber?: number | undefined;
+
+    /**
+     * The column number where the element was created.
+     */
+    columnNumber?: number | undefined;
+}
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsxDEV(
+    type: React.ElementType,
+    props: unknown,
+    key: React.Key | undefined,
+    isStatic: boolean,
+    source?: JSXSource,
+    self?: unknown,
+): React.ReactElement;
+
+## node_modules/@types/react/ts5.0/jsx-runtime.d.ts
+import * as React from "./";
+export { Fragment } from "./";
+
+export namespace JSX {
+    interface Element extends React.JSX.Element {}
+    interface ElementClass extends React.JSX.ElementClass {}
+    interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
+    interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
+    type LibraryManagedAttributes<C, P> = React.JSX.LibraryManagedAttributes<C, P>;
+    interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
+    interface IntrinsicClassAttributes<T> extends React.JSX.IntrinsicClassAttributes<T> {}
+    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+}
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsx(
+    type: React.ElementType,
+    props: unknown,
+    key?: React.Key,
+): React.ReactElement;
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsxs(
+    type: React.ElementType,
+    props: unknown,
+    key?: React.Key,
+): React.ReactElement;
+
+## node_modules/@types/react/ts5.0/v18/global.d.ts
+/*
+React projects that don't include the DOM library need these interfaces to compile.
+React Native applications use React, but there is no DOM available. The JavaScript runtime
+is ES6/ES2015 only. These definitions allow such projects to compile with only `--lib ES6`.
+
+Warning: all of these interfaces are empty. If you want type definitions for various properties
+(such as HTMLInputElement.prototype.value), you need to add `--lib DOM` (via command line or tsconfig.json).
+*/
+
+interface Event {}
+interface AnimationEvent extends Event {}
+interface ClipboardEvent extends Event {}
+interface CompositionEvent extends Event {}
+interface DragEvent extends Event {}
+interface FocusEvent extends Event {}
+interface InputEvent extends Event {}
+interface KeyboardEvent extends Event {}
+interface MouseEvent extends Event {}
+interface TouchEvent extends Event {}
+interface PointerEvent extends Event {}
+interface ToggleEvent extends Event {}
+interface TransitionEvent extends Event {}
+interface UIEvent extends Event {}
+interface WheelEvent extends Event {}
+
+interface EventTarget {}
+interface Document {}
+interface DataTransfer {}
+interface StyleMedia {}
+
+interface Element {}
+interface DocumentFragment {}
+
+interface HTMLElement extends Element {}
+interface HTMLAnchorElement extends HTMLElement {}
+interface HTMLAreaElement extends HTMLElement {}
+interface HTMLAudioElement extends HTMLElement {}
+interface HTMLBaseElement extends HTMLElement {}
+interface HTMLBodyElement extends HTMLElement {}
+interface HTMLBRElement extends HTMLElement {}
+interface HTMLButtonElement extends HTMLElement {}
+interface HTMLCanvasElement extends HTMLElement {}
+interface HTMLDataElement extends HTMLElement {}
+interface HTMLDataListElement extends HTMLElement {}
+interface HTMLDetailsElement extends HTMLElement {}
+interface HTMLDialogElement extends HTMLElement {}
+interface HTMLDivElement extends HTMLElement {}
+interface HTMLDListElement extends HTMLElement {}
+interface HTMLEmbedElement extends HTMLElement {}
+interface HTMLFieldSetElement extends HTMLElement {}
+interface HTMLFormElement extends HTMLElement {}
+interface HTMLHeadingElement extends HTMLElement {}
+interface HTMLHeadElement extends HTMLElement {}
+interface HTMLHRElement extends HTMLElement {}
+interface HTMLHtmlElement extends HTMLElement {}
+interface HTMLIFrameElement extends HTMLElement {}
+interface HTMLImageElement extends HTMLElement {}
+interface HTMLInputElement extends HTMLElement {}
+interface HTMLModElement extends HTMLElement {}
+interface HTMLLabelElement extends HTMLElement {}
+interface HTMLLegendElement extends HTMLElement {}
+interface HTMLLIElement extends HTMLElement {}
+interface HTMLLinkElement extends HTMLElement {}
+interface HTMLMapElement extends HTMLElement {}
+interface HTMLMetaElement extends HTMLElement {}
+interface HTMLMeterElement extends HTMLElement {}
+interface HTMLObjectElement extends HTMLElement {}
+interface HTMLOListElement extends HTMLElement {}
+interface HTMLOptGroupElement extends HTMLElement {}
+interface HTMLOptionElement extends HTMLElement {}
+interface HTMLOutputElement extends HTMLElement {}
+interface HTMLParagraphElement extends HTMLElement {}
+interface HTMLParamElement extends HTMLElement {}
+interface HTMLPreElement extends HTMLElement {}
+interface HTMLProgressElement extends HTMLElement {}
+interface HTMLQuoteElement extends HTMLElement {}
+interface HTMLSlotElement extends HTMLElement {}
+interface HTMLScriptElement extends HTMLElement {}
+interface HTMLSelectElement extends HTMLElement {}
+interface HTMLSourceElement extends HTMLElement {}
+interface HTMLSpanElement extends HTMLElement {}
+interface HTMLStyleElement extends HTMLElement {}
+interface HTMLTableElement extends HTMLElement {}
+interface HTMLTableColElement extends HTMLElement {}
+interface HTMLTableDataCellElement extends HTMLElement {}
+interface HTMLTableHeaderCellElement extends HTMLElement {}
+interface HTMLTableRowElement extends HTMLElement {}
+interface HTMLTableSectionElement extends HTMLElement {}
+interface HTMLTemplateElement extends HTMLElement {}
+interface HTMLTextAreaElement extends HTMLElement {}
+interface HTMLTimeElement extends HTMLElement {}
+interface HTMLTitleElement extends HTMLElement {}
+interface HTMLTrackElement extends HTMLElement {}
+interface HTMLUListElement extends HTMLElement {}
+interface HTMLVideoElement extends HTMLElement {}
+interface HTMLWebViewElement extends HTMLElement {}
+
+interface SVGElement extends Element {}
+interface SVGSVGElement extends SVGElement {}
+interface SVGCircleElement extends SVGElement {}
+[TRONCATO]
+
+## node_modules/@types/react/ts5.0/v18/index.d.ts
+// NOTE: Users of the `experimental` builds of React should add a reference
+// to 'react/experimental' in their project. See experimental.d.ts's top comment
+// for reference and documentation on how exactly to do it.
+
+/// <reference path="global.d.ts" />
+
+import * as CSS from "csstype";
+import * as PropTypes from "prop-types";
+
+type NativeAnimationEvent = AnimationEvent;
+type NativeClipboardEvent = ClipboardEvent;
+type NativeCompositionEvent = CompositionEvent;
+type NativeDragEvent = DragEvent;
+type NativeFocusEvent = FocusEvent;
+type NativeInputEvent = InputEvent;
+type NativeKeyboardEvent = KeyboardEvent;
+type NativeMouseEvent = MouseEvent;
+type NativeTouchEvent = TouchEvent;
+type NativePointerEvent = PointerEvent;
+type NativeTransitionEvent = TransitionEvent;
+type NativeUIEvent = UIEvent;
+type NativeWheelEvent = WheelEvent;
+
+/**
+ * Used to represent DOM API's where users can either pass
+ * true or false as a boolean or as its equivalent strings.
+ */
+type Booleanish = boolean | "true" | "false";
+
+/**
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/crossorigin MDN}
+ */
+type CrossOrigin = "anonymous" | "use-credentials" | "" | undefined;
+
+declare const UNDEFINED_VOID_ONLY: unique symbol;
+
+/**
+ * The function returned from an effect passed to {@link React.useEffect useEffect},
+ * which can be used to clean up the effect when the component unmounts.
+ *
+ * @see {@link https://react.dev/reference/react/useEffect React Docs}
+ */
+type Destructor = () => void | { [UNDEFINED_VOID_ONLY]: never };
+type VoidOrUndefinedOnly = void | { [UNDEFINED_VOID_ONLY]: never };
+
+// eslint-disable-next-line @definitelytyped/export-just-namespace
+export = React;
+export as namespace React;
+
+declare namespace React {
+    //
+    // React Elements
+    // ----------------------------------------------------------------------
+
+    /**
+     * Used to retrieve the possible components which accept a given set of props.
+     *
+     * Can be passed no type parameters to get a union of all possible components
+     * and tags.
+     *
+     * Is a superset of {@link ComponentType}.
+     *
+     * @template P The props to match against. If not passed, defaults to any.
+     * @template Tag An optional tag to match against. If not passed, attempts to match against all possible tags.
+     *
+     * @example
+     *
+     * ```tsx
+     * // All components and tags (img, embed etc.)
+     * // which accept `src`
+     * type SrcComponents = ElementType<{ src: any }>;
+     * ```
+     *
+     * @example
+     *
+     * ```tsx
+     * // All components
+     * type AllComponents = ElementType;
+     * ```
+     *
+     * @example
+     *
+     * ```tsx
+     * // All custom components which match `src`, and tags which
+     * // match `src`, narrowed down to just `audio` and `embed`
+     * type SrcComponents = ElementType<{ src: any }, 'audio' | 'embed'>;
+     * ```
+     */
+    type ElementType<P = any, Tag extends keyof JSX.IntrinsicElements = keyof JSX.IntrinsicElements> =
+        | { [K in Tag]: P extends JSX.IntrinsicElements[K] ? K : never }[Tag]
+        | ComponentType<P>;
+
+    /**
+     * Represents any user-defined component, either as a function or a class.
+     *
+     * Similar to {@link JSXElementConstructor}, but with extra properties like
+     * {@link FunctionComponent.defaultProps defaultProps } and
+     * {@link ComponentClass.contextTypes contextTypes}.
+     *
+     * @template P The props the component accepts.
+[TRONCATO]
+
+## node_modules/@types/react/ts5.0/v18/jsx-dev-runtime.d.ts
+import * as React from "./";
+export { Fragment } from "./";
+
+export namespace JSX {
+    type ElementType = React.JSX.ElementType;
+    interface Element extends React.JSX.Element {}
+    interface ElementClass extends React.JSX.ElementClass {}
+    interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
+    interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
+    type LibraryManagedAttributes<C, P> = React.JSX.LibraryManagedAttributes<C, P>;
+    interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
+    interface IntrinsicClassAttributes<T> extends React.JSX.IntrinsicClassAttributes<T> {}
+    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+}
+
+export interface JSXSource {
+    /**
+     * The source file where the element originates from.
+     */
+    fileName?: string | undefined;
+
+    /**
+     * The line number where the element was created.
+     */
+    lineNumber?: number | undefined;
+
+    /**
+     * The column number where the element was created.
+     */
+    columnNumber?: number | undefined;
+}
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsxDEV(
+    type: React.ElementType,
+    props: unknown,
+    key: React.Key | undefined,
+    isStatic: boolean,
+    source?: JSXSource,
+    self?: unknown,
+): React.ReactElement;
+
+## node_modules/@types/react/ts5.0/v18/jsx-runtime.d.ts
+import * as React from "./";
+export { Fragment } from "./";
+
+export namespace JSX {
+    type ElementType = React.JSX.ElementType;
+    interface Element extends React.JSX.Element {}
+    interface ElementClass extends React.JSX.ElementClass {}
+    interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
+    interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
+    type LibraryManagedAttributes<C, P> = React.JSX.LibraryManagedAttributes<C, P>;
+    interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
+    interface IntrinsicClassAttributes<T> extends React.JSX.IntrinsicClassAttributes<T> {}
+    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+}
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsx(
+    type: React.ElementType,
+    props: unknown,
+    key?: React.Key,
+): React.ReactElement;
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsxs(
+    type: React.ElementType,
+    props: unknown,
+    key?: React.Key,
+): React.ReactElement;
+
+## node_modules/@types/react/ts5.0/v18/ts5.0/global.d.ts
+/*
+React projects that don't include the DOM library need these interfaces to compile.
+React Native applications use React, but there is no DOM available. The JavaScript runtime
+is ES6/ES2015 only. These definitions allow such projects to compile with only `--lib ES6`.
+
+Warning: all of these interfaces are empty. If you want type definitions for various properties
+(such as HTMLInputElement.prototype.value), you need to add `--lib DOM` (via command line or tsconfig.json).
+*/
+
+interface Event {}
+interface AnimationEvent extends Event {}
+interface ClipboardEvent extends Event {}
+interface CompositionEvent extends Event {}
+interface DragEvent extends Event {}
+interface FocusEvent extends Event {}
+interface InputEvent extends Event {}
+interface KeyboardEvent extends Event {}
+interface MouseEvent extends Event {}
+interface TouchEvent extends Event {}
+interface PointerEvent extends Event {}
+interface ToggleEvent extends Event {}
+interface TransitionEvent extends Event {}
+interface UIEvent extends Event {}
+interface WheelEvent extends Event {}
+
+interface EventTarget {}
+interface Document {}
+interface DataTransfer {}
+interface StyleMedia {}
+
+interface Element {}
+interface DocumentFragment {}
+
+interface HTMLElement extends Element {}
+interface HTMLAnchorElement extends HTMLElement {}
+interface HTMLAreaElement extends HTMLElement {}
+interface HTMLAudioElement extends HTMLElement {}
+interface HTMLBaseElement extends HTMLElement {}
+interface HTMLBodyElement extends HTMLElement {}
+interface HTMLBRElement extends HTMLElement {}
+interface HTMLButtonElement extends HTMLElement {}
+interface HTMLCanvasElement extends HTMLElement {}
+interface HTMLDataElement extends HTMLElement {}
+interface HTMLDataListElement extends HTMLElement {}
+interface HTMLDetailsElement extends HTMLElement {}
+interface HTMLDialogElement extends HTMLElement {}
+interface HTMLDivElement extends HTMLElement {}
+interface HTMLDListElement extends HTMLElement {}
+interface HTMLEmbedElement extends HTMLElement {}
+interface HTMLFieldSetElement extends HTMLElement {}
+interface HTMLFormElement extends HTMLElement {}
+interface HTMLHeadingElement extends HTMLElement {}
+interface HTMLHeadElement extends HTMLElement {}
+interface HTMLHRElement extends HTMLElement {}
+interface HTMLHtmlElement extends HTMLElement {}
+interface HTMLIFrameElement extends HTMLElement {}
+interface HTMLImageElement extends HTMLElement {}
+interface HTMLInputElement extends HTMLElement {}
+interface HTMLModElement extends HTMLElement {}
+interface HTMLLabelElement extends HTMLElement {}
+interface HTMLLegendElement extends HTMLElement {}
+interface HTMLLIElement extends HTMLElement {}
+interface HTMLLinkElement extends HTMLElement {}
+interface HTMLMapElement extends HTMLElement {}
+interface HTMLMetaElement extends HTMLElement {}
+interface HTMLMeterElement extends HTMLElement {}
+interface HTMLObjectElement extends HTMLElement {}
+interface HTMLOListElement extends HTMLElement {}
+interface HTMLOptGroupElement extends HTMLElement {}
+interface HTMLOptionElement extends HTMLElement {}
+interface HTMLOutputElement extends HTMLElement {}
+interface HTMLParagraphElement extends HTMLElement {}
+interface HTMLParamElement extends HTMLElement {}
+interface HTMLPreElement extends HTMLElement {}
+interface HTMLProgressElement extends HTMLElement {}
+interface HTMLQuoteElement extends HTMLElement {}
+interface HTMLSlotElement extends HTMLElement {}
+interface HTMLScriptElement extends HTMLElement {}
+interface HTMLSelectElement extends HTMLElement {}
+interface HTMLSourceElement extends HTMLElement {}
+interface HTMLSpanElement extends HTMLElement {}
+interface HTMLStyleElement extends HTMLElement {}
+interface HTMLTableElement extends HTMLElement {}
+interface HTMLTableColElement extends HTMLElement {}
+interface HTMLTableDataCellElement extends HTMLElement {}
+interface HTMLTableHeaderCellElement extends HTMLElement {}
+interface HTMLTableRowElement extends HTMLElement {}
+interface HTMLTableSectionElement extends HTMLElement {}
+interface HTMLTemplateElement extends HTMLElement {}
+interface HTMLTextAreaElement extends HTMLElement {}
+interface HTMLTimeElement extends HTMLElement {}
+interface HTMLTitleElement extends HTMLElement {}
+interface HTMLTrackElement extends HTMLElement {}
+interface HTMLUListElement extends HTMLElement {}
+interface HTMLVideoElement extends HTMLElement {}
+interface HTMLWebViewElement extends HTMLElement {}
+
+interface SVGElement extends Element {}
+interface SVGSVGElement extends SVGElement {}
+interface SVGCircleElement extends SVGElement {}
+[TRONCATO]
+
+## node_modules/@types/react/ts5.0/v18/ts5.0/index.d.ts
+// NOTE: Users of the `experimental` builds of React should add a reference
+// to 'react/experimental' in their project. See experimental.d.ts's top comment
+// for reference and documentation on how exactly to do it.
+
+/// <reference path="global.d.ts" />
+
+import * as CSS from "csstype";
+import * as PropTypes from "prop-types";
+
+type NativeAnimationEvent = AnimationEvent;
+type NativeClipboardEvent = ClipboardEvent;
+type NativeCompositionEvent = CompositionEvent;
+type NativeDragEvent = DragEvent;
+type NativeFocusEvent = FocusEvent;
+type NativeInputEvent = InputEvent;
+type NativeKeyboardEvent = KeyboardEvent;
+type NativeMouseEvent = MouseEvent;
+type NativeTouchEvent = TouchEvent;
+type NativePointerEvent = PointerEvent;
+type NativeTransitionEvent = TransitionEvent;
+type NativeUIEvent = UIEvent;
+type NativeWheelEvent = WheelEvent;
+
+/**
+ * Used to represent DOM API's where users can either pass
+ * true or false as a boolean or as its equivalent strings.
+ */
+type Booleanish = boolean | "true" | "false";
+
+/**
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/crossorigin MDN}
+ */
+type CrossOrigin = "anonymous" | "use-credentials" | "" | undefined;
+
+declare const UNDEFINED_VOID_ONLY: unique symbol;
+
+/**
+ * The function returned from an effect passed to {@link React.useEffect useEffect},
+ * which can be used to clean up the effect when the component unmounts.
+ *
+ * @see {@link https://react.dev/reference/react/useEffect React Docs}
+ */
+type Destructor = () => void | { [UNDEFINED_VOID_ONLY]: never };
+type VoidOrUndefinedOnly = void | { [UNDEFINED_VOID_ONLY]: never };
+
+// eslint-disable-next-line @definitelytyped/export-just-namespace
+export = React;
+export as namespace React;
+
+declare namespace React {
+    //
+    // React Elements
+    // ----------------------------------------------------------------------
+
+    /**
+     * Used to retrieve the possible components which accept a given set of props.
+     *
+     * Can be passed no type parameters to get a union of all possible components
+     * and tags.
+     *
+     * Is a superset of {@link ComponentType}.
+     *
+     * @template P The props to match against. If not passed, defaults to any.
+     * @template Tag An optional tag to match against. If not passed, attempts to match against all possible tags.
+     *
+     * @example
+     *
+     * ```tsx
+     * // All components and tags (img, embed etc.)
+     * // which accept `src`
+     * type SrcComponents = ElementType<{ src: any }>;
+     * ```
+     *
+     * @example
+     *
+     * ```tsx
+     * // All components
+     * type AllComponents = ElementType;
+     * ```
+     *
+     * @example
+     *
+     * ```tsx
+     * // All custom components which match `src`, and tags which
+     * // match `src`, narrowed down to just `audio` and `embed`
+     * type SrcComponents = ElementType<{ src: any }, 'audio' | 'embed'>;
+     * ```
+     */
+    type ElementType<P = any, Tag extends keyof JSX.IntrinsicElements = keyof JSX.IntrinsicElements> =
+        | { [K in Tag]: P extends JSX.IntrinsicElements[K] ? K : never }[Tag]
+        | ComponentType<P>;
+
+    /**
+     * Represents any user-defined component, either as a function or a class.
+     *
+     * Similar to {@link JSXElementConstructor}, but with extra properties like
+     * {@link FunctionComponent.defaultProps defaultProps } and
+     * {@link ComponentClass.contextTypes contextTypes}.
+     *
+     * @template P The props the component accepts.
+[TRONCATO]
+
+## node_modules/@types/react/ts5.0/v18/ts5.0/jsx-dev-runtime.d.ts
+import * as React from "./";
+export { Fragment } from "./";
+
+export namespace JSX {
+    interface Element extends React.JSX.Element {}
+    interface ElementClass extends React.JSX.ElementClass {}
+    interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
+    interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
+    type LibraryManagedAttributes<C, P> = React.JSX.LibraryManagedAttributes<C, P>;
+    interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
+    interface IntrinsicClassAttributes<T> extends React.JSX.IntrinsicClassAttributes<T> {}
+    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+}
+
+export interface JSXSource {
+    /**
+     * The source file where the element originates from.
+     */
+    fileName?: string | undefined;
+
+    /**
+     * The line number where the element was created.
+     */
+    lineNumber?: number | undefined;
+
+    /**
+     * The column number where the element was created.
+     */
+    columnNumber?: number | undefined;
+}
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsxDEV(
+    type: React.ElementType,
+    props: unknown,
+    key: React.Key | undefined,
+    isStatic: boolean,
+    source?: JSXSource,
+    self?: unknown,
+): React.ReactElement;
+
+## node_modules/@types/react/ts5.0/v18/ts5.0/jsx-runtime.d.ts
+import * as React from "./";
+export { Fragment } from "./";
+
+export namespace JSX {
+    interface Element extends React.JSX.Element {}
+    interface ElementClass extends React.JSX.ElementClass {}
+    interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
+    interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
+    type LibraryManagedAttributes<C, P> = React.JSX.LibraryManagedAttributes<C, P>;
+    interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
+    interface IntrinsicClassAttributes<T> extends React.JSX.IntrinsicClassAttributes<T> {}
+    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+}
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsx(
+    type: React.ElementType,
+    props: unknown,
+    key?: React.Key,
+): React.ReactElement;
+
+/**
+ * Create a React element.
+ *
+ * You should not use this function directly. Use JSX and a transpiler instead.
+ */
+export function jsxs(
+    type: React.ElementType,
+    props: unknown,
+    key?: React.Key,
+): React.ReactElement;
+
+## node_modules/csstype/README.md
+# CSSType
+
+[![npm](https://img.shields.io/npm/v/csstype.svg)](https://www.npmjs.com/package/csstype)
+
+TypeScript and Flow definitions for CSS, generated by [data from MDN](https://github.com/mdn/data). It provides autocompletion and type checking for CSS properties and values.
+
+**TypeScript**
+
+```ts
+import type * as CSS from 'csstype';
+
+const style: CSS.Properties = {
+  colour: 'white', // Type error on property
+  textAlign: 'middle', // Type error on value
+};
+```
+
+**Flow**
+
+```js
+// @flow strict
+import * as CSS from 'csstype';
+
+const style: CSS.Properties<> = {
+  colour: 'white', // Type error on property
+  textAlign: 'middle', // Type error on value
+};
+```
+
+_Further examples below will be in TypeScript!_
+
+## Getting started
+
+```sh
+$ npm install csstype
+```
+
+## Table of content
+
+- [Style types](#style-types)
+- [At-rule types](#at-rule-types)
+- [Pseudo types](#pseudo-types)
+- [Generics](#generics)
+- [Usage](#usage)
+- [What should I do when I get type errors?](#what-should-i-do-when-i-get-type-errors)
+- [Version 3.0](#version-30)
+- [Contributing](#contributing)
+
+## Style types
+
+Properties are categorized in different uses and in several technical variations to provide typings that suits as many as possible.
+
+|                | Default              | `Hyphen`                   | `Fallback`                   | `HyphenFallback`                   |
+| -------------- | -------------------- | -------------------------- | ---------------------------- | ---------------------------------- |
+| **All**        | `Properties`         | `PropertiesHyphen`         | `PropertiesFallback`         | `PropertiesHyphenFallback`         |
+| **`Standard`** | `StandardProperties` | `StandardPropertiesHyphen` | `StandardPropertiesFallback` | `StandardPropertiesHyphenFallback` |
+| **`Vendor`**   | `VendorProperties`   | `VendorPropertiesHyphen`   | `VendorPropertiesFallback`   | `VendorPropertiesHyphenFallback`   |
+| **`Obsolete`** | `ObsoleteProperties` | `ObsoletePropertiesHyphen` | `ObsoletePropertiesFallback` | `ObsoletePropertiesHyphenFallback` |
+| **`Svg`**      | `SvgProperties`      | `SvgPropertiesHyphen`      | `SvgPropertiesFallback`      | `SvgPropertiesHyphenFallback`      |
+
+Categories:
+
+- **All** - Includes `Standard`, `Vendor`, `Obsolete` and `Svg`
+- **`Standard`** - Current properties and extends subcategories `StandardLonghand` and `StandardShorthand` _(e.g. `StandardShorthandProperties`)_
+- **`Vendor`** - Vendor prefixed properties and extends subcategories `VendorLonghand` and `VendorShorthand` _(e.g. `VendorShorthandProperties`)_
+- **`Obsolete`** - Removed or deprecated properties
+- **`Svg`** - SVG-specific properties
+
+Variations:
+
+- **Default** - JavaScript (camel) cased property names
+- **`Hyphen`** - CSS (kebab) cased property names
+- **`Fallback`** - Also accepts array of values e.g. `string | string[]`
+
+## At-rule types
+
+At-rule interfaces with descriptors.
+
+**TypeScript**: These will be found in the `AtRule` namespace, e.g. `AtRule.Viewport`.  
+**Flow**: These will be prefixed with `AtRule$`, e.g. `AtRule$Viewport`.
+
+|                      | Default        | `Hyphen`             | `Fallback`             | `HyphenFallback`             |
+| -------------------- | -------------- | -------------------- | ---------------------- | ---------------------------- |
+| **`@counter-style`** | `CounterStyle` | `CounterStyleHyphen` | `CounterStyleFallback` | `CounterStyleHyphenFallback` |
+| **`@font-face`**     | `FontFace`     | `FontFaceHyphen`     | `FontFaceFallback`     | `FontFaceHyphenFallback`     |
+| **`@viewport`**      | `Viewport`     | `ViewportHyphen`     | `ViewportFallback`     | `ViewportHyphenFallback`     |
+
+## Pseudo types
+
+String literals of pseudo classes and pseudo elements
+
+- `Pseudos`
+
+  Extends:
+
+  - `AdvancedPseudos`
+
+    Function-like pseudos e.g. `:not(:first-child)`. The string literal contains the value excluding the parenthesis: `:not`. These are separated because they require an argument that results in infinite number of variations.
+
+  - `SimplePseudos`
+[TRONCATO]
+
+## node_modules/csstype/index.d.ts
+export {};
+
+export type PropertyValue<TValue> = TValue extends Array<infer AValue>
+  ? Array<AValue extends infer TUnpacked & {} ? TUnpacked : AValue>
+  : TValue extends infer TUnpacked & {}
+  ? TUnpacked
+  : TValue;
+
+export type Fallback<T> = { [P in keyof T]: T[P] | readonly NonNullable<T[P]>[] };
+
+export interface StandardLonghandProperties<TLength = (string & {}) | 0, TTime = string & {}> {
+  /**
+   * The **`accent-color`** CSS property sets the accent color for user-interface controls generated by some elements.
+   *
+   * **Syntax**: `auto | <color>`
+   *
+   * **Initial value**: `auto`
+   *
+   * | Chrome | Firefox |  Safari  | Edge | IE  |
+   * | :----: | :-----: | :------: | :--: | :-: |
+   * | **93** | **92**  | **15.4** | n/a  | No  |
+   *
+   * @see https://developer.mozilla.org/docs/Web/CSS/accent-color
+   */
+  accentColor?: Property.AccentColor | undefined;
+  /**
+   * The CSS **`align-content`** property sets the distribution of space between and around content items along a flexbox's cross-axis or a grid's block axis.
+   *
+   * **Syntax**: `normal | <baseline-position> | <content-distribution> | <overflow-position>? <content-position>`
+   *
+   * **Initial value**: `normal`
+   *
+   * |  Chrome  | Firefox | Safari  |  Edge  |   IE   |
+   * | :------: | :-----: | :-----: | :----: | :----: |
+   * |  **29**  | **28**  |  **9**  | **12** | **11** |
+   * | 21 _-x-_ |         | 7 _-x-_ |        |        |
+   *
+   * @see https://developer.mozilla.org/docs/Web/CSS/align-content
+   */
+  alignContent?: Property.AlignContent | undefined;
+  /**
+   * The CSS **`align-items`** property sets the `align-self` value on all direct children as a group. In Flexbox, it controls the alignment of items on the Cross Axis. In Grid Layout, it controls the alignment of items on the Block Axis within their grid area.
+   *
+   * **Syntax**: `normal | stretch | <baseline-position> | [ <overflow-position>? <self-position> ]`
+   *
+   * **Initial value**: `normal`
+   *
+   * |  Chrome  | Firefox | Safari  |  Edge  |   IE   |
+   * | :------: | :-----: | :-----: | :----: | :----: |
+   * |  **29**  | **20**  |  **9**  | **12** | **11** |
+   * | 21 _-x-_ |         | 7 _-x-_ |        |        |
+   *
+   * @see https://developer.mozilla.org/docs/Web/CSS/align-items
+   */
+  alignItems?: Property.AlignItems | undefined;
+  /**
+   * The **`align-self`** CSS property overrides a grid or flex item's `align-items` value. In Grid, it aligns the item inside the grid area. In Flexbox, it aligns the item on the cross axis.
+   *
+   * **Syntax**: `auto | normal | stretch | <baseline-position> | <overflow-position>? <self-position>`
+   *
+   * **Initial value**: `auto`
+   *
+   * |  Chrome  | Firefox | Safari  |  Edge  |   IE   |
+   * | :------: | :-----: | :-----: | :----: | :----: |
+   * |  **29**  | **20**  |  **9**  | **12** | **10** |
+   * | 21 _-x-_ |         | 7 _-x-_ |        |        |
+   *
+   * @see https://developer.mozilla.org/docs/Web/CSS/align-self
+   */
+  alignSelf?: Property.AlignSelf | undefined;
+  /**
+   * The **`align-tracks`** CSS property sets the alignment in the masonry axis for grid containers that have masonry in their block axis.
+   *
+   * **Syntax**: `[ normal | <baseline-position> | <content-distribution> | <overflow-position>? <content-position> ]#`
+   *
+   * **Initial value**: `normal`
+   *
+   * | Chrome | Firefox | Safari | Edge | IE  |
+   * | :----: | :-----: | :----: | :--: | :-: |
+   * |   No   |   n/a   |   No   | n/a  | No  |
+   *
+   * @see https://developer.mozilla.org/docs/Web/CSS/align-tracks
+   */
+  alignTracks?: Property.AlignTracks | undefined;
+  /**
+   * The **`animation-composition`** CSS property specifies the composite operation to use when multiple animations affect the same property simultaneously.
+   *
+   * **Syntax**: `<single-animation-composition>#`
+   *
+   * **Initial value**: `replace`
+   *
+   * | Chrome  | Firefox | Safari | Edge | IE  |
+   * | :-----: | :-----: | :----: | :--: | :-: |
+   * | **112** | **115** | **16** | n/a  | No  |
+   *
+   * @see https://developer.mozilla.org/docs/Web/CSS/animation-composition
+   */
+  animationComposition?: Property.AnimationComposition | undefined;
+  /**
+   * The **`animation-delay`** CSS property specifies the amount of time to wait from applying the animation to an element before beginning to perform the animation. The animation can start later, immediately from its beginning, or immediately and partway through the animation.
+[TRONCATO]
+
+## node_modules/csstype/package.json
+{
+  "name": "csstype",
+  "version": "3.1.3",
+  "main": "",
+  "types": "index.d.ts",
+  "description": "Strict TypeScript and Flow types for style based on MDN data",
+  "repository": "https://github.com/frenic/csstype",
+  "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chokidar": "^2.1.3",
+    "@types/css-tree": "^2.3.1",
+    "@types/jest": "^29.5.0",
+    "@types/jsdom": "^21.1.1",
+    "@types/node": "^16.18.23",
+    "@types/prettier": "^2.7.2",
+    "@types/request": "^2.48.8",
+    "@types/turndown": "^5.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
+    "chalk": "^4.1.2",
+    "chokidar": "^3.5.3",
+    "eslint": "^8.37.0",
+    "css-tree": "^2.3.1",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "fast-glob": "^3.2.12",
+    "flow-bin": "^0.203.1",
+    "jest": "^29.5.0",
+    "jsdom": "^21.1.1",
+    "mdn-browser-compat-data": "git+https://github.com/mdn/browser-compat-data.git#1bf44517bd08de735e9ec20dbfe8e86c96341054",
+    "mdn-data": "git+https://github.com/mdn/data.git#7f0c865a3c4b5d891285c93308ee5c25cb5cfee8",
+    "prettier": "^2.8.7",
+    "request": "^2.88.2",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
+    "turndown": "^7.1.2",
+    "typescript": "~5.0.3"
+  },
+  "scripts": {
+    "prepublish": "npm install --prefix __tests__ && npm install --prefix __tests__/__fixtures__",
+    "prepublishOnly": "tsc && npm run test:src && npm run build && ts-node --files prepublish.ts",
+    "update": "ts-node --files update.ts",
+    "build": "ts-node --files build.ts --start",
+    "watch": "ts-node --files build.ts --watch",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "pretty": "prettier --write build.ts **/*.{ts,js,json,md}",
+    "lazy": "tsc && npm run lint",
+    "test": "jest --runInBand",
+    "test:src": "jest src.*.ts",
+    "test:dist": "jest dist.*.ts --runInBand"
+  },
+  "files": [
+    "index.d.ts",
+    "index.js.flow"
+  ],
+  "keywords": [
+    "css",
+    "style",
+    "typescript",
+    "flow",
+    "typings",
+    "types",
+    "definitions"
+  ]
+}
+
+## node_modules/react/README.md
+# `react`
+
+React is a JavaScript library for creating user interfaces.
+
+The `react` package contains only the functionality necessary to define React components. It is typically used together with a React renderer like `react-dom` for the web, or `react-native` for the native environments.
+
+**Note:** by default, React will be in development mode. The development version includes extra warnings about common mistakes, whereas the production version includes extra performance optimizations and strips all error messages. Don't forget to use the [production build](https://reactjs.org/docs/optimizing-performance.html#use-the-production-build) when deploying your application.
+
+## Usage
+
+```js
+import { useState } from 'react';
+import { createRoot } from 'react-dom/client';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    <>
+      <h1>{count}</h1>
+      <button onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+    </>
+  );
+}
+
+const root = createRoot(document.getElementById('root'));
+root.render(<Counter />);
+```
+
+## Documentation
+
+See https://react.dev/
+
+## API
+
+See https://react.dev/reference/react
+
+## node_modules/react/compiler-runtime.js
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+'use strict';
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = require('./cjs/react-compiler-runtime.production.js');
+} else {
+  module.exports = require('./cjs/react-compiler-runtime.development.js');
+}
+
+## node_modules/react/index.js
+'use strict';
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = require('./cjs/react.production.js');
+} else {
+  module.exports = require('./cjs/react.development.js');
+}
+
+## node_modules/react/jsx-dev-runtime.js
+'use strict';
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = require('./cjs/react-jsx-dev-runtime.production.js');
+} else {
+  module.exports = require('./cjs/react-jsx-dev-runtime.development.js');
+}
+
+## node_modules/react/jsx-dev-runtime.react-server.js
+'use strict';
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = require('./cjs/react-jsx-dev-runtime.react-server.production.js');
+} else {
+  module.exports = require('./cjs/react-jsx-dev-runtime.react-server.development.js');
+}
+
+## node_modules/react/jsx-runtime.js
+'use strict';
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = require('./cjs/react-jsx-runtime.production.js');
+} else {
+  module.exports = require('./cjs/react-jsx-runtime.development.js');
+}
+
+## node_modules/react/jsx-runtime.react-server.js
+'use strict';
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = require('./cjs/react-jsx-runtime.react-server.production.js');
+} else {
+  module.exports = require('./cjs/react-jsx-runtime.react-server.development.js');
+}
+
+## node_modules/react/package.json
+{
+  "name": "react",
+  "description": "React is a JavaScript library for building user interfaces.",
+  "keywords": [
+    "react"
+  ],
+  "version": "19.1.0",
+  "homepage": "https://react.dev/",
+  "bugs": "https://github.com/facebook/react/issues",
+  "license": "MIT",
+  "files": [
+    "LICENSE",
+    "README.md",
+    "index.js",
+    "cjs/",
+    "compiler-runtime.js",
+    "jsx-runtime.js",
+    "jsx-runtime.react-server.js",
+    "jsx-dev-runtime.js",
+    "jsx-dev-runtime.react-server.js",
+    "react.react-server.js"
+  ],
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "react-server": "./react.react-server.js",
+      "default": "./index.js"
+    },
+    "./package.json": "./package.json",
+    "./jsx-runtime": {
+      "react-server": "./jsx-runtime.react-server.js",
+      "default": "./jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "react-server": "./jsx-dev-runtime.react-server.js",
+      "default": "./jsx-dev-runtime.js"
+    },
+    "./compiler-runtime": {
+      "react-server": "./compiler-runtime.js",
+      "default": "./compiler-runtime.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/react.git",
+    "directory": "packages/react"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  }
+}
+
+## node_modules/react/react.react-server.js
+'use strict';
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = require('./cjs/react.react-server.production.js');
+} else {
+  module.exports = require('./cjs/react.react-server.development.js');
+}
+
+## node_modules/react/cjs/react-compiler-runtime.development.js
+/**
+ * @license React
+ * react-compiler-runtime.development.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+"production" !== process.env.NODE_ENV &&
+  (function () {
+    var ReactSharedInternals =
+      require("react").__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+    exports.c = function (size) {
+      var dispatcher = ReactSharedInternals.H;
+      null === dispatcher &&
+        console.error(
+          "Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:\n1. You might have mismatching versions of React and the renderer (such as React DOM)\n2. You might be breaking the Rules of Hooks\n3. You might have more than one copy of React in the same app\nSee https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem."
+        );
+      return dispatcher.useMemoCache(size);
+    };
+  })();
+
+## node_modules/react/cjs/react-compiler-runtime.production.js
+/**
+ * @license React
+ * react-compiler-runtime.production.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+var ReactSharedInternals =
+  require("react").__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+exports.c = function (size) {
+  return ReactSharedInternals.H.useMemoCache(size);
+};
+
+## node_modules/react/cjs/react-compiler-runtime.profiling.js
+/**
+ * @license React
+ * react-compiler-runtime.profiling.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+var ReactSharedInternals =
+  require("react").__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+exports.c = function (size) {
+  return ReactSharedInternals.H.useMemoCache(size);
+};
+
+## node_modules/react/cjs/react-jsx-dev-runtime.development.js
+/**
+ * @license React
+ * react-jsx-dev-runtime.development.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+"production" !== process.env.NODE_ENV &&
+  (function () {
+    function getComponentNameFromType(type) {
+      if (null == type) return null;
+      if ("function" === typeof type)
+        return type.$$typeof === REACT_CLIENT_REFERENCE
+          ? null
+          : type.displayName || type.name || null;
+      if ("string" === typeof type) return type;
+      switch (type) {
+        case REACT_FRAGMENT_TYPE:
+          return "Fragment";
+        case REACT_PROFILER_TYPE:
+          return "Profiler";
+        case REACT_STRICT_MODE_TYPE:
+          return "StrictMode";
+        case REACT_SUSPENSE_TYPE:
+          return "Suspense";
+        case REACT_SUSPENSE_LIST_TYPE:
+          return "SuspenseList";
+        case REACT_ACTIVITY_TYPE:
+          return "Activity";
+      }
+      if ("object" === typeof type)
+        switch (
+          ("number" === typeof type.tag &&
+            console.error(
+              "Received an unexpected object in getComponentNameFromType(). This is likely a bug in React. Please file an issue."
+            ),
+          type.$$typeof)
+        ) {
+          case REACT_PORTAL_TYPE:
+            return "Portal";
+          case REACT_CONTEXT_TYPE:
+            return (type.displayName || "Context") + ".Provider";
+          case REACT_CONSUMER_TYPE:
+            return (type._context.displayName || "Context") + ".Consumer";
+          case REACT_FORWARD_REF_TYPE:
+            var innerType = type.render;
+            type = type.displayName;
+            type ||
+              ((type = innerType.displayName || innerType.name || ""),
+              (type = "" !== type ? "ForwardRef(" + type + ")" : "ForwardRef"));
+            return type;
+          case REACT_MEMO_TYPE:
+            return (
+              (innerType = type.displayName || null),
+              null !== innerType
+                ? innerType
+                : getComponentNameFromType(type.type) || "Memo"
+            );
+          case REACT_LAZY_TYPE:
+            innerType = type._payload;
+            type = type._init;
+            try {
+              return getComponentNameFromType(type(innerType));
+            } catch (x) {}
+        }
+      return null;
+    }
+    function testStringCoercion(value) {
+      return "" + value;
+    }
+    function checkKeyStringCoercion(value) {
+      try {
+        testStringCoercion(value);
+        var JSCompiler_inline_result = !1;
+      } catch (e) {
+        JSCompiler_inline_result = !0;
+      }
+      if (JSCompiler_inline_result) {
+        JSCompiler_inline_result = console;
+        var JSCompiler_temp_const = JSCompiler_inline_result.error;
+        var JSCompiler_inline_result$jscomp$0 =
+          ("function" === typeof Symbol &&
+            Symbol.toStringTag &&
+            value[Symbol.toStringTag]) ||
+          value.constructor.name ||
+          "Object";
+        JSCompiler_temp_const.call(
+          JSCompiler_inline_result,
+          "The provided key is an unsupported type %s. This value must be coerced to a string before using it here.",
+          JSCompiler_inline_result$jscomp$0
+        );
+        return testStringCoercion(value);
+      }
+    }
+    function getTaskName(type) {
+      if (type === REACT_FRAGMENT_TYPE) return "<>";
+[TRONCATO]
+
+## node_modules/react/cjs/react-jsx-dev-runtime.production.js
+/**
+ * @license React
+ * react-jsx-dev-runtime.production.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
+exports.Fragment = REACT_FRAGMENT_TYPE;
+exports.jsxDEV = void 0;
+
+## node_modules/react/cjs/react-jsx-dev-runtime.profiling.js
+/**
+ * @license React
+ * react-jsx-dev-runtime.profiling.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
+exports.Fragment = REACT_FRAGMENT_TYPE;
+exports.jsxDEV = void 0;
+
+## node_modules/react/cjs/react-jsx-dev-runtime.react-server.development.js
+/**
+ * @license React
+ * react-jsx-dev-runtime.react-server.development.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+"production" !== process.env.NODE_ENV &&
+  (function () {
+    function getComponentNameFromType(type) {
+      if (null == type) return null;
+      if ("function" === typeof type)
+        return type.$$typeof === REACT_CLIENT_REFERENCE
+          ? null
+          : type.displayName || type.name || null;
+      if ("string" === typeof type) return type;
+      switch (type) {
+        case REACT_FRAGMENT_TYPE:
+          return "Fragment";
+        case REACT_PROFILER_TYPE:
+          return "Profiler";
+        case REACT_STRICT_MODE_TYPE:
+          return "StrictMode";
+        case REACT_SUSPENSE_TYPE:
+          return "Suspense";
+        case REACT_SUSPENSE_LIST_TYPE:
+          return "SuspenseList";
+        case REACT_ACTIVITY_TYPE:
+          return "Activity";
+      }
+      if ("object" === typeof type)
+        switch (
+          ("number" === typeof type.tag &&
+            console.error(
+              "Received an unexpected object in getComponentNameFromType(). This is likely a bug in React. Please file an issue."
+            ),
+          type.$$typeof)
+        ) {
+          case REACT_PORTAL_TYPE:
+            return "Portal";
+          case REACT_CONTEXT_TYPE:
+            return (type.displayName || "Context") + ".Provider";
+          case REACT_CONSUMER_TYPE:
+            return (type._context.displayName || "Context") + ".Consumer";
+          case REACT_FORWARD_REF_TYPE:
+            var innerType = type.render;
+            type = type.displayName;
+            type ||
+              ((type = innerType.displayName || innerType.name || ""),
+              (type = "" !== type ? "ForwardRef(" + type + ")" : "ForwardRef"));
+            return type;
+          case REACT_MEMO_TYPE:
+            return (
+              (innerType = type.displayName || null),
+              null !== innerType
+                ? innerType
+                : getComponentNameFromType(type.type) || "Memo"
+            );
+          case REACT_LAZY_TYPE:
+            innerType = type._payload;
+            type = type._init;
+            try {
+              return getComponentNameFromType(type(innerType));
+            } catch (x) {}
+        }
+      return null;
+    }
+    function testStringCoercion(value) {
+      return "" + value;
+    }
+    function checkKeyStringCoercion(value) {
+      try {
+        testStringCoercion(value);
+        var JSCompiler_inline_result = !1;
+      } catch (e) {
+        JSCompiler_inline_result = !0;
+      }
+      if (JSCompiler_inline_result) {
+        JSCompiler_inline_result = console;
+        var JSCompiler_temp_const = JSCompiler_inline_result.error;
+        var JSCompiler_inline_result$jscomp$0 =
+          ("function" === typeof Symbol &&
+            Symbol.toStringTag &&
+            value[Symbol.toStringTag]) ||
+          value.constructor.name ||
+          "Object";
+        JSCompiler_temp_const.call(
+          JSCompiler_inline_result,
+          "The provided key is an unsupported type %s. This value must be coerced to a string before using it here.",
+          JSCompiler_inline_result$jscomp$0
+        );
+        return testStringCoercion(value);
+      }
+    }
+    function getTaskName(type) {
+      if (type === REACT_FRAGMENT_TYPE) return "<>";
+[TRONCATO]
+
+## node_modules/react/cjs/react-jsx-dev-runtime.react-server.production.js
+/**
+ * @license React
+ * react-jsx-dev-runtime.react-server.production.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+var React = require("react"),
+  REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element"),
+  REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
+if (!React.__SERVER_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE)
+  throw Error(
+    'The "react" package in this environment is not configured correctly. The "react-server" condition must be enabled in any environment that runs React Server Components.'
+  );
+function jsxProd(type, config, maybeKey) {
+  var key = null;
+  void 0 !== maybeKey && (key = "" + maybeKey);
+  void 0 !== config.key && (key = "" + config.key);
+  if ("key" in config) {
+    maybeKey = {};
+    for (var propName in config)
+      "key" !== propName && (maybeKey[propName] = config[propName]);
+  } else maybeKey = config;
+  config = maybeKey.ref;
+  return {
+    $$typeof: REACT_ELEMENT_TYPE,
+    type: type,
+    key: key,
+    ref: void 0 !== config ? config : null,
+    props: maybeKey
+  };
+}
+exports.Fragment = REACT_FRAGMENT_TYPE;
+exports.jsx = jsxProd;
+exports.jsxDEV = void 0;
+exports.jsxs = jsxProd;
+
+## node_modules/react/cjs/react-jsx-runtime.development.js
+/**
+ * @license React
+ * react-jsx-runtime.development.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+"production" !== process.env.NODE_ENV &&
+  (function () {
+    function getComponentNameFromType(type) {
+      if (null == type) return null;
+      if ("function" === typeof type)
+        return type.$$typeof === REACT_CLIENT_REFERENCE
+          ? null
+          : type.displayName || type.name || null;
+      if ("string" === typeof type) return type;
+      switch (type) {
+        case REACT_FRAGMENT_TYPE:
+          return "Fragment";
+        case REACT_PROFILER_TYPE:
+          return "Profiler";
+        case REACT_STRICT_MODE_TYPE:
+          return "StrictMode";
+        case REACT_SUSPENSE_TYPE:
+          return "Suspense";
+        case REACT_SUSPENSE_LIST_TYPE:
+          return "SuspenseList";
+        case REACT_ACTIVITY_TYPE:
+          return "Activity";
+      }
+      if ("object" === typeof type)
+        switch (
+          ("number" === typeof type.tag &&
+            console.error(
+              "Received an unexpected object in getComponentNameFromType(). This is likely a bug in React. Please file an issue."
+            ),
+          type.$$typeof)
+        ) {
+          case REACT_PORTAL_TYPE:
+            return "Portal";
+          case REACT_CONTEXT_TYPE:
+            return (type.displayName || "Context") + ".Provider";
+          case REACT_CONSUMER_TYPE:
+            return (type._context.displayName || "Context") + ".Consumer";
+          case REACT_FORWARD_REF_TYPE:
+            var innerType = type.render;
+            type = type.displayName;
+            type ||
+              ((type = innerType.displayName || innerType.name || ""),
+              (type = "" !== type ? "ForwardRef(" + type + ")" : "ForwardRef"));
+            return type;
+          case REACT_MEMO_TYPE:
+            return (
+              (innerType = type.displayName || null),
+              null !== innerType
+                ? innerType
+                : getComponentNameFromType(type.type) || "Memo"
+            );
+          case REACT_LAZY_TYPE:
+            innerType = type._payload;
+            type = type._init;
+            try {
+              return getComponentNameFromType(type(innerType));
+            } catch (x) {}
+        }
+      return null;
+    }
+    function testStringCoercion(value) {
+      return "" + value;
+    }
+    function checkKeyStringCoercion(value) {
+      try {
+        testStringCoercion(value);
+        var JSCompiler_inline_result = !1;
+      } catch (e) {
+        JSCompiler_inline_result = !0;
+      }
+      if (JSCompiler_inline_result) {
+        JSCompiler_inline_result = console;
+        var JSCompiler_temp_const = JSCompiler_inline_result.error;
+        var JSCompiler_inline_result$jscomp$0 =
+          ("function" === typeof Symbol &&
+            Symbol.toStringTag &&
+            value[Symbol.toStringTag]) ||
+          value.constructor.name ||
+          "Object";
+        JSCompiler_temp_const.call(
+          JSCompiler_inline_result,
+          "The provided key is an unsupported type %s. This value must be coerced to a string before using it here.",
+          JSCompiler_inline_result$jscomp$0
+        );
+        return testStringCoercion(value);
+      }
+    }
+    function getTaskName(type) {
+      if (type === REACT_FRAGMENT_TYPE) return "<>";
+[TRONCATO]
+
+## node_modules/react/cjs/react-jsx-runtime.production.js
+/**
+ * @license React
+ * react-jsx-runtime.production.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+var REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element"),
+  REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
+function jsxProd(type, config, maybeKey) {
+  var key = null;
+  void 0 !== maybeKey && (key = "" + maybeKey);
+  void 0 !== config.key && (key = "" + config.key);
+  if ("key" in config) {
+    maybeKey = {};
+    for (var propName in config)
+      "key" !== propName && (maybeKey[propName] = config[propName]);
+  } else maybeKey = config;
+  config = maybeKey.ref;
+  return {
+    $$typeof: REACT_ELEMENT_TYPE,
+    type: type,
+    key: key,
+    ref: void 0 !== config ? config : null,
+    props: maybeKey
+  };
+}
+exports.Fragment = REACT_FRAGMENT_TYPE;
+exports.jsx = jsxProd;
+exports.jsxs = jsxProd;
+
+## node_modules/react/cjs/react-jsx-runtime.profiling.js
+/**
+ * @license React
+ * react-jsx-runtime.profiling.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+var REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element"),
+  REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
+function jsxProd(type, config, maybeKey) {
+  var key = null;
+  void 0 !== maybeKey && (key = "" + maybeKey);
+  void 0 !== config.key && (key = "" + config.key);
+  if ("key" in config) {
+    maybeKey = {};
+    for (var propName in config)
+      "key" !== propName && (maybeKey[propName] = config[propName]);
+  } else maybeKey = config;
+  config = maybeKey.ref;
+  return {
+    $$typeof: REACT_ELEMENT_TYPE,
+    type: type,
+    key: key,
+    ref: void 0 !== config ? config : null,
+    props: maybeKey
+  };
+}
+exports.Fragment = REACT_FRAGMENT_TYPE;
+exports.jsx = jsxProd;
+exports.jsxs = jsxProd;
+
+## node_modules/react/cjs/react-jsx-runtime.react-server.development.js
+/**
+ * @license React
+ * react-jsx-runtime.react-server.development.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+"production" !== process.env.NODE_ENV &&
+  (function () {
+    function getComponentNameFromType(type) {
+      if (null == type) return null;
+      if ("function" === typeof type)
+        return type.$$typeof === REACT_CLIENT_REFERENCE
+          ? null
+          : type.displayName || type.name || null;
+      if ("string" === typeof type) return type;
+      switch (type) {
+        case REACT_FRAGMENT_TYPE:
+          return "Fragment";
+        case REACT_PROFILER_TYPE:
+          return "Profiler";
+        case REACT_STRICT_MODE_TYPE:
+          return "StrictMode";
+        case REACT_SUSPENSE_TYPE:
+          return "Suspense";
+        case REACT_SUSPENSE_LIST_TYPE:
+          return "SuspenseList";
+        case REACT_ACTIVITY_TYPE:
+          return "Activity";
+      }
+      if ("object" === typeof type)
+        switch (
+          ("number" === typeof type.tag &&
+            console.error(
+              "Received an unexpected object in getComponentNameFromType(). This is likely a bug in React. Please file an issue."
+            ),
+          type.$$typeof)
+        ) {
+          case REACT_PORTAL_TYPE:
+            return "Portal";
+          case REACT_CONTEXT_TYPE:
+            return (type.displayName || "Context") + ".Provider";
+          case REACT_CONSUMER_TYPE:
+            return (type._context.displayName || "Context") + ".Consumer";
+          case REACT_FORWARD_REF_TYPE:
+            var innerType = type.render;
+            type = type.displayName;
+            type ||
+              ((type = innerType.displayName || innerType.name || ""),
+              (type = "" !== type ? "ForwardRef(" + type + ")" : "ForwardRef"));
+            return type;
+          case REACT_MEMO_TYPE:
+            return (
+              (innerType = type.displayName || null),
+              null !== innerType
+                ? innerType
+                : getComponentNameFromType(type.type) || "Memo"
+            );
+          case REACT_LAZY_TYPE:
+            innerType = type._payload;
+            type = type._init;
+            try {
+              return getComponentNameFromType(type(innerType));
+            } catch (x) {}
+        }
+      return null;
+    }
+    function testStringCoercion(value) {
+      return "" + value;
+    }
+    function checkKeyStringCoercion(value) {
+      try {
+        testStringCoercion(value);
+        var JSCompiler_inline_result = !1;
+      } catch (e) {
+        JSCompiler_inline_result = !0;
+      }
+      if (JSCompiler_inline_result) {
+        JSCompiler_inline_result = console;
+        var JSCompiler_temp_const = JSCompiler_inline_result.error;
+        var JSCompiler_inline_result$jscomp$0 =
+          ("function" === typeof Symbol &&
+            Symbol.toStringTag &&
+            value[Symbol.toStringTag]) ||
+          value.constructor.name ||
+          "Object";
+        JSCompiler_temp_const.call(
+          JSCompiler_inline_result,
+          "The provided key is an unsupported type %s. This value must be coerced to a string before using it here.",
+          JSCompiler_inline_result$jscomp$0
+        );
+        return testStringCoercion(value);
+      }
+    }
+    function getTaskName(type) {
+      if (type === REACT_FRAGMENT_TYPE) return "<>";
+[TRONCATO]
+
+## node_modules/react/cjs/react-jsx-runtime.react-server.production.js
+/**
+ * @license React
+ * react-jsx-runtime.react-server.production.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+var React = require("react"),
+  REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element"),
+  REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
+if (!React.__SERVER_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE)
+  throw Error(
+    'The "react" package in this environment is not configured correctly. The "react-server" condition must be enabled in any environment that runs React Server Components.'
+  );
+function jsxProd(type, config, maybeKey) {
+  var key = null;
+  void 0 !== maybeKey && (key = "" + maybeKey);
+  void 0 !== config.key && (key = "" + config.key);
+  if ("key" in config) {
+    maybeKey = {};
+    for (var propName in config)
+      "key" !== propName && (maybeKey[propName] = config[propName]);
+  } else maybeKey = config;
+  config = maybeKey.ref;
+  return {
+    $$typeof: REACT_ELEMENT_TYPE,
+    type: type,
+    key: key,
+    ref: void 0 !== config ? config : null,
+    props: maybeKey
+  };
+}
+exports.Fragment = REACT_FRAGMENT_TYPE;
+exports.jsx = jsxProd;
+exports.jsxDEV = void 0;
+exports.jsxs = jsxProd;
+
+## node_modules/react/cjs/react.development.js
+/**
+ * @license React
+ * react.development.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+"production" !== process.env.NODE_ENV &&
+  (function () {
+    function defineDeprecationWarning(methodName, info) {
+      Object.defineProperty(Component.prototype, methodName, {
+        get: function () {
+          console.warn(
+            "%s(...) is deprecated in plain JavaScript React classes. %s",
+            info[0],
+            info[1]
+          );
+        }
+      });
+    }
+    function getIteratorFn(maybeIterable) {
+      if (null === maybeIterable || "object" !== typeof maybeIterable)
+        return null;
+      maybeIterable =
+        (MAYBE_ITERATOR_SYMBOL && maybeIterable[MAYBE_ITERATOR_SYMBOL]) ||
+        maybeIterable["@@iterator"];
+      return "function" === typeof maybeIterable ? maybeIterable : null;
+    }
+    function warnNoop(publicInstance, callerName) {
+      publicInstance =
+        ((publicInstance = publicInstance.constructor) &&
+          (publicInstance.displayName || publicInstance.name)) ||
+        "ReactClass";
+      var warningKey = publicInstance + "." + callerName;
+      didWarnStateUpdateForUnmountedComponent[warningKey] ||
+        (console.error(
+          "Can't call %s on a component that is not yet mounted. This is a no-op, but it might indicate a bug in your application. Instead, assign to `this.state` directly or define a `state = {};` class property with the desired state in the %s component.",
+          callerName,
+          publicInstance
+        ),
+        (didWarnStateUpdateForUnmountedComponent[warningKey] = !0));
+    }
+    function Component(props, context, updater) {
+      this.props = props;
+      this.context = context;
+      this.refs = emptyObject;
+      this.updater = updater || ReactNoopUpdateQueue;
+    }
+    function ComponentDummy() {}
+    function PureComponent(props, context, updater) {
+      this.props = props;
+      this.context = context;
+      this.refs = emptyObject;
+      this.updater = updater || ReactNoopUpdateQueue;
+    }
+    function testStringCoercion(value) {
+      return "" + value;
+    }
+    function checkKeyStringCoercion(value) {
+      try {
+        testStringCoercion(value);
+        var JSCompiler_inline_result = !1;
+      } catch (e) {
+        JSCompiler_inline_result = !0;
+      }
+      if (JSCompiler_inline_result) {
+        JSCompiler_inline_result = console;
+        var JSCompiler_temp_const = JSCompiler_inline_result.error;
+        var JSCompiler_inline_result$jscomp$0 =
+          ("function" === typeof Symbol &&
+            Symbol.toStringTag &&
+            value[Symbol.toStringTag]) ||
+          value.constructor.name ||
+          "Object";
+        JSCompiler_temp_const.call(
+          JSCompiler_inline_result,
+          "The provided key is an unsupported type %s. This value must be coerced to a string before using it here.",
+          JSCompiler_inline_result$jscomp$0
+        );
+        return testStringCoercion(value);
+      }
+    }
+    function getComponentNameFromType(type) {
+      if (null == type) return null;
+      if ("function" === typeof type)
+        return type.$$typeof === REACT_CLIENT_REFERENCE
+          ? null
+          : type.displayName || type.name || null;
+      if ("string" === typeof type) return type;
+      switch (type) {
+        case REACT_FRAGMENT_TYPE:
+          return "Fragment";
+        case REACT_PROFILER_TYPE:
+          return "Profiler";
+        case REACT_STRICT_MODE_TYPE:
+          return "StrictMode";
+[TRONCATO]
+
+## node_modules/react/cjs/react.production.js
+/**
+ * @license React
+ * react.production.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+var REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element"),
+  REACT_PORTAL_TYPE = Symbol.for("react.portal"),
+  REACT_FRAGMENT_TYPE = Symbol.for("react.fragment"),
+  REACT_STRICT_MODE_TYPE = Symbol.for("react.strict_mode"),
+  REACT_PROFILER_TYPE = Symbol.for("react.profiler"),
+  REACT_CONSUMER_TYPE = Symbol.for("react.consumer"),
+  REACT_CONTEXT_TYPE = Symbol.for("react.context"),
+  REACT_FORWARD_REF_TYPE = Symbol.for("react.forward_ref"),
+  REACT_SUSPENSE_TYPE = Symbol.for("react.suspense"),
+  REACT_MEMO_TYPE = Symbol.for("react.memo"),
+  REACT_LAZY_TYPE = Symbol.for("react.lazy"),
+  MAYBE_ITERATOR_SYMBOL = Symbol.iterator;
+function getIteratorFn(maybeIterable) {
+  if (null === maybeIterable || "object" !== typeof maybeIterable) return null;
+  maybeIterable =
+    (MAYBE_ITERATOR_SYMBOL && maybeIterable[MAYBE_ITERATOR_SYMBOL]) ||
+    maybeIterable["@@iterator"];
+  return "function" === typeof maybeIterable ? maybeIterable : null;
+}
+var ReactNoopUpdateQueue = {
+    isMounted: function () {
+      return !1;
+    },
+    enqueueForceUpdate: function () {},
+    enqueueReplaceState: function () {},
+    enqueueSetState: function () {}
+  },
+  assign = Object.assign,
+  emptyObject = {};
+function Component(props, context, updater) {
+  this.props = props;
+  this.context = context;
+  this.refs = emptyObject;
+  this.updater = updater || ReactNoopUpdateQueue;
+}
+Component.prototype.isReactComponent = {};
+Component.prototype.setState = function (partialState, callback) {
+  if (
+    "object" !== typeof partialState &&
+    "function" !== typeof partialState &&
+    null != partialState
+  )
+    throw Error(
+      "takes an object of state variables to update or a function which returns an object of state variables."
+    );
+  this.updater.enqueueSetState(this, partialState, callback, "setState");
+};
+Component.prototype.forceUpdate = function (callback) {
+  this.updater.enqueueForceUpdate(this, callback, "forceUpdate");
+};
+function ComponentDummy() {}
+ComponentDummy.prototype = Component.prototype;
+function PureComponent(props, context, updater) {
+  this.props = props;
+  this.context = context;
+  this.refs = emptyObject;
+  this.updater = updater || ReactNoopUpdateQueue;
+}
+var pureComponentPrototype = (PureComponent.prototype = new ComponentDummy());
+pureComponentPrototype.constructor = PureComponent;
+assign(pureComponentPrototype, Component.prototype);
+pureComponentPrototype.isPureReactComponent = !0;
+var isArrayImpl = Array.isArray,
+  ReactSharedInternals = { H: null, A: null, T: null, S: null, V: null },
+  hasOwnProperty = Object.prototype.hasOwnProperty;
+function ReactElement(type, key, self, source, owner, props) {
+  self = props.ref;
+  return {
+    $$typeof: REACT_ELEMENT_TYPE,
+    type: type,
+    key: key,
+    ref: void 0 !== self ? self : null,
+    props: props
+  };
+}
+function cloneAndReplaceKey(oldElement, newKey) {
+  return ReactElement(
+    oldElement.type,
+    newKey,
+    void 0,
+    void 0,
+    void 0,
+    oldElement.props
+  );
+}
+function isValidElement(object) {
+  return (
+    "object" === typeof object &&
+    null !== object &&
+[TRONCATO]
+
+## node_modules/react/cjs/react.react-server.development.js
+/**
+ * @license React
+ * react.react-server.development.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+"production" !== process.env.NODE_ENV &&
+  (function () {
+    function getIteratorFn(maybeIterable) {
+      if (null === maybeIterable || "object" !== typeof maybeIterable)
+        return null;
+      maybeIterable =
+        (MAYBE_ITERATOR_SYMBOL && maybeIterable[MAYBE_ITERATOR_SYMBOL]) ||
+        maybeIterable["@@iterator"];
+      return "function" === typeof maybeIterable ? maybeIterable : null;
+    }
+    function testStringCoercion(value) {
+      return "" + value;
+    }
+    function checkKeyStringCoercion(value) {
+      try {
+        testStringCoercion(value);
+        var JSCompiler_inline_result = !1;
+      } catch (e) {
+        JSCompiler_inline_result = !0;
+      }
+      if (JSCompiler_inline_result) {
+        JSCompiler_inline_result = console;
+        var JSCompiler_temp_const = JSCompiler_inline_result.error;
+        var JSCompiler_inline_result$jscomp$0 =
+          ("function" === typeof Symbol &&
+            Symbol.toStringTag &&
+            value[Symbol.toStringTag]) ||
+          value.constructor.name ||
+          "Object";
+        JSCompiler_temp_const.call(
+          JSCompiler_inline_result,
+          "The provided key is an unsupported type %s. This value must be coerced to a string before using it here.",
+          JSCompiler_inline_result$jscomp$0
+        );
+        return testStringCoercion(value);
+      }
+    }
+    function getComponentNameFromType(type) {
+      if (null == type) return null;
+      if ("function" === typeof type)
+        return type.$$typeof === REACT_CLIENT_REFERENCE
+          ? null
+          : type.displayName || type.name || null;
+      if ("string" === typeof type) return type;
+      switch (type) {
+        case REACT_FRAGMENT_TYPE:
+          return "Fragment";
+        case REACT_PROFILER_TYPE:
+          return "Profiler";
+        case REACT_STRICT_MODE_TYPE:
+          return "StrictMode";
+        case REACT_SUSPENSE_TYPE:
+          return "Suspense";
+        case REACT_SUSPENSE_LIST_TYPE:
+          return "SuspenseList";
+        case REACT_ACTIVITY_TYPE:
+          return "Activity";
+      }
+      if ("object" === typeof type)
+        switch (
+          ("number" === typeof type.tag &&
+            console.error(
+              "Received an unexpected object in getComponentNameFromType(). This is likely a bug in React. Please file an issue."
+            ),
+          type.$$typeof)
+        ) {
+          case REACT_PORTAL_TYPE:
+            return "Portal";
+          case REACT_CONTEXT_TYPE:
+            return (type.displayName || "Context") + ".Provider";
+          case REACT_CONSUMER_TYPE:
+            return (type._context.displayName || "Context") + ".Consumer";
+          case REACT_FORWARD_REF_TYPE:
+            var innerType = type.render;
+            type = type.displayName;
+            type ||
+              ((type = innerType.displayName || innerType.name || ""),
+              (type = "" !== type ? "ForwardRef(" + type + ")" : "ForwardRef"));
+            return type;
+          case REACT_MEMO_TYPE:
+            return (
+              (innerType = type.displayName || null),
+              null !== innerType
+                ? innerType
+                : getComponentNameFromType(type.type) || "Memo"
+            );
+          case REACT_LAZY_TYPE:
+            innerType = type._payload;
+            type = type._init;
+[TRONCATO]
+
+## node_modules/react/cjs/react.react-server.production.js
+/**
+ * @license React
+ * react.react-server.production.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+"use strict";
+var ReactSharedInternals = { H: null, A: null };
+function formatProdErrorMessage(code) {
+  var url = "https://react.dev/errors/" + code;
+  if (1 < arguments.length) {
+    url += "?args[]=" + encodeURIComponent(arguments[1]);
+    for (var i = 2; i < arguments.length; i++)
+      url += "&args[]=" + encodeURIComponent(arguments[i]);
+  }
+  return (
+    "Minified React error #" +
+    code +
+    "; visit " +
+    url +
+    " for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+  );
+}
+var isArrayImpl = Array.isArray,
+  REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element"),
+  REACT_PORTAL_TYPE = Symbol.for("react.portal"),
+  REACT_FRAGMENT_TYPE = Symbol.for("react.fragment"),
+  REACT_STRICT_MODE_TYPE = Symbol.for("react.strict_mode"),
+  REACT_PROFILER_TYPE = Symbol.for("react.profiler"),
+  REACT_FORWARD_REF_TYPE = Symbol.for("react.forward_ref"),
+  REACT_SUSPENSE_TYPE = Symbol.for("react.suspense"),
+  REACT_MEMO_TYPE = Symbol.for("react.memo"),
+  REACT_LAZY_TYPE = Symbol.for("react.lazy"),
+  MAYBE_ITERATOR_SYMBOL = Symbol.iterator;
+function getIteratorFn(maybeIterable) {
+  if (null === maybeIterable || "object" !== typeof maybeIterable) return null;
+  maybeIterable =
+    (MAYBE_ITERATOR_SYMBOL && maybeIterable[MAYBE_ITERATOR_SYMBOL]) ||
+    maybeIterable["@@iterator"];
+  return "function" === typeof maybeIterable ? maybeIterable : null;
+}
+var hasOwnProperty = Object.prototype.hasOwnProperty,
+  assign = Object.assign;
+function ReactElement(type, key, self, source, owner, props) {
+  self = props.ref;
+  return {
+    $$typeof: REACT_ELEMENT_TYPE,
+    type: type,
+    key: key,
+    ref: void 0 !== self ? self : null,
+    props: props
+  };
+}
+function cloneAndReplaceKey(oldElement, newKey) {
+  return ReactElement(
+    oldElement.type,
+    newKey,
+    void 0,
+    void 0,
+    void 0,
+    oldElement.props
+  );
+}
+function isValidElement(object) {
+  return (
+    "object" === typeof object &&
+    null !== object &&
+    object.$$typeof === REACT_ELEMENT_TYPE
+  );
+}
+function escape(key) {
+  var escaperLookup = { "=": "=0", ":": "=2" };
+  return (
+    "$" +
+    key.replace(/[=:]/g, function (match) {
+      return escaperLookup[match];
+    })
+  );
+}
+var userProvidedKeyEscapeRegex = /\/+/g;
+function getElementKey(element, index) {
+  return "object" === typeof element && null !== element && null != element.key
+    ? escape("" + element.key)
+    : index.toString(36);
+}
+function noop() {}
+function resolveThenable(thenable) {
+  switch (thenable.status) {
+    case "fulfilled":
+      return thenable.value;
+    case "rejected":
+      throw thenable.reason;
+    default:
+      switch (
+        ("string" === typeof thenable.status
+          ? thenable.then(noop, noop)
+[TRONCATO]
+
+## orchestrator/__init__.py
+
+## orchestrator/autonomy_controller.py
+"""
+Modulo: autonomy_controller.py
+Descrizione: Gestione autonoma delle esperienze e delle azioni eseguite da Mercurius∞.
+Permette di registrare eventi, esiti e attivare modelli di adattamento comportamentale.
+Autore: Mercurius∞ AI Engineer
+"""
+
+from datetime import datetime
+from collections import Counter
+from typing import List, Dict, Any
+
+
+class AutonomyController:

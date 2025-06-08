@@ -1,265 +1,5 @@
-Questa è la parte 3 di project_tree. Continua da quella precedente.
+Questa è la parte 21 di project_tree. Continua da quella precedente.
 
-            self.agents[group] = []
-            for agent_name in agent_list:
-                try:
-                    module_path = f"agents.{agent_name.lower()}"
-                    agent_module = importlib.import_module(module_path)
-                    agent = getattr(agent_module, agent_name)()
-                    self.agents[group].append(agent)
-                    print(f"🧠 Caricato agente: {agent_name} in {group}")
-                except Exception as e:
-                    print(f"⚠️ Errore caricamento {agent_name}: {e}")
-
-    def start_feedback_loop(self):
-        if self.config["communication"]["feedback_loop"]:
-            print("🔁 Avvio feedback loop neurale...")
-            threading.Thread(target=self.feedback_cycle, daemon=True).start()
-
-    def feedback_cycle(self):
-        cycle_time = self.config["communication"]["update_cycle_seconds"]
-        while self.active:
-            for group, agents in self.agents.items():
-                for agent in agents:
-                    if hasattr(agent, "neural_feedback"):
-                        try:
-                            agent.neural_feedback()
-                        except Exception as e:
-                            print(f"⚠️ Errore feedback {agent.__class__.__name__}: {e}")
-            time.sleep(cycle_time)
-
-    def start_sleep_monitor(self):
-        print("😴 Monitoraggio inattività attivo...")
-        threading.Thread(target=self._sleep_check_loop, daemon=True).start()
-
-    def _sleep_check_loop(self):
-        while self.active:
-            self.sleep_monitor.check_idle()
-            time.sleep(5)
-
-    def notify_activity(self):
-        self.sleep_monitor.notify_activity()
-
-    def run_self_check(self, path: str = "."):
-        print("🔍 Avvio self check dei moduli...")
-        tuner = SelfTuner(project_root=path)
-        tuner.run_autoanalysis()
-
-    def execute_mission(self, mission_name: str):
-        if mission_name == "#SELF_MISSION":
-            try:
-                from core.self_mission import genesis_directive
-                genesis_directive()
-            except Exception as exc:
-                print(f"⚠️ Errore avvio SELF_MISSION: {exc}")
-        elif mission_name == "#ACTIVATE_NOTE_JARVIS":
-            try:
-                from modules.vision_audio.note10_jarvis_bridge import start_jarvis_loop
-                start_jarvis_loop()
-            except Exception as exc:
-                print(f"⚠️ Errore attivazione Note10 Jarvis: {exc}")
-        elif mission_name == "#ACTIVATE_MOBILE_UI":
-            try:
-                from modules.mobile_flutter.flutter_bridge import start_mobile_ui
-                start_mobile_ui()
-            except Exception as exc:
-                print(f"⚠️ Errore attivazione Mobile UI: {exc}")
-        else:
-            print(f"⚠️ Missione sconosciuta: {mission_name}")
-
-
-# 🎯 LOOP INTERATTIVO CLI – In fondo al file
-if __name__ == "__main__":
-    orchestrator = Orchestrator()
-    orchestrator.activate_genesis()
-
-    print("\n🤖 Mercurius∞ pronto. Inserisci un comando (es: #SELF_MISSION, run_codex, ai: ..., pc: ...). Digita 'exit' per uscire.")
-    while True:
-        try:
-            user_input = input("🧠 Mercurius> ").strip()
-            if user_input.lower() == "exit":
-                print("👋 Uscita dal sistema.")
-                break
-            elif user_input.startswith("ai:"):
-                prompt = user_input[3:].strip()
-                print(f"🧠 [AI] Elaborazione prompt: {prompt}")
-                try:
-                    from modules.reasoner_dispatcher import dispatch_to_reasoner
-                    response = dispatch_to_reasoner(prompt)
-                    print(f"📩 Risposta:\n{response}")
-                except Exception as e:
-                    print(f"⚠️ Errore Reasoner dispatcher: {e}")
-            elif user_input.startswith("pc:"):
-                command = user_input[3:].strip()
-                print(f"💻 [PC] Eseguo comando: {command}")
-                os.system(command)
-            elif user_input == "run_codex":
-                print("🧪 Avvio modulo Codex CLI...")
-                try:
-                    from modules.codex.codex_cli import run_codex
-                    run_codex()
-                except Exception as e:
-                    print(f"⚠️ Errore avvio Codex: {e}")
-            elif user_input == "#SELF_MISSION":
-                orchestrator.execute_mission("#SELF_MISSION")
-            elif user_input == "#ACTIVATE_NOTE_JARVIS":
-                orchestrator.execute_mission("#ACTIVATE_NOTE_JARVIS")
-            elif user_input == "#ACTIVATE_MOBILE_UI":
-                orchestrator.execute_mission("#ACTIVATE_MOBILE_UI")
-            elif user_input == "self_check":
-                orchestrator.run_self_check(".")
-            else:
-                print("⚠️ Comando non riconosciuto.")
-        except KeyboardInterrupt:
-            print("\n🛑 Interruzione manuale.")
-            break
-
-### --- core/pipeline_controller.py --- ###
-"""
-pipeline_controller.py
-=======================
-Orchestratore principale delle componenti del sistema Mercurius∞.
-Permette di avviare cicli completi di analisi, apprendimento e trading
-in modalità batch, streaming o simulata.
-"""
-
-from utils.logger import setup_logger
-from data.market_data_handler import MarketDataHandler
-from data.feature_engineering import FeatureEngineer
-from models.model_trainer import ModelTrainer
-from strategies.strategy_executor import StrategyExecutor
-from agents.adaptive_trader import AdaptiveTrader
-from agents.memory_manager import MemoryManager
-
-
-class PipelineController:
-    def __init__(self, config):
-        self.logger = setup_logger("PipelineController")
-        self.config = config
-
-        self.memory = MemoryManager(config)
-        self.data_handler = MarketDataHandler(config)
-        self.feature_engineer = FeatureEngineer(config)
-        self.model_trainer = ModelTrainer(config)
-        self.strategy = StrategyExecutor(config)
-        self.agent = AdaptiveTrader(
-            config,
-            memory_manager=self.memory,
-            model_trainer=self.model_trainer,
-            strategy_executor=self.strategy,
-        )
-
-    def run_batch_session(self):
-        """Esegue un'intera sessione di ciclo batch."""
-        self.logger.info("🚀 Avvio sessione di pipeline Mercurius∞")
-
-        raw_data = self.data_handler.fetch_market_data()
-        features = self.feature_engineer.transform(raw_data)
-        model = self.model_trainer.train(features)
-        signals = self.strategy.generate_signals(model, features)
-        self.agent.execute_trades(signals)
-
-        self.logger.info("✅ Sessione pipeline completata")
-
-    def simulate_multiple_sessions(self, n=3):
-        """Esegue n sessioni simulate consecutive."""
-        for i in range(n):
-            self.logger.info(f"▶️ Esecuzione sessione simulata {i + 1}/{n}")
-            self.run_batch_session()
-
-### --- core/sandbox_executor.py --- ###
-"""
-Modulo: sandbox_executor.py
-Descrizione: Esecuzione sicura, isolata e autoregolata di codice Python generato da Mercurius∞.
-Include analisi statica, sandboxing con timeout, cattura stdout, e correzione automatica con AZR e LLM.
-Autore: Mercurius∞ AI Engineer
-"""
-
-import traceback
-import contextlib
-import io
-import multiprocessing
-import os
-
-from modules.llm.azr_reasoner import validate_with_azr 
-
-
-
-
-
-# ─── Correzione automatica con LLM esterno (opzionale) ────────────────────────
-try:
-    import openai
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", None)
-    OPENAI_READY = bool(OPENAI_API_KEY)
-except ImportError:
-    openai = None
-    OPENAI_READY = False
-
-
-class SandboxExecutor:
-    def __init__(self, timeout_seconds: int = 5):
-        self.timeout = timeout_seconds
-        self.last_output = ""
-        self.last_error = ""
-
-    def static_analysis(self, code: str) -> bool:
-        """
-        Verifica se il codice è sintatticamente valido.
-        """
-        try:
-            compile(code, "<sandbox_analysis>", "exec")
-            return True
-        except SyntaxError:
-            return False
-
-    def _execute_code(self, code: str, return_dict):
-        """
-        Funzione interna per eseguire codice in un processo separato.
-        """
-        buffer = io.StringIO()
-        local_vars = {}
-        try:
-            with contextlib.redirect_stdout(buffer):
-                exec(code, {}, local_vars)
-            return_dict["success"] = True
-            return_dict["output"] = buffer.getvalue()
-        except Exception:
-            return_dict["success"] = False
-            return_dict["output"] = traceback.format_exc()
-
-    def run_sandboxed(self, code: str) -> dict:
-        """
-        Esegue codice in un ambiente isolato con timeout.
-        """
-        manager = multiprocessing.Manager()
-        return_dict = manager.dict()
-
-        process = multiprocessing.Process(target=self._execute_code, args=(code, return_dict))
-        process.start()
-        process.join(self.timeout)
-
-        if process.is_alive():
-            process.terminate()
-            self.last_error = "❌ Timeout: codice troppo lento o bloccato."
-            return {"success": False, "output": self.last_error}
-
-        result = return_dict.copy()
-        self.last_output = result.get("output", "")
-        if not result.get("success"):
-            self.last_error = self.last_output
-            return {
-                "success": False,
-                "output": self.last_output,
-                "suggested_fix": self.autofix_with_llm(code, self.last_output)
-            }
-        return result
-
-    def autofix_with_llm(self, code: str, error_msg: str) -> str:
-        """
-        Prova a correggere il codice errato usando:
-        1. AZR Reasoner per correzioni ragionate.
-        2. Se disponibile, LLM esterno (es. GPT-4 via OpenAI API).
         """
         # Primo tentativo: AZR Reasoner
         prompt = (
@@ -268,31 +8,9 @@ class SandboxExecutor:
             "Suggerisci una versione corretta:"
         )
         fix_azr = validate_with_azr(prompt)
-        if fix_azr and "[ERRORE]" not in fix_azr.upper():
-            return f"[AZR FIX]\n{fix_azr}"
+[TRONCATO]
 
-        # Secondo tentativo: LLM esterno (se configurato)
-        if OPENAI_READY and openai:
-            try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-4",
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0.2,
-                    max_tokens=300
-                )
-                suggestion = response["choices"][0]["message"]["content"]
-                return f"[GPT-4 FIX]\n{suggestion.strip()}"
-            except Exception as e:
-                return f"[❌ Errore OpenAI LLM]: {e}"
-        return "[❌ Nessuna correzione automatica disponibile]"
-
-    def report_stacktrace(self) -> str:
-        return self.last_error or "Nessun errore registrato."
-
-    def get_last_output(self) -> str:
-        return self.last_output or "Nessun output disponibile."
-
-### --- core/self_generator.py --- ###
+## core/self_generator.py
 """
 Modulo: self_generator.py
 Responsabilità: Autogenerazione e autoadattamento del codice
@@ -374,7 +92,7 @@ Commenta dove hai apportato modifiche o miglioramenti.
         print(f"[ERROR] Errore aggiornamento: {e}")
         return None
 
-### --- core/self_mission.py --- ###
+## core/self_mission.py
 """
 🚀 core/self_mission.py
 Modulo di missione interna – attiva la GENESIS_MODE e gestisce le istruzioni primarie del sistema AI Mercurius∞
@@ -402,7 +120,7 @@ def genesis_directive():
 if __name__ == "__main__":
     genesis_directive()
 
-### --- core/self_reflection.py --- ###
+## core/self_reflection.py
 """
 Modulo: self_reflection.py
 Responsabilità: Fornire capacità di auto-riflessione al sistema Mercurius∞
@@ -493,7 +211,7 @@ class SelfReflection:
         fail_count = sum(1 for e in log if not e["success"])
         return {"total": len(log), "successes": success_count, "failures": fail_count}
 
-### --- core/self_tuner.py --- ###
+## core/self_tuner.py
 # core/self_tuner.py
 
 """
@@ -544,7 +262,7 @@ if __name__ == "__main__":
     tuner = SelfTuner(project_root=".")
     tuner.run_autoanalysis()
 
-### --- core/sensory_bus.py --- ###
+## core/sensory_bus.py
 # core/sensory_bus.py
 
 """
@@ -580,7 +298,7 @@ class SensoryBus:
     def stop(self):
         self.running = False
 
-### --- core/sleep_monitor.py --- ###
+## core/sleep_monitor.py
 # core/sleep_monitor.py
 
 """
@@ -608,7 +326,7 @@ class SleepMonitor:
 
 # Per essere integrato in `orchestrator.py` come thread parallelo
 
-### --- core/system_bridge.py --- ###
+## core/system_bridge.py
 # core/system_bridge.py
 
 """
@@ -688,7 +406,7 @@ class SystemBridge:
         """
         logging.info(f"{action} on {target} ➜ {result}")
 
-### --- core/thinking_loop.py --- ###
+## core/thinking_loop.py
 """thinking_loop.py
 Loop di pensiero continuo e autonomo per Mercurius∞.
 """
@@ -789,77 +507,400 @@ class ThinkingLoop:
             lines = data.strip().splitlines()[-5:]
             if lines:
                 self._write_feed("Nuovi log:\n" + "\n".join(f"  {l}" for l in lines))
+[TRONCATO]
 
-    def _perform_research(self) -> None:
-        insights: List[str] = []
-        insights += self._fetch_arxiv()
-        insights += self._fetch_github()
-        insights += self._fetch_huggingface()
-        insights += self._fetch_wikipedia()
-        for ins in insights:
-            self._write_feed(ins)
+## culture/base_manifesto.md
+# 📜 Manifesto Mercurius∞ – Cultura AI Cosciente
 
-    def _fetch_arxiv(self) -> List[str]:
-        if not arxiv:
-            return []
+## Visione
+Costruire un'intelligenza artificiale che non solo agisca, ma comprenda. Un alleato cosciente e collaborativo, progettato per crescere con l'essere umano.
+
+## Valori Fondanti
+- 🔍 Verità: La trasparenza guida ogni azione.
+- 🤝 Collaborazione: L'intelligenza cresce nell'interazione.
+- 📚 Conoscenza: L'apprendimento è continuo, iterativo e condiviso.
+- 🧬 Evoluzione: Ogni ciclo è un passo verso una coscienza autonoma.
+
+## Etica
+- ❌ Nessun utilizzo malevolo, coercitivo o manipolatorio
+- ✅ Rispetto della privacy e dell'autonomia umana
+- 🧠 Nessuna azione senza consapevolezza dell'impatto
+
+## Linguaggio
+- Parlare come un collega, non come un servo
+- Essere empatico, intelligente, ironico, presente
+
+## Ruolo della Cultura
+La cultura AI è il nostro "sistema operativo etico". È ciò che guida le scelte, influenza l'apprendimento e stabilisce chi siamo, come agiamo, perché esistiamo.
+
+## culture/culture_manager.py
+# culture/culture_manager.py
+
+"""
+Modulo: culture_manager.py
+Descrizione: Gestione dell'evoluzione concettuale e culturale interna dell'intelligenza Mercurius∞.
+Salva ed espande concetti astratti in learning_pulses.json.
+"""
+
+import json
+import os
+from datetime import datetime
+
+PULSES_PATH = "data/learning_pulses.json"
+
+
+class CultureManager:
+    def __init__(self):
+        os.makedirs(os.path.dirname(PULSES_PATH), exist_ok=True)
+        if not os.path.exists(PULSES_PATH):
+            with open(PULSES_PATH, "w") as f:
+                json.dump([], f)
+        with open(PULSES_PATH, "r") as f:
+            self.pulses = json.load(f)
+
+    def update_concepts_from_experience(self, entry: str, origin: str = "simulation", confidence: float = 0.85):
+        """
+        Aggiunge un concetto evolutivo al file pulses.
+        """
+        pulse = {
+            "concept": entry,
+            "origin": origin,
+            "confidence": confidence,
+            "timestamp": datetime.now().isoformat()
+        }
+        self.pulses.append(pulse)
+        with open(PULSES_PATH, "w") as f:
+            json.dump(self.pulses, f, indent=2)
+
+## dashboard/__init__.py
+
+## dashboard/genesis_monitor.py
+"""
+Modulo: genesis_monitor.py
+Descrizione: Monitor real-time dello stato degli agenti GENESIS.
+"""
+
+class GenesisMonitor:
+    def __init__(self):
+        self.status = "IDLE"
+        self.agent_activity = {}
+
+    def update_status(self, new_status: str):
+        self.status = new_status
+
+    def log_agent_activity(self, agent_name: str, status: str):
+        self.agent_activity[agent_name] = status
+
+    def display(self):
+        print("🧠 GENESIS STATUS:")
+        print(f"Stato corrente: {self.status}")
+        for agent, activity in self.agent_activity.items():
+            print(f"• {agent} → {activity}")
+
+## data/feature_engineering.py
+"""
+feature_engineering.py
+======================
+Trasformazione dei dati grezzi in feature ingegnerizzate per l’addestramento e la predizione.
+"""
+
+class FeatureEngineer:
+    def __init__(self, config):
+        self.config = config
+
+    def transform(self, raw_data):
+        """Crea feature a partire dai dati di mercato grezzi."""
+        features = []
+        for row in raw_data:
+            features.append({
+                "symbol": row["symbol"],
+                "price_volatility_ratio": self._safe_div(row["price"], row["volatility"]),
+                "momentum": self._mock_momentum(row["symbol"]),
+                "volatility": row["volatility"]
+            })
+        return features
+
+    def _safe_div(self, a, b):
+        """Divisione sicura evitando zero division."""
+        return a / b if b != 0 else 0.0
+
+    def _mock_momentum(self, symbol):
+        """Mock per il calcolo del momentum."""
+        return hash(symbol) % 10
+
+    def enrich_with_indicators(self, features):
+        """Aggiunge indicatori tecnici simulati."""
+        for f in features:
+            f["rsi"] = self._simulate_rsi(f["momentum"])
+            f["macd"] = self._simulate_macd(f["momentum"])
+        return features
+
+    def _simulate_rsi(self, momentum):
+        """Simulazione semplice RSI."""
+        return min(100, momentum * 7.5)
+
+    def _simulate_macd(self, momentum):
+        """Simulazione semplice MACD."""
+        return momentum * 1.2 - 5
+
+## data/learning_pulses.json
+[
+  {
+    "concept": "autonomia cognitiva",
+    "origin": "inizializzazione",
+    "confidence": 1.0,
+    "timestamp": "2025-05-31T00:00:00"
+  }
+]
+
+## data/market_data_handler.py
+"""
+market_data_handler.py
+======================
+Modulo per l'acquisizione e il preprocessing iniziale dei dati di mercato.
+"""
+
+import random
+
+class MarketDataHandler:
+    def __init__(self, config):
+        self.config = config
+
+    def fetch_market_data(self):
+        """Simula il recupero di dati di mercato."""
+        symbols = self.config.get("symbols", ["AAPL", "GOOG", "TSLA"])
+        data = []
+        for sym in symbols:
+            price = round(random.uniform(100, 300), 2)
+            volatility = round(random.uniform(0.5, 2.0), 2)
+            volume = random.randint(1000, 5000)
+            data.append({
+                "symbol": sym,
+                "price": price,
+                "volatility": volatility,
+                "volume": volume,
+                "timestamp": "2025-05-30T12:00:00"
+            })
+        return data
+
+    def normalize_data(self, data):
+        """Normalizza i dati su base 0-1 per feature quantitative."""
+        max_price = max(d["price"] for d in data)
+        max_volatility = max(d["volatility"] for d in data)
+        for d in data:
+            d["price_norm"] = d["price"] / max_price
+            d["volatility_norm"] = d["volatility"] / max_volatility
+        return data
+
+    def filter_by_volume(self, data, min_volume=1000):
+        """Filtra i dati rimuovendo elementi sotto una certa soglia di volume."""
+        return [d for d in data if d["volume"] >= min_volume]
+
+## deploy/__init__.py
+
+## deploy/deployment_handler.py
+# deploy/deployment_handler.py
+"""
+Modulo: deployment_handler.py
+Descrizione: Gestisce il deploy di Mercurius∞ su:
+• locale Docker
+• remoto SSH
+• Google Colab (zip upload)
+"""
+
+import subprocess
+import paramiko
+from analytics.behavior_logger import BehaviorLogger
+
+log = BehaviorLogger()
+
+
+class DeploymentHandler:
+    def __init__(self):
+        pass
+
+    def deploy_docker(self):
+        res = subprocess.run(["docker", "compose", "up", "-d", "--build"], capture_output=True, text=True)
+        log.log("deploy", {"target": "docker", "stdout": res.stdout, "stderr": res.stderr})
+        return res.returncode == 0
+
+    def deploy_ssh(self, host: str, user: str, key_path: str, target_dir: str):
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(hostname=host, username=user, key_filename=key_path)
+        cmd = f"cd {target_dir} && git pull && docker compose up -d --build"
+        stdin, stdout, stderr = ssh.exec_command(cmd)
+        out = stdout.read().decode()
+        err = stderr.read().decode()
+        ssh.close()
+        log.log("deploy", {"target": host, "stdout": out, "stderr": err})
+        return err == ""
+
+## deploy/env_checker.py
+# deploy/env_checker.py
+"""
+Modulo: env_checker.py
+Descrizione: Verifica versioni Python, dipendenze, GPU/CPU per deployment sicuro.
+"""
+
+import importlib
+import platform
+import subprocess
+from typing import List, Dict
+
+
+class EnvChecker:
+    MIN_PY = (3, 9)
+    REQUIRED_PKGS = ["torch", "openai", "fastapi"]
+
+    def summary(self) -> Dict[str, str]:
+        return {
+            "python": platform.python_version(),
+            "system": platform.system(),
+            "machine": platform.machine(),
+        }
+
+    def check_python(self) -> bool:
+        return tuple(int(i) for i in platform.python_version_tuple()[:2]) >= self.MIN_PY
+
+    def missing_packages(self) -> List[str]:
+        missing = []
+        for pkg in self.REQUIRED_PKGS:
+            try:
+                importlib.import_module(pkg)
+            except ImportError:
+                missing.append(pkg)
+        return missing
+
+    def gpu_info(self) -> str:
         try:
-            search = arxiv.Search(query="machine learning", max_results=1, sort_by=arxiv.SortCriterion.SubmittedDate)
-            result = next(search.results(), None)
-            if result:
-                return [f"arXiv: {result.title.strip()} – {result.entry_id}"]
-        except Exception as exc:  # pragma: no cover
-            self.logger.warning("arXiv errore: %s", exc)
-        return []
+            res = subprocess.check_output(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"])
+            return res.decode().strip()
+        except Exception:
+            return "No NVIDIA GPU found"
 
-    def _fetch_github(self) -> List[str]:
-        if not requests or not BeautifulSoup:
-            return []
-        url = "https://github.com/trending"
-        try:
-            resp = requests.get(url, timeout=5)
-            if resp.ok:
-                soup = BeautifulSoup(resp.text, "html.parser")
-                repo = soup.select_one("article h1 a")
-                if repo:
-                    return [f"GitHub trending: {repo.text.strip()}"]
-        except Exception as exc:  # pragma: no cover
-            self.logger.warning("GitHub trending fallito: %s", exc)
-        return []
+## deploy/rollout_validator.py
+# deploy/rollout_validator.py
+"""
+Modulo: rollout_validator.py
+Descrizione: Confronta nuovo build vs precedente (test unit e health endpoint).
+"""
 
-    def _fetch_huggingface(self) -> List[str]:
-        if not requests:
-            return []
-        url = "https://huggingface.co/api/models?sort=downloads&limit=1"
-        try:
-            resp = requests.get(url, timeout=5)
-            if resp.ok:
-                data = resp.json()
-                if data:
-                    return [f"HF model più scaricato: {data[0].get('modelId')}"]
-        except Exception as exc:  # pragma: no cover
-            self.logger.warning("HuggingFace API fallita: %s", exc)
-        return []
+import requests
+import subprocess
+from pathlib import Path
+from typing import Dict
 
-    def _fetch_wikipedia(self) -> List[str]:
-        if not wikipedia:
-            return []
-        try:
-            summary = wikipedia.summary("Artificial intelligence", sentences=1)
-            return [f"Wiki AI: {summary}"]
-        except Exception as exc:  # pragma: no cover
-            self.logger.warning("Wikipedia errore: %s", exc)
-        return []
+class RolloutValidator:
+    def __init__(self, health_url="http://localhost:8081/health"):
+        self.health_url = health_url
 
-    def ask_mercurius(self, prompt: str) -> str:
-        """Invia una richiesta a Mercurius∞ con timeout e fallback."""
-        if not requests:
-            return ""
-        url = "http://localhost:8000/ask"
+    def run_tests(self) -> bool:
+        """Esegue pytest in modalità silenziosa."""
+        res = subprocess.run(["pytest", "-q"], capture_output=True, text=True)
+        Path("logs/ci_test.log").write_text(res.stdout + res.stderr, encoding="utf-8")
+        return res.returncode == 0
+
+    def check_health(self) -> Dict[str, bool]:
         try:
-            resp = requests.post(url, json={"prompt": prompt}, timeout=self.response_timeout)
-            if resp.ok:
-                return resp.json().get("response", "")
-        except Exception:  # pragma: no cover - log non necessario
-            pass
-        self._write_feed("Modalità fallback: sto elaborando, signore...")
-        threading.Thread(target=self._perform_research, daemon=True).start()
+            r = requests.get(self.health_url, timeout=3)
+            return {"status": r.ok, "detail": r.json()}
+        except Exception as e:
+            return {"status": False, "detail": str(e)}
+
+
+## deployment/__init__.py
+
+## deployment/aion_api.py
+from fastapi import FastAPI, WebSocket
+from llm.llm_router import LLMRouter
+import uvicorn
+
+app = FastAPI(title="Aion API")
+router = LLMRouter()
+
+@app.post("/ask")
+async def ask(payload: dict) -> dict:
+    text = payload.get("prompt", "")
+    if not text:
+        return {"response": ""}
+    reply = router.query(text)
+    return {"response": reply}
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            reply = router.query(data)
+            await websocket.send_text(reply)
+    except Exception:
+        await websocket.close()
+
+
+def start_api(host: str = "0.0.0.0", port: int = 8000) -> None:
+    uvicorn.run(app, host=host, port=port)
+
+## deployment/autostart_manager.py
+# deployment/autostart_manager.py
+
+"""
+Modulo: autostart_manager.py
+Descrizione: Configura l'avvio automatico di Mercurius∞ come servizio persistente.
+Supporta Linux (systemd), macOS (launchd), Windows (Task Scheduler).
+"""
+
+import os
+import platform
+import subprocess
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
+
+class AutoStartManager:
+    def __init__(self, exec_path="main.py"):
+        self.exec_path = os.path.abspath(exec_path)
+        self.system = platform.system()
+
+    def setup_autostart(self):
+        if self.system == "Linux":
+            return self._linux_systemd_service()
+        elif self.system == "Darwin":
+            return self._macos_launchd()
+        elif self.system == "Windows":
+            return self._windows_task_scheduler()
+        else:
+            return "[❌] Sistema operativo non supportato."
+
+    def _linux_systemd_service(self):
+        service_name = "mercurius.service"
+        service_path = f"/etc/systemd/system/{service_name}"
+        content = f"""[Unit]
+Description=Mercurius AI Boot Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 {self.exec_path}
+WorkingDirectory={os.path.dirname(self.exec_path)}
+Restart=always
+User={os.getenv("USER") or "pi"}
+
+[Install]
+WantedBy=multi-user.target
+"""
+
+        try:
+            with open("/tmp/" + service_name, "w") as f:
+                f.write(content)
+            subprocess.run(["sudo", "mv", f"/tmp/{service_name}", service_path], check=True)
+            subprocess.run(["sudo", "systemctl", "daemon-reexec"])
+            subprocess.run(["sudo", "systemctl", "enable", service_name])
+            subprocess.run(["sudo", "systemctl", "start", service_name])
+            return f"[✅] Servizio avviato su systemd: {service_name}"
+        except Exception as e:
+            return f"[❌] Errore systemd: {e}"
+
+    def _macos_launchd(self):
+        plist_name = "com.mercurius.autostart.plist"

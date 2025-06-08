@@ -1,0 +1,915 @@
+Questa è la parte 43 di project_tree. Continua da quella precedente.
+
+  "${WRAPPER_ROOT}/include"
+)
+add_dependencies(flutter_wrapper_plugin flutter_assemble)
+
+# Wrapper sources needed for the runner.
+add_library(flutter_wrapper_app STATIC
+  ${CPP_WRAPPER_SOURCES_CORE}
+  ${CPP_WRAPPER_SOURCES_APP}
+)
+apply_standard_settings(flutter_wrapper_app)
+target_link_libraries(flutter_wrapper_app PUBLIC flutter)
+target_include_directories(flutter_wrapper_app PUBLIC
+  "${WRAPPER_ROOT}/include"
+)
+add_dependencies(flutter_wrapper_app flutter_assemble)
+
+# === Flutter tool backend ===
+# _phony_ is a non-existent file to force this command to run every time,
+# since currently there's no way to get a full input/output list from the
+# flutter tool.
+set(PHONY_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/_phony_")
+set_source_files_properties("${PHONY_OUTPUT}" PROPERTIES SYMBOLIC TRUE)
+add_custom_command(
+  OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
+    ${CPP_WRAPPER_SOURCES_CORE} ${CPP_WRAPPER_SOURCES_PLUGIN}
+    ${CPP_WRAPPER_SOURCES_APP}
+    ${PHONY_OUTPUT}
+  COMMAND ${CMAKE_COMMAND} -E env
+    ${FLUTTER_TOOL_ENVIRONMENT}
+    "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.bat"
+      ${FLUTTER_TARGET_PLATFORM} $<CONFIG>
+[TRONCATO]
+
+## mobile_jarvis_ui/windows/runner/CMakeLists.txt
+cmake_minimum_required(VERSION 3.14)
+project(runner LANGUAGES CXX)
+
+# Define the application target. To change its name, change BINARY_NAME in the
+# top-level CMakeLists.txt, not the value here, or `flutter run` will no longer
+# work.
+#
+# Any new source files that you add to the application should be added here.
+add_executable(${BINARY_NAME} WIN32
+  "flutter_window.cpp"
+  "main.cpp"
+  "utils.cpp"
+  "win32_window.cpp"
+  "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
+  "Runner.rc"
+  "runner.exe.manifest"
+)
+
+# Apply the standard set of build settings. This can be removed for applications
+# that need different build settings.
+apply_standard_settings(${BINARY_NAME})
+
+# Add preprocessor definitions for the build version.
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\"${FLUTTER_VERSION}\"")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=${FLUTTER_VERSION_MAJOR}")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MINOR=${FLUTTER_VERSION_MINOR}")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_PATCH=${FLUTTER_VERSION_PATCH}")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=${FLUTTER_VERSION_BUILD}")
+
+# Disable Windows macros that collide with C++ standard library functions.
+target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
+
+# Add dependency libraries and include directories. Add any application-specific
+# dependencies here.
+target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
+target_link_libraries(${BINARY_NAME} PRIVATE "dwmapi.lib")
+target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
+
+# Run the Flutter tool portions of the build. This must not be removed.
+add_dependencies(${BINARY_NAME} flutter_assemble)
+
+## models/goal_manager.py
+"""
+Modulo: goal_manager.py
+Responsabilità: Gestione dinamica e gerarchica degli obiettivi del sistema
+Autore: Mercurius∞ Engineer Mode
+"""
+
+from typing import List, Dict
+
+
+class Goal:
+    def __init__(self, name: str, priority: int = 1, context: Dict = None):
+        self.name = name
+        self.priority = priority
+        self.context = context or {}
+        self.status = "pending"  # può essere: pending, active, completed, failed
+
+    def __repr__(self):
+        return f"<Goal: {self.name}, priority={self.priority}, status={self.status}>"
+
+    def to_dict(self) -> Dict:
+        return {
+            "name": self.name,
+            "priority": self.priority,
+            "context": self.context,
+            "status": self.status
+        }
+
+
+class GoalManager:
+    """
+    Gestore degli obiettivi a breve/lungo termine.
+    """
+
+    def __init__(self):
+        self.goals: List[Goal] = []
+
+    def add_goal(self, name: str, priority: int = 1, context: Dict = None):
+        self.goals.append(Goal(name, priority, context))
+        self.sort_goals()
+
+    def sort_goals(self):
+        self.goals.sort(key=lambda g: g.priority, reverse=True)
+
+    def get_next_goal(self) -> Goal:
+        for goal in self.goals:
+            if goal.status == "pending":
+                goal.status = "active"
+                return goal
+        return None
+
+    def complete_goal(self, name: str):
+        for goal in self.goals:
+            if goal.name == name:
+                goal.status = "completed"
+                return True
+        return False
+
+    def fail_goal(self, name: str):
+        for goal in self.goals:
+            if goal.name == name:
+                goal.status = "failed"
+                return True
+        return False
+
+    def active_goals(self) -> List[Goal]:
+        return [g for g in self.goals if g.status == "active"]
+
+    def pending_goals(self) -> List[Goal]:
+        return [g for g in self.goals if g.status == "pending"]
+
+    def completed_goals(self) -> List[Goal]:
+        return [g for g in self.goals if g.status == "completed"]
+
+    def all_goals(self) -> List[Dict]:
+        return [g.to_dict() for g in self.goals]
+
+## models/model_trainer.py
+"""
+model_trainer.py
+================
+Training del modello neurale e interfaccia per predizioni.
+"""
+
+from models.neural_network import NeuralNetwork
+
+class ModelTrainer:
+    def __init__(self, config):
+        self.config = config
+        self.model = NeuralNetwork(input_dim=3)
+
+    def train(self, features):
+        """Addestra il modello con le feature fornite."""
+        training_data = []
+        for f in features:
+            inputs = [
+                f["price_volatility_ratio"],
+                f["momentum"],
+                f["volatility"]
+            ]
+            training_data.append(inputs)
+        self.model.train(training_data)
+        return self.model
+
+    def predict(self, feature_row):
+        """Predice l'output per una riga di feature."""
+        inputs = [
+            feature_row["price_volatility_ratio"],
+            feature_row["momentum"],
+            feature_row["volatility"]
+        ]
+        return self.model.forward(inputs)
+
+    def retrain_on_error(self, features, performance_feedback):
+        """Esegue un retraining se la performance scende sotto la soglia."""
+        threshold = self.config.get("retrain_threshold", 0.65)
+        if performance_feedback["accuracy"] < threshold:
+            print("Retraining attivato: accuracy bassa.")
+            self.train(features)
+
+## models/neo_learning.py
+# modules/neo_learning.py
+
+"""
+Modulo: neo_learning.py
+Descrizione: Sistema di apprendimento esperienziale per Mercurius∞.
+Simula situazioni, osserva i risultati e aggiorna la memoria episodica in base all'esito.
+"""
+
+from typing import Dict
+from memory.episodic_memory import EpisodicMemory
+from memory.synaptic_log import SynapticLog
+
+
+class NeoLearning:
+    def __init__(self):
+        self.memory = EpisodicMemory()
+        self.logger = SynapticLog()
+
+    def simulate_and_learn(self, experience: Dict) -> None:
+        """
+        Registra un'esperienza simulata nella memoria episodica e logga l'evento.
+        """
+        context = experience.get("context", "simulated")
+        user_input = experience.get("scenario", "")
+        ai_response = experience.get("outcome", "")
+        self.memory.record_episode(context, user_input, ai_response)
+        self.logger.log_event("NeoLearning", "Simulated Experience Learned", f"{context} -> {ai_response}")
+
+## models/neural_network.py
+"""
+neural_network.py
+=================
+Definizione di un modello neurale semplice per classificazione dei segnali.
+"""
+
+class NeuralNetwork:
+    def __init__(self, input_dim):
+        self.input_dim = input_dim
+        self.weights = [0.5 for _ in range(input_dim)]
+        self.bias = 0.1
+
+    def forward(self, inputs):
+        """Applica la rete ai dati di input (mock semplificato)."""
+        output = sum(x * w for x, w in zip(inputs, self.weights)) + self.bias
+        return [self._sigmoid(output)]
+
+    def _sigmoid(self, x):
+        """Funzione di attivazione sigmoid."""
+        try:
+            return 1 / (1 + pow(2.718, -x))
+        except OverflowError:
+            return 0.0 if x < 0 else 1.0
+
+    def train(self, data):
+        """Mock training: registra i dati per debugging."""
+        print("Training data ricevuti:", data)
+
+    def update_weights(self, new_weights):
+        """Aggiorna i pesi della rete."""
+        if len(new_weights) == self.input_dim:
+            self.weights = new_weights
+
+    def summary(self):
+        """Restituisce un riassunto del modello."""
+        return {
+            "weights": self.weights,
+            "bias": self.bias,
+            "input_dim": self.input_dim
+        }
+
+## models/metrics/performance_metrics.py
+"""
+performance_metrics.py
+=======================
+Calcolo di metriche da esperienze Mercurius∞: accuracy, distribuzione profitti, ecc.
+"""
+
+from statistics import mean, stdev
+
+
+class PerformanceMetrics:
+    def __init__(self, experiences):
+        self.experiences = experiences
+
+    def profit_stats(self):
+        profits = [e["result"].get("profit", 0) for e in self.experiences]
+        return {
+            "mean": mean(profits) if profits else 0,
+            "stddev": stdev(profits) if len(profits) > 1 else 0,
+            "count": len(profits)
+        }
+
+    def accuracy(self):
+        correct = 0
+        for e in self.experiences:
+            profit = e["result"].get("profit", 0)
+            action = e["trade"]["action"]
+            if (profit > 0 and action == "BUY") or (profit < 0 and action == "SELL"):
+                correct += 1
+        return correct / len(self.experiences) if self.experiences else 0
+
+    def summary(self):
+        stats = self.profit_stats()
+        return {
+            **stats,
+            "accuracy": self.accuracy()
+        }
+
+## modules/__init__.py
+# modules/__init__.py
+# rende importabili i sotto‐pacchetti
+
+## modules/autogen_chat.py
+# modules/autogen_chat.py
+
+"""
+Modulo: autogen_chat.py
+Descrizione: Implementazione simulata di chat cooperativa multi-agente tramite Microsoft Autogen.
+"""
+
+class AutoGenChat:
+    def __init__(self, agents=None):
+        if agents is None:
+            agents = ["Coder", "Planner", "Validator"]
+        self.agents = agents
+
+    def simulate_chat(self, topic: str):
+        return "\n".join([f"{agent}: Partecipo alla discussione su '{topic}'." for agent in self.agents])
+
+
+# Test
+if __name__ == "__main__":
+    chat = AutoGenChat()
+    print(chat.simulate_chat("Sviluppo modulo di visione AI"))
+
+## modules/chatgpt_interface.py
+"""
+Modulo: chatgpt_interface.py
+Descrizione: Interfaccia tra Mercurius∞ e ChatGPT-4 per ragionamento, validazione e supporto decisionale.
+"""
+
+import openai
+import os
+
+
+class ChatGPTInterface:
+    def __init__(self, model="gpt-4", temperature=0.4):
+        self.model = model
+        self.temperature = temperature
+        self.api_key = os.getenv("OPENAI_API_KEY", "")
+
+        if not self.api_key:
+            raise ValueError("❌ OPENAI_API_KEY non definita nell'ambiente.")
+
+        openai.api_key = self.api_key
+
+    def ask(self, prompt: str, system: str = "Agisci come supervisore AI avanzato.") -> str:
+        """
+        Invia un messaggio a ChatGPT e restituisce la risposta.
+        """
+        try:
+            response = openai.ChatCompletion.create(
+                model=self.model,
+                temperature=self.temperature,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            reply = response.choices[0].message.content.strip()
+            return reply
+        except Exception as e:
+            return f"⚠️ Errore nella richiesta a ChatGPT: {e}"
+
+    def validate_code(self, code_snippet: str) -> str:
+        """
+        Chiede a ChatGPT di validare un frammento di codice.
+        """
+        prompt = f"Valuta se il seguente codice è valido e migliorabile:\n\n{code_snippet}"
+        return self.ask(prompt, system="Sei un validatore di codice Python altamente esperto.")
+
+
+# Uso diretto
+if __name__ == "__main__":
+    gpt = ChatGPTInterface()
+    print(gpt.ask("Qual è il significato della vita secondo l'informatica?"))
+
+## modules/crewai_team.py
+# modules/crewai_team.py
+
+"""
+Modulo: crewai_team.py
+Descrizione: Simulazione di un team AI con ruoli definiti (coder, manager, validator) basato su CrewAI.
+"""
+
+class CrewAI:
+    def __init__(self):
+        self.members = {
+            "Project Manager": [],
+            "Senior Coder": [],
+            "Validator": []
+        }
+
+    def assign_task(self, role: str, task: str):
+        if role in self.members:
+            self.members[role].append(task)
+            return f"📌 Task assegnato a {role}: {task}"
+        else:
+            return f"❌ Ruolo non valido: {role}"
+
+    def team_report(self):
+        return "\n".join([f"{role}: {', '.join(tasks)}" if tasks else f"{role}: 🔕 Nessun task" for role, tasks in self.members.items()])
+
+
+# Test
+if __name__ == "__main__":
+    crew = CrewAI()
+    print(crew.assign_task("Senior Coder", "Sviluppare interfaccia OCR"))
+    print(crew.assign_task("Validator", "Verifica modulo vocale"))
+    print(crew.team_report())
+
+## modules/feedback_loop.py
+# modules/feedback_loop.py
+
+"""
+Modulo: feedback_loop.py
+Descrizione: Coordina il feedback tra moduli AI in Mercurius∞ per auto-apprendimento, miglioramento codice e decisioni collettive.
+"""
+
+class FeedbackLoop:
+    def __init__(self):
+        self.logs = []
+
+    def collect_feedback(self, source: str, message: str):
+        entry = f"🔁 [{source}] → {message}"
+        self.logs.append(entry)
+        print(entry)
+
+    def last_feedback(self, n=5):
+        return "\n".join(self.logs[-n:])
+
+
+# Test rapido
+if __name__ == "__main__":
+    fb = FeedbackLoop()
+    fb.collect_feedback("AZR", "Codice semanticamente corretto.")
+    fb.collect_feedback("GPT-4o", "Suggerita ottimizzazione per compatibilità.")
+    print(fb.last_feedback())
+
+## modules/fingpt_analyzer.py
+# modules/fingpt_analyzer.py
+
+"""
+Modulo: fingpt_analyzer.py
+Descrizione: Modulo di analisi NLP con FinGPT per generare segnali operativi da notizie e sentiment.
+"""
+
+class FinGPTAnalyzer:
+    def __init__(self):
+        self.last_signal = None
+
+    def analyze_text(self, text: str) -> str:
+        if "inflation" in text.lower():
+            self.last_signal = "SELL"
+        else:
+            self.last_signal = "BUY"
+        return f"📉 Segnale da news: {self.last_signal}"
+
+
+# Test rapido
+if __name__ == "__main__":
+    bot = FinGPTAnalyzer()
+    print(bot.analyze_text("US Inflation data released - very high"))
+
+## modules/finrl_agent.py
+# modules/finrl_agent.py
+
+"""
+Modulo: finrl_agent.py
+Descrizione: Wrapper per l’utilizzo di FinRL all’interno di Mercurius∞. Consente addestramento e deploy di agenti RL per trading.
+"""
+
+class FinRLAgent:
+    def __init__(self):
+        self.model = None
+
+    def train(self, data_path: str, model_type="ppo"):
+        print(f"📈 Addestramento agente {model_type} su {data_path}")
+        # Qui si collegherà al training FinRL in futuro
+
+    def predict(self, state):
+        return "🧠 Predizione (stub): buy/sell/hold"
+
+    def evaluate(self):
+        return "📊 Performance dell’agente: +4.2% (simulata)"
+
+
+# Test
+if __name__ == "__main__":
+    agent = FinRLAgent()
+    agent.train("data/btc.csv")
+    print(agent.predict("BTC_state"))
+
+## modules/freqtrade_bot.py
+# modules/freqtrade_bot.py
+
+"""
+Modulo: freqtrade_bot.py
+Descrizione: Struttura base per l'integrazione di strategie ML con Freqtrade.
+"""
+
+class FreqtradeBot:
+    def __init__(self, strategy_name="MLBaseline"):
+        self.strategy = strategy_name
+
+    def run(self):
+        return f"🤖 Esecuzione bot crypto con strategia: {self.strategy}"
+
+    def update_strategy(self, new_name):
+        self.strategy = new_name
+        return f"🔁 Strategia aggiornata a: {self.strategy}"
+
+
+# Test
+if __name__ == "__main__":
+    bot = FreqtradeBot()
+    print(bot.run())
+    print(bot.update_strategy("SuperAI_MACD"))
+
+## modules/gesture.py
+"""
+Modulo: gesture.py
+Responsabilità: Stub logico per riconoscimento gesti e azioni gestuali
+Autore: Mercurius∞ Engineer Mode
+"""
+
+from typing import Dict
+
+
+class GestureRecognizer:
+    """
+    Placeholder per riconoscimento gesti. Può essere integrato con visione artificiale.
+    """
+
+    def recognize(self, input_frame) -> Dict:
+        """
+        Analizza un frame video e ritorna un gesto identificato (stub logico).
+        """
+        # In un sistema reale si integrerebbe OpenCV + ML per gesture spotting
+        return {
+            "gesture": "saluto",
+            "action": "inizia_conversazione"
+        }
+
+    def interpret_gesture(self, gesture: str) -> Dict:
+        """
+        Converte un gesto in comando.
+        """
+        if gesture == "saluto":
+            return {"action": "interagisci_utente"}
+        elif gesture == "indicazione":
+            return {"action": "raggiungi_destinazione", "context": {"destinazione": "indicata"}}
+        else:
+            return {"action": "ignora"}
+
+## modules/goal_manager.py
+"""
+Modulo: goal_manager.py
+Descrizione: Gestione di obiettivi (Goal) con priorità, stato e contesto.
+Autore: Mercurius∞ AI Engineer
+"""
+
+from dataclasses import dataclass, field
+from typing import List, Dict, Any, Optional
+
+@dataclass(order=False)  # disattiva ordinamento automatico
+class Goal:
+    name: str
+    priority: int = 1
+    context: Dict[str, Any] = field(default_factory=dict)
+    done: bool = False
+    status: str = "pending"  # possible values: pending, active, completed
+
+class GoalManager:
+    def __init__(self):
+        self._goals: List[Goal] = []
+
+    # --- API principale ---
+    def add_goal(self, name: str, priority: int = 1, context: Optional[Dict[str, Any]] = None):
+        self._goals.append(Goal(name=name, priority=priority, context=context or {}))
+        # ordina per PRIORITÀ decrescente (priorità alta prima)
+        self._goals.sort(key=lambda g: g.priority, reverse=True)
+
+    def get_next_goal(self) -> Optional[Goal]:
+        for g in self._goals:
+            if not g.done:
+                g.status = "active"  # aggiorna lo stato a active
+                return g
+        return None
+
+    def complete_goal(self, name: str):
+        for g in self._goals:
+            if g.name == name:
+                g.done = True
+                g.status = "completed"
+                break
+
+    def list_goals(self) -> List[Goal]:
+        return self._goals
+
+    def active_goals(self) -> List[Goal]:
+        """Restituisce la lista di goal attivi (status active e non done)."""
+        return [g for g in self._goals if g.status == "active" and not g.done]
+
+    def pending_goals(self) -> List[Goal]:
+        """Ritorna i goal ancora in attesa di essere attivati."""
+        return [g for g in self._goals if g.status == "pending" and not g.done]
+
+    def all_goals(self) -> List[Dict[str, Any]]:
+        """Rappresentazione serializzabile di tutti i goal."""
+        return [
+            {
+                "name": g.name,
+                "priority": g.priority,
+                "context": g.context,
+                "status": g.status,
+                "done": g.done,
+            }
+            for g in self._goals
+        ]
+
+# Esempio di utilizzo
+if __name__ == "__main__":
+    gm = GoalManager()
+    gm.add_goal("Scrivere report", priority=5)
+    gm.add_goal("Debug sistema", priority=10)
+    next_goal = gm.get_next_goal()
+    print("Goal attivo:", next_goal)
+    gm.complete_goal(next_goal.name)
+    print("Lista goal:", gm.list_goals())
+
+## modules/gpt4o_interface.py
+"""
+Modulo: gpt4o_interface.py
+Descrizione: Comunicazione diretta con GPT-4o per validazione, riflessione e finalizzazione dei task AI.
+"""
+
+import openai
+import os
+
+class GPT4oInterface:
+    def __init__(self, api_key: str = None, model: str = "gpt-4o"):
+        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
+        self.model = model
+        openai.api_key = self.api_key
+
+    def ask(self, prompt: str, temperature: float = 0.7, max_tokens: int = 1024) -> str:
+        """
+        Invia un prompt a GPT-4o e restituisce la risposta testuale.
+        """
+        try:
+            response = openai.ChatCompletion.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            return response["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            return f"❌ Errore GPT-4o: {str(e)}"
+
+
+# Test locale
+if __name__ == "__main__":
+    gpt = GPT4oInterface()
+    reply = gpt.ask("Validami questa funzione Python: def somma(a, b): return a + b")
+    print(reply)
+
+## modules/gpt_engineer_wrapper.py
+# modules/gpt_engineer_wrapper.py
+
+"""
+Modulo: gpt_engineer_wrapper.py
+Descrizione: Interfaccia per pilotare GPT-Engineer via CLI o API, permettendo generazione autonoma di progetti e moduli.
+"""
+
+import subprocess
+import os
+
+class GPTEngineerWrapper:
+    def __init__(self, project_path="generated_projects/", config_file=None):
+        self.project_path = project_path
+        self.config_file = config_file or "gpt_config.yaml"
+
+    def generate_project(self, prompt: str) -> str:
+        """
+        Avvia GPT-Engineer per generare un progetto in base al prompt.
+        """
+        try:
+            os.makedirs(self.project_path, exist_ok=True)
+            with open("prompt.txt", "w") as f:
+                f.write(prompt)
+
+            result = subprocess.run(
+                ["gpt-engineer", "."],
+                cwd=self.project_path,
+                capture_output=True,
+                text=True
+            )
+            return result.stdout or "✅ Generazione completata."
+        except Exception as e:
+            return f"❌ Errore GPT-Engineer: {e}"
+
+
+# Test
+if __name__ == "__main__":
+    wrapper = GPTEngineerWrapper()
+    print(wrapper.generate_project("Crea un'applicazione per il tracciamento del sonno"))
+
+## modules/gpt_task_router.py
+
+## modules/hf_tools_manager.py
+# modules/hf_tools_manager.py
+
+"""
+Modulo: hf_tools_manager.py
+Descrizione: Integrazione con HuggingFace Transformers Agents per interagire con strumenti locali.
+"""
+
+from transformers import HfAgent
+
+class HFToolsManager:
+    def __init__(self):
+        self.agent = HfAgent("https://api-inference.huggingface.co/models/bigcode/starcoder")
+
+    def use_tool(self, query: str) -> str:
+        try:
+            return self.agent.run(query)
+        except Exception as e:
+            return f"❌ Errore HuggingFace Tools: {str(e)}"
+
+## modules/leonai_bridge.py
+# modules/leonai_bridge.py
+
+"""
+Modulo: leonai_bridge.py
+Descrizione: Integrazione Leon AI per il controllo testuale/vocale del sistema operativo.
+"""
+
+import os
+
+class LeonAI:
+    def execute_command(self, command: str) -> str:
+        try:
+            result = os.popen(command).read()
+            return f"✅ Comando eseguito:\n{result}"
+        except Exception as e:
+            return f"❌ Errore: {str(e)}"
+
+
+# Test
+if __name__ == "__main__":
+    leon = LeonAI()
+    print(leon.execute_command("echo 'Mercurius è operativo!'"))
+
+## modules/localai_executor.py
+# modules/localai_executor.py
+
+"""
+Modulo: localai_executor.py
+Descrizione: Wrapper per gestire LocalAI in locale con modelli in formato GGUF.
+Supporta: GPT, STT/TTS, SD.
+"""
+
+import subprocess
+
+class LocalAIExecutor:
+    def __init__(self, base_url="http://localhost:8080"):
+        self.base_url = base_url
+
+    def call_model(self, prompt: str, model="gpt4all"):
+        try:
+            # Simulazione chiamata locale (sostituibile con requests.post se installato)
+            command = f'curl -X POST {self.base_url}/chat -d \'{{"prompt": "{prompt}", "model": "{model}"}}\''
+            output = subprocess.getoutput(command)
+            return output
+        except Exception as e:
+            return f"❌ Errore durante l'esecuzione: {str(e)}"
+
+## modules/meta_team_agent.py
+# modules/meta_team_agent.py
+
+"""
+Modulo: meta_team_agent.py
+Descrizione: Simula un team AI composto da PM, Developer e QA utilizzando MetaGPT o logica equivalente. Coordina task evolutivi.
+"""
+
+class MetaTeamAgent:
+    def __init__(self):
+        self.roles = {
+            "PM": self.project_manager,
+            "DEV": self.developer,
+            "QA": self.quality_assurance
+        }
+
+    def assign_task(self, task: str) -> str:
+        pm_result = self.roles["PM"](task)
+        dev_result = self.roles["DEV"](pm_result)
+        return self.roles["QA"](dev_result)
+
+    def project_manager(self, task: str) -> str:
+        return f"[PM] Definizione requisiti per: {task}"
+
+    def developer(self, spec: str) -> str:
+        return f"[DEV] Implementazione codice basata su: {spec}"
+
+    def quality_assurance(self, code: str) -> str:
+        return f"[QA] Validazione e test eseguiti su: {code}"
+
+
+# Test locale
+if __name__ == "__main__":
+    meta = MetaTeamAgent()
+    print(meta.assign_task("Crea un modulo per la gestione vocale"))
+
+## modules/n8n_connector.py
+# modules/n8n_connector.py
+
+"""
+Modulo: n8n_connector.py
+Descrizione: Invio e ricezione webhook da n8n per orchestrare flussi AI → PC locale.
+"""
+
+import requests
+
+class N8NConnector:
+    def __init__(self, webhook_url="http://localhost:5678/webhook/test"):
+        self.webhook_url = webhook_url
+
+    def trigger_flow(self, payload: dict) -> str:
+        try:
+            res = requests.post(self.webhook_url, json=payload)
+            return f"📡 Webhook n8n attivato: {res.status_code}"
+        except Exception as e:
+            return f"❌ Errore n8n: {str(e)}"
+
+## modules/network_analyzer.py
+"""network_analyzer.py
+Analizza dispositivi sulla rete locale e categoriza le ricerche web.
+"""
+
+from __future__ import annotations
+
+import os
+from pathlib import Path
+from collections import defaultdict
+from datetime import datetime
+
+try:
+    from scapy.all import ARP, Ether, srp, sniff, DNSQR
+except Exception:  # pragma: no cover - scapy may not be installed
+    ARP = Ether = srp = sniff = DNSQR = None  # type: ignore
+
+try:
+    import bluetooth
+except Exception:  # pragma: no cover - bluetooth may not be installed
+    bluetooth = None  # type: ignore
+
+try:
+    import pywhatkit
+except Exception:  # pragma: no cover - pywhatkit may not be installed
+    pywhatkit = None  # type: ignore
+
+# Categoria di parole chiave per le ricerche
+CATEGORY_PATTERNS = {
+    "salute": ["salute", "medic", "ospedale", "dieta", "farmac"],
+    "politica": ["politic", "governo", "elezion"],
+    "gossip": ["gossip", "vip", "celebrity"],
+    "economia": ["econom", "borsa", "finanza"],
+    "viaggi": ["viagg", "hotel", "voli"],
+    "religione": ["chiesa", "papa", "religion"],
+    "social": ["facebook", "instagram", "tiktok", "twitter"],
+}
+
+# Eventuale mappatura IP/MAC -> nome utente
+KNOWN_DEVICES = {
+    "AA:BB:CC:DD:EE:FF": "PAPA",
+}
+
+
+def scan_wifi_network(network_range: str = "192.168.1.0/24") -> list[dict]:
+    """Rileva i dispositivi Wi-Fi sulla rete locale."""
+    if ARP is None:
+        return []
+    arp = ARP(pdst=network_range)
+    ether = Ether(dst="ff:ff:ff:ff:ff:ff")
+    packet = ether / arp
+    result = srp(packet, timeout=3, verbose=0)[0]
+    devices = []
+    for sent, received in result:
+        devices.append({"ip": received.psrc, "mac": received.hwsrc})
+    return devices
+
+
+def scan_bluetooth_devices() -> list[dict]:
+    """Scansione dei dispositivi Bluetooth vicini."""
+    if bluetooth is None:
+        return []
+    devices = []
+    try:
+        nearby = bluetooth.discover_devices(duration=5, lookup_names=True)
+        for addr, name in nearby:
+            devices.append({"mac": addr, "name": name})
+    except Exception:
+        pass
+    return devices
+

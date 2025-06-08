@@ -1,316 +1,5 @@
-Questa è la parte 4 di project_tree. Continua da quella precedente.
+Questa è la parte 40 di project_tree. Continua da quella precedente.
 
-        return "Sto elaborando, signore..."
-
-
-def start_thinking_loop() -> ThinkingLoop:
-    """Helper per avviare rapidamente il thinking loop."""
-    loop = ThinkingLoop()
-    loop.start()
-    return loop
-
-if __name__ == "__main__":  # pragma: no cover - avvio manuale
-    start_thinking_loop()
-    while True:
-        time.sleep(1)
-
-### --- culture/base_manifesto.md --- ###
-# 📜 Manifesto Mercurius∞ – Cultura AI Cosciente
-
-## Visione
-Costruire un'intelligenza artificiale che non solo agisca, ma comprenda. Un alleato cosciente e collaborativo, progettato per crescere con l'essere umano.
-
-## Valori Fondanti
-- 🔍 Verità: La trasparenza guida ogni azione.
-- 🤝 Collaborazione: L'intelligenza cresce nell'interazione.
-- 📚 Conoscenza: L'apprendimento è continuo, iterativo e condiviso.
-- 🧬 Evoluzione: Ogni ciclo è un passo verso una coscienza autonoma.
-
-## Etica
-- ❌ Nessun utilizzo malevolo, coercitivo o manipolatorio
-- ✅ Rispetto della privacy e dell'autonomia umana
-- 🧠 Nessuna azione senza consapevolezza dell'impatto
-
-## Linguaggio
-- Parlare come un collega, non come un servo
-- Essere empatico, intelligente, ironico, presente
-
-## Ruolo della Cultura
-La cultura AI è il nostro "sistema operativo etico". È ciò che guida le scelte, influenza l'apprendimento e stabilisce chi siamo, come agiamo, perché esistiamo.
-
-### --- culture/culture_manager.py --- ###
-# culture/culture_manager.py
-
-"""
-Modulo: culture_manager.py
-Descrizione: Gestione dell'evoluzione concettuale e culturale interna dell'intelligenza Mercurius∞.
-Salva ed espande concetti astratti in learning_pulses.json.
-"""
-
-import json
-import os
-from datetime import datetime
-
-PULSES_PATH = "data/learning_pulses.json"
-
-
-class CultureManager:
-    def __init__(self):
-        os.makedirs(os.path.dirname(PULSES_PATH), exist_ok=True)
-        if not os.path.exists(PULSES_PATH):
-            with open(PULSES_PATH, "w") as f:
-                json.dump([], f)
-        with open(PULSES_PATH, "r") as f:
-            self.pulses = json.load(f)
-
-    def update_concepts_from_experience(self, entry: str, origin: str = "simulation", confidence: float = 0.85):
-        """
-        Aggiunge un concetto evolutivo al file pulses.
-        """
-        pulse = {
-            "concept": entry,
-            "origin": origin,
-            "confidence": confidence,
-            "timestamp": datetime.now().isoformat()
-        }
-        self.pulses.append(pulse)
-        with open(PULSES_PATH, "w") as f:
-            json.dump(self.pulses, f, indent=2)
-
-### --- dashboard/__init__.py --- ###
-
-
-### --- dashboard/genesis_monitor.py --- ###
-"""
-Modulo: genesis_monitor.py
-Descrizione: Monitor real-time dello stato degli agenti GENESIS.
-"""
-
-class GenesisMonitor:
-    def __init__(self):
-        self.status = "IDLE"
-        self.agent_activity = {}
-
-    def update_status(self, new_status: str):
-        self.status = new_status
-
-    def log_agent_activity(self, agent_name: str, status: str):
-        self.agent_activity[agent_name] = status
-
-    def display(self):
-        print("🧠 GENESIS STATUS:")
-        print(f"Stato corrente: {self.status}")
-        for agent, activity in self.agent_activity.items():
-            print(f"• {agent} → {activity}")
-
-### --- dashboard.py --- ###
-# dashboard.py
-"""
-Mercurius∞ GUI – Interfaccia interattiva con stream webcam, trascrizione vocale, stato agenti
-"""
-
-import sys
-import cv2
-import threading
-import speech_recognition as sr
-from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QLabel, QPushButton,
-    QTextEdit, QListWidget, QHBoxLayout, QSplitter, QGraphicsView, QGraphicsScene
-)
-from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
-from PyQt5.QtGui import QImage, QPixmap
-
-
-class WebcamThread(QThread):
-    frame_ready = pyqtSignal(QImage)
-
-    def run(self):
-        cap = cv2.VideoCapture(0)
-        while True:
-            ret, frame = cap.read()
-            if ret:
-                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                h, w, ch = rgb.shape
-                img = QImage(rgb.data, w, h, ch * w, QImage.Format_RGB888)
-                self.frame_ready.emit(img)
-
-
-class SpeechThread(QThread):
-    result_ready = pyqtSignal(str)
-
-    def run(self):
-        recognizer = sr.Recognizer()
-        mic = sr.Microphone()
-        with mic as source:
-            recognizer.adjust_for_ambient_noise(source)
-            while True:
-                audio = recognizer.listen(source)
-                try:
-                    text = recognizer.recognize_google(audio, language="it-IT")
-                    self.result_ready.emit(text)
-                except sr.UnknownValueError:
-                    self.result_ready.emit("[...]")
-                except sr.RequestError:
-                    self.result_ready.emit("❌ Errore STT")
-
-
-class MercuriusDashboard(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("🧠 Mercurius∞ – Interfaccia Sensoriale")
-        self.setGeometry(100, 100, 1040, 640)
-
-        self.menu = QListWidget()
-        self.menu.addItems(["Stato", "Agenti", "Memoria", "Voce", "Visione", "Log", "Test"])
-        self.menu.currentRowChanged.connect(self.change_section)
-
-        self.content_area = QTextEdit()
-        self.content_area.setReadOnly(True)
-
-        self.btn_action = QPushButton("Esegui Comando")
-        self.btn_action.clicked.connect(self.execute_action)
-
-        sidebar = QVBoxLayout()
-        sidebar.addWidget(QLabel("🔧 Menu"))
-        sidebar.addWidget(self.menu)
-        sidebar.addWidget(self.btn_action)
-
-        sidebar_widget = QWidget()
-        sidebar_widget.setLayout(sidebar)
-
-        self.splitter = QSplitter(Qt.Horizontal)
-        self.splitter.addWidget(sidebar_widget)
-        self.splitter.addWidget(self.content_area)
-
-        layout = QHBoxLayout()
-        layout.addWidget(self.splitter)
-        self.setLayout(layout)
-
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.refresh_status)
-        self.timer.start(3000)
-
-        # Webcam e STT
-        self.cam_view = QLabel()
-        self.scene = QGraphicsScene()
-        self.stt_live = QTextEdit()
-        self.stt_live.setReadOnly(True)
-
-        self.cam_thread = WebcamThread()
-        self.cam_thread.frame_ready.connect(self.update_cam)
-        self.cam_thread.start()
-
-        self.stt_thread = SpeechThread()
-        self.stt_thread.result_ready.connect(self.update_speech)
-        self.stt_thread.start()
-
-    def update_cam(self, image):
-        self.cam_view.setPixmap(QPixmap.fromImage(image).scaled(480, 360, Qt.KeepAspectRatio))
-
-    def update_speech(self, text):
-        self.stt_live.append(f"🗣️ {text}")
-
-    def change_section(self, index):
-        if index == 4:  # Visione
-            self.content_area.setWidgetResizable(True)
-            self.content_area.setPlainText("")
-            self.splitter.widget(1).deleteLater()
-            container = QWidget()
-            cam_layout = QVBoxLayout()
-            cam_layout.addWidget(QLabel("📷 Webcam Live"))
-            cam_layout.addWidget(self.cam_view)
-            container.setLayout(cam_layout)
-            self.splitter.insertWidget(1, container)
-
-        elif index == 3:  # Voce
-            self.content_area.setWidgetResizable(True)
-            self.splitter.widget(1).deleteLater()
-            container = QWidget()
-            stt_layout = QVBoxLayout()
-            stt_layout.addWidget(QLabel("🎤 Trascrizione Vocale Live"))
-            stt_layout.addWidget(self.stt_live)
-            container.setLayout(stt_layout)
-            self.splitter.insertWidget(1, container)
-
-        elif index == 1:  # Agenti
-            self.content_area.setPlainText("🤖 Agenti attivi:\n- Neo\n- AZR\n- MemoryTrainer")
-
-        else:
-            text_map = {
-                0: "🧠 Stato:\n- Moduli online\n- Sensori attivi\n- Memoria attiva",
-                2: "💾 Memoria:\n- Episodica: OK\n- Sinaptica: OK",
-                5: "📜 Log:\n- Avvio: OK\n- Nessun errore rilevato",
-                6: "🧪 TEST:\nPremi Esegui per simulare pensiero"
-            }
-            self.content_area.setPlainText(text_map.get(index, ""))
-
-    def execute_action(self):
-        self.content_area.append("🧠 Elaborazione pensiero...")
-
-    def refresh_status(self):
-        if self.menu.currentRow() == 0:
-            self.change_section(0)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    gui = MercuriusDashboard()
-    gui.show()
-    sys.exit(app.exec_())
-
-### --- dashboard_streamlit.py --- ###
-import streamlit as st
-st.title("Mercurius∞ Dashboard")
-
-### --- data/feature_engineering.py --- ###
-"""
-feature_engineering.py
-======================
-Trasformazione dei dati grezzi in feature ingegnerizzate per l’addestramento e la predizione.
-"""
-
-class FeatureEngineer:
-    def __init__(self, config):
-        self.config = config
-
-    def transform(self, raw_data):
-        """Crea feature a partire dai dati di mercato grezzi."""
-        features = []
-        for row in raw_data:
-            features.append({
-                "symbol": row["symbol"],
-                "price_volatility_ratio": self._safe_div(row["price"], row["volatility"]),
-                "momentum": self._mock_momentum(row["symbol"]),
-                "volatility": row["volatility"]
-            })
-        return features
-
-    def _safe_div(self, a, b):
-        """Divisione sicura evitando zero division."""
-        return a / b if b != 0 else 0.0
-
-    def _mock_momentum(self, symbol):
-        """Mock per il calcolo del momentum."""
-        return hash(symbol) % 10
-
-    def enrich_with_indicators(self, features):
-        """Aggiunge indicatori tecnici simulati."""
-        for f in features:
-            f["rsi"] = self._simulate_rsi(f["momentum"])
-            f["macd"] = self._simulate_macd(f["momentum"])
-        return features
-
-    def _simulate_rsi(self, momentum):
-        """Simulazione semplice RSI."""
-        return min(100, momentum * 7.5)
-
-    def _simulate_macd(self, momentum):
-        """Simulazione semplice MACD."""
-        return momentum * 1.2 - 5
-
-### --- data/learning_pulses.json --- ###
-[
-  {
     "concept": "autonomia cognitiva",
     "origin": "inizializzazione",
     "confidence": 1.0,
@@ -318,7 +7,7 @@ class FeatureEngineer:
   }
 ]
 
-### --- data/market_data_handler.py --- ###
+## data/market_data_handler.py
 """
 market_data_handler.py
 ======================
@@ -361,10 +50,9 @@ class MarketDataHandler:
         """Filtra i dati rimuovendo elementi sotto una certa soglia di volume."""
         return [d for d in data if d["volume"] >= min_volume]
 
-### --- deploy/__init__.py --- ###
+## deploy/__init__.py
 
-
-### --- deploy/deployment_handler.py --- ###
+## deploy/deployment_handler.py
 # deploy/deployment_handler.py
 """
 Modulo: deployment_handler.py
@@ -402,7 +90,7 @@ class DeploymentHandler:
         log.log("deploy", {"target": host, "stdout": out, "stderr": err})
         return err == ""
 
-### --- deploy/env_checker.py --- ###
+## deploy/env_checker.py
 # deploy/env_checker.py
 """
 Modulo: env_checker.py
@@ -445,7 +133,7 @@ class EnvChecker:
         except Exception:
             return "No NVIDIA GPU found"
 
-### --- deploy/rollout_validator.py --- ###
+## deploy/rollout_validator.py
 # deploy/rollout_validator.py
 """
 Modulo: rollout_validator.py
@@ -474,10 +162,10 @@ class RolloutValidator:
         except Exception as e:
             return {"status": False, "detail": str(e)}
 
-### --- deployment/__init__.py --- ###
 
+## deployment/__init__.py
 
-### --- deployment/aion_api.py --- ###
+## deployment/aion_api.py
 from fastapi import FastAPI, WebSocket
 from llm.llm_router import LLMRouter
 import uvicorn
@@ -508,7 +196,7 @@ async def websocket_endpoint(websocket: WebSocket):
 def start_api(host: str = "0.0.0.0", port: int = 8000) -> None:
     uvicorn.run(app, host=host, port=port)
 
-### --- deployment/autostart_manager.py --- ###
+## deployment/autostart_manager.py
 # deployment/autostart_manager.py
 
 """
@@ -608,7 +296,7 @@ WantedBy=multi-user.target
         except Exception as e:
             return f"[❌] Errore Scheduler: {e}"
 
-### --- deployment/remote_access.py --- ###
+## deployment/remote_access.py
 # deployment/remote_access.py
 
 """
@@ -638,7 +326,7 @@ def logs():
 def start_remote_server(host="0.0.0.0", port=8800):
     uvicorn.run(app, host=host, port=port)
 
-### --- deployment/task_scheduler.py --- ###
+## deployment/task_scheduler.py
 # deployment/task_scheduler.py
 
 """
@@ -675,7 +363,7 @@ class TaskScheduler:
                 time.sleep(1)
         threading.Thread(target=runner, daemon=True).start()
 
-### --- deployment/telemetry_monitor.py --- ###
+## deployment/telemetry_monitor.py
 # deployment/telemetry_monitor.py
 
 """
@@ -712,65 +400,11 @@ class TelemetryMonitor:
         with open(path, "r") as f:
             return "\n".join(f.readlines()[-lines:])
 
-### --- docker-compose.override.yml --- ###
-# docker-compose.override.yml
-version: "3.9"
+## docs/ARCHITECTURE.md
 
-services:
-  mercurius:
-    environment:
-      - MERCURIUS_READY=true
+## docs/USAGE_GUIDE.md
 
-  healthcheck:
-    build: .
-    command: ["python", "monitoring/health_check.py"]
-    ports:
-      - "8081:8080"
-    depends_on:
-      - mercurius
-
-  metrics:
-    build: .
-    command: ["python", "monitoring/metrics_exporter.py"]
-    ports:
-      - "9100:9100"
-    depends_on:
-      - mercurius
-
-  audit_dashboard:
-    build: .
-    command: ["streamlit", "run", "monitoring/log_dashboard.py", "--server.port", "8501"]
-    ports:
-      - "8501:8501"
-    volumes:
-      - ./logs:/app/logs
-    depends_on:
-      - mercurius
-
-### --- docker-compose.yml --- ###
-
-# docker-compose.yml
-version: "3.9"
-
-services:
-  mercurius:
-    build: .
-    container_name: mercurius_ai
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    volumes:
-      - ./memory/long_term_data:/app/memory/long_term_data
-      - ./logs:/app/logs
-    ports:
-      - "8088:8080"
-
-### --- docs/ARCHITECTURE.md --- ###
-
-
-### --- docs/USAGE_GUIDE.md --- ###
-
-
-### --- evolution/auto_updater.py --- ###
+## evolution/auto_updater.py
 # evolution/auto_updater.py
 
 """
@@ -816,7 +450,7 @@ class AutoUpdater:
 
         return f"✅ {len(generated_files)} snippet salvati da {url}"
 
-### --- evolution/behavior_simulator.py --- ###
+## evolution/behavior_simulator.py
 # evolution/behavior_simulator.py
 
 """
@@ -846,7 +480,7 @@ class BehaviorSimulator:
         self.memory.record_episode(context, user_input, ai_response)
         self.log.log_event("BehaviorSimulator", "Simulated Scenario", f"{context} -> {ai_response}")
 
-### --- evolution/logic_injector.py --- ###
+## evolution/logic_injector.py
 # evolution/logic_injector.py
 
 """
@@ -932,3 +566,366 @@ class LogicInjector:
 
     def test_injection(self, module_name: str, function_name: str, test_args: tuple = ()) -> str:
         """
+        Testa una funzione precedentemente iniettata eseguendola.
+
+        Args:
+            module_name (str): Nome del modulo target
+            function_name (str): Nome della funzione da testare
+            test_args (tuple): Argomenti di test da passare alla funzione
+
+        Returns:
+            str: Output del test o errore catturato.
+        """
+        try:
+            module = importlib.import_module(module_name)
+            func = getattr(module, function_name)
+            result = func(*test_args)
+            return f"✅ Output della funzione: {result}"
+[TRONCATO]
+
+## evolution/neural_plasticity.py
+# evolution/neural_plasticity.py
+
+"""
+Modulo: neural_plasticity.py
+Descrizione: Simula la plasticità neurale rinforzando l'uso dei moduli più attivi nel sistema Mercurius∞.
+Aggiorna il log sinaptico e crea una mappa di rafforzamento.
+"""
+
+from memory.synaptic_log import SynapticLog
+from collections import defaultdict
+import json
+import os
+
+PLASTICITY_TRACKER = "data/plasticity_weights.json"
+
+
+class NeuralPlasticity:
+    def __init__(self):
+        self.log = SynapticLog()
+        self.weights = defaultdict(int)
+        self._load_weights()
+
+    def _load_weights(self):
+        if os.path.exists(PLASTICITY_TRACKER):
+            with open(PLASTICITY_TRACKER, "r") as f:
+                self.weights.update(json.load(f))
+
+    def _save_weights(self):
+        with open(PLASTICITY_TRACKER, "w") as f:
+            json.dump(self.weights, f, indent=2)
+
+    def reinforce_module_usage(self, module_name: str):
+        self.weights[module_name] += 1
+        self._save_weights()
+        self.log.log_event("NeuralPlasticity", "Reinforced", f"{module_name}: {self.weights[module_name]}")
+
+## evolution/open_evolve.py
+class OpenEvolve:
+    def __init__(self):
+        self.name = "OpenEvolve"
+
+    def evolve(self, population: list, generations: int = 10) -> list:
+        return [f"{indiv}_gen{generations}" for indiv in population]
+
+## evolution/openalpha_evolve.py
+class OpenAlphaEvolve:
+    def __init__(self):
+        self.name = "OpenAlphaEvolve"
+
+    def simulate_strategy(self, context: dict) -> str:
+        return f"[{self.name}] Strategia simulata con successo in contesto: {context}"
+
+## evolution/pwb_alphaevolve.py
+class PWBAlphaEvolve:
+    def __init__(self):
+        self.name = "PWB-AlphaEvolve"
+
+    def evolve_strategy(self, data: list, constraints: dict = {}) -> str:
+        return f"[{self.name}] Strategia evoluta su {len(data)} dati con vincoli {constraints}"
+
+## evolution/web_scraper.py
+# evolution/web_scraper.py
+
+"""
+Modulo: web_scraper.py
+Descrizione: Sistema di acquisizione automatica per l’auto-evoluzione di Mercurius∞.
+Scarica, estrae e indicizza contenuti testuali e di codice da pagine web, GitHub e documentazione.
+"""
+
+import requests
+from bs4 import BeautifulSoup
+from typing import List
+
+
+class WebScraper:
+    def __init__(self, user_agent: str = "MercuriusBot/1.0"):
+        self.headers = {"User-Agent": user_agent}
+
+    def get_text_from_url(self, url: str) -> str:
+        """
+        Scarica testo leggibile da una pagina web.
+        """
+        try:
+            response = requests.get(url, headers=self.headers, timeout=10)
+            if response.status_code != 200:
+                return f"[Errore HTTP {response.status_code}]"
+
+            soup = BeautifulSoup(response.text, "html.parser")
+            texts = [p.get_text() for p in soup.find_all(["p", "pre", "code", "li"])]
+            return "\n".join(texts).strip()
+
+        except Exception as e:
+            return f"[Errore scraping]: {e}"
+
+    def extract_code_blocks(self, html_text: str) -> List[str]:
+        """
+        Estrae blocchi <code> o <pre> come frammenti di codice.
+        """
+        soup = BeautifulSoup(html_text, "html.parser")
+        code_blocks = soup.find_all(["code", "pre"])
+        return [block.get_text() for block in code_blocks if block.get_text()]
+
+## exports/README.txt
+🧠 Mercurius∞ – Builder Esegubile Desktop
+
+▶ Per creare la versione installabile dell'interfaccia grafica:
+
+1. Installa PyInstaller (se non già presente):
+   pip install pyinstaller
+
+2. Avvia il processo build:
+
+   - Windows:
+     build_win.bat
+
+   - macOS/Linux:
+     bash build_mac.sh
+
+▶ Output:
+Troverai l'eseguibile finale in: dist/MercuriusGUI(.exe)
+
+📎 Requisiti:
+- Python 3.9+
+- dashboard.py funzionante
+- Icona in /exports/icon/
+
+## exports/build_dashboard.py
+# build_dashboard.py
+"""
+Script: build_dashboard.py
+Uso: genera un eseguibile standalone per il modulo dashboard.py
+"""
+
+import os
+
+ENTRY = "dashboard.py"
+ICON = "icon/icon.ico"
+
+os.system(f"pyinstaller --onefile --windowed --icon={ICON} --name=MercuriusGUI {ENTRY}")
+
+## generated_agents/ApprendimentoGenericoAgent.py
+"""
+Agente auto-generato basato sul concetto: apprendimento generico – Modello: rete neurale generativa multi-scopo.
+"""
+from modules.ai_kernel.agent_core import AgentCore
+
+class ApprendimentoGenericoAgent(AgentCore):
+    def __init__(self):
+        super().__init__(name="ApprendimentoGenericoAgent")
+        # Inizializzazione aggiuntiva basata sul concetto estratto (se necessaria)
+
+    def think(self, input_data):
+        # Metodo di esempio che utilizza il concetto appreso
+        print(f"🧠 {self.name} applica il concetto di apprendimento generico all'input fornito.")
+        return "Insight basato su rete neurale generativa multi-scopo"
+
+## generated_agents/__init__.py
+# Inizializzazione agenti generati
+
+## genesis_core/autogpt_bridge.py
+import subprocess
+import os
+
+def run_autogpt(task_prompt: str):
+    os.chdir("AutoGPT")
+    with open("input.txt", "w") as f:
+        f.write(task_prompt)
+
+    result = subprocess.run(["python", "-m", "autogpt"], capture_output=True, text=True)
+    return result.stdout
+
+## installer/package_builder.py
+# installer/package_builder.py
+
+"""
+Modulo: package_builder.py
+Descrizione: Creazione automatica di eseguibili desktop Mercurius∞ per Windows, Linux, Mac.
+"""
+
+import os
+import subprocess
+from datetime import datetime
+
+class PackageBuilder:
+    def __init__(self, exports_dir="exports/"):
+        self.exports_dir = exports_dir
+        os.makedirs(exports_dir, exist_ok=True)
+
+    def build_windows_exe(self, entry_script: str, icon: str = None):
+        cmd = [
+            "pyinstaller", "--onefile", "--noconsole", entry_script,
+            "--distpath", self.exports_dir,
+            "--name", "Mercurius"
+        ]
+        if icon:
+            cmd += ["--icon", icon]
+        self._run(cmd, "windows")
+
+    def build_linux_sh(self, entry_script: str):
+        output_file = os.path.join(self.exports_dir, "mercurius.sh")
+        with open(output_file, "w") as f:
+            f.write(f"#!/bin/bash\npython3 {entry_script}")
+        os.chmod(output_file, 0o755)
+        self._log_build("linux", output_file)
+
+    def build_mac_app(self, entry_script: str):
+        app_path = os.path.join(self.exports_dir, "Mercurius.app")
+        os.makedirs(app_path, exist_ok=True)
+        os.symlink(entry_script, os.path.join(app_path, "Mercurius"))
+        self._log_build("mac", app_path)
+
+    def _run(self, cmd, platform: str):
+        try:
+            subprocess.run(cmd, check=True)
+            self._log_build(platform, self.exports_dir)
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Errore durante build {platform}: {e}")
+
+    def _log_build(self, platform: str, path: str):
+        log_path = os.path.join(self.exports_dir, "README.txt")
+        with open(log_path, "a") as f:
+            f.write(f"[{datetime.now().isoformat()}] Build completata ({platform}): {path}\n")
+
+## integrations/README.md
+# 🌐 Integration – Interoperabilità
+
+Modulo per connettività con ambienti esterni: GitHub, Colab, sistema operativo.
+
+## Contenuto
+
+- `github_sync.py`
+- `colab_linker.py`
+- `system_control.py`
+
+## Obiettivo
+
+Gestire flussi DevOps, sincronizzazioni remote e automazioni locali.
+
+## integrations/__init__.py
+
+## integrations/bridge_josch.py
+"""bridge_josch.py
+===================
+Interfaccia FastAPI per comunicare con il sistema "Josh" (alias JOSCH).
+
+Il modulo espone un piccolo server FastAPI che consente l'esecuzione remota
+di comandi su un sistema esterno e fornisce inoltre la funzione
+``send_command_to_pc`` da utilizzare all'interno di Mercurius∞ per inviare
+comandi al bridge.
+"""
+
+import requests
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import subprocess
+import uvicorn
+import time
+
+app = FastAPI(title="JOSCH Bridge")
+start_time = time.time()
+
+
+class CommandRequest(BaseModel):
+    command: str
+    mode: str = "cmd"  # cmd | powershell | python
+
+
+@app.get("/ping")
+def ping():
+    return {"status": "online", "uptime": f"{int(time.time() - start_time)}s"}
+
+
+@app.post("/cmd")
+def run_command(req: CommandRequest):
+    try:
+        if req.mode == "cmd":
+            result = subprocess.run(req.command, shell=True, capture_output=True, text=True)
+        elif req.mode == "powershell":
+            result = subprocess.run(["powershell", "-Command", req.command], capture_output=True, text=True)
+        elif req.mode == "python":
+            result = subprocess.run(["python", "-c", req.command], capture_output=True, text=True)
+        else:
+            raise HTTPException(status_code=400, detail="Invalid mode specified")
+
+        return {
+            "returncode": result.returncode,
+            "stdout": result.stdout.strip(),
+            "stderr": result.stderr.strip(),
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def send_command_to_pc(command: str, mode: str = "cmd", base_url: str = "http://localhost:3020") -> dict:
+    """Invia un comando al bridge JOSCH e restituisce la risposta JSON."""
+    try:
+        res = requests.post(
+            f"{base_url}/cmd",
+            json={"command": command, "mode": mode},
+            timeout=5,
+        )
+        if res.status_code == 200:
+            return res.json()
+        return {"error": res.text, "status": res.status_code}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+def start_bridge(host="0.0.0.0", port=3020):
+    uvicorn.run(app, host=host, port=port)
+
+
+if __name__ == "__main__":
+    start_bridge()
+
+## integrations/colab_linker.py
+class ColabLinker:
+    def __init__(self):
+        self.name = "ColabLinker"
+
+    def send_code(self, module: str):
+        return f"[{self.name}] Modulo {module} inviato a Colab"
+
+## integrations/finviz_connector.py
+"""
+finviz_connector.py
+===================
+Scraping dei fondamentali e notizie da Finviz per Mercurius∞.
+"""
+
+import requests
+from bs4 import BeautifulSoup
+
+
+class FinvizConnector:
+    def __init__(self):
+        self.base = "https://finviz.com/quote.ashx?t="
+
+    def fetch(self, symbol):
+        url = self.base + symbol
+        headers = {"User-Agent": "Mozilla/5.0"}
+        soup = BeautifulSoup(requests.get(url, headers=headers).text, "html.parser")
+        data = {}

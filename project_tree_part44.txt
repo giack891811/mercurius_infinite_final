@@ -1,0 +1,870 @@
+Questa è la parte 44 di project_tree. Continua da quella precedente.
+
+def _extract_domain(packet) -> str | None:
+    if DNSQR and packet.haslayer(DNSQR):
+        try:
+            return packet[DNSQR].qname.decode().rstrip('.')
+        except Exception:
+            return None
+    return None
+
+
+def capture_dns_queries(duration: int = 30) -> list[str]:
+    """Sniffa il traffico DNS per un certo periodo."""
+    if sniff is None:
+        return []
+    queries = []
+    packets = sniff(filter="udp port 53", timeout=duration)
+    for p in packets:
+        d = _extract_domain(p)
+        if d:
+            queries.append(d)
+    return queries
+
+
+def categorize_domain(domain: str) -> str:
+    lower = domain.lower()
+    for cat, keywords in CATEGORY_PATTERNS.items():
+        for kw in keywords:
+            if kw in lower:
+                return cat
+    return "altro"
+[TRONCATO]
+
+## modules/nlp.py
+"""
+Modulo: nlp.py
+Responsabilità: Interpretazione semantica dei comandi vocali/testuali
+Autore: Mercurius∞ Engineer Mode
+"""
+
+from typing import Dict
+
+
+class CommandInterpreter:
+    """
+    Interpreta frasi e comandi naturali in azioni simboliche.
+    """
+
+    def __init__(self):
+        self.known_commands = {
+            "analizza l'ambiente": {"action": "analizza_ambiente"},
+            "vai alla base": {"action": "raggiungi_destinazione", "context": {"destinazione": "base"}},
+            "parla con me": {"action": "interagisci_utente"},
+        }
+
+    def interpret(self, text: str) -> Dict:
+        """
+        Converte una frase in comando semantico.
+        """
+        text = text.lower().strip()
+        if text in self.known_commands:
+            return self.known_commands[text]
+        elif "ambiente" in text:
+            return {"action": "analizza_ambiente"}
+        elif "base" in text:
+            return {"action": "raggiungi_destinazione", "context": {"destinazione": "base"}}
+        elif "parla" in text or "conversazione" in text:
+            return {"action": "interagisci_utente"}
+        else:
+            return {"action": "ignora", "context": {"frase": text}}
+
+## modules/ollama3_interface.py
+"""
+Modulo: ollama3_interface.py
+Descrizione: Interfaccia per comunicare con il server locale di Ollama 3 e ottenere risposte da modelli LLM open source.
+"""
+
+import requests
+import json
+
+
+class Ollama3Interface:
+    def __init__(self, base_url="http://localhost:11434/api/generate", model="llama3"):
+        self.base_url = base_url
+        self.model = model
+
+    def ask(self, prompt: str, stream: bool = False) -> str:
+        """
+        Invia un prompt al modello Ollama 3 e restituisce la risposta.
+        """
+        headers = {"Content-Type": "application/json"}
+        data = {
+            "model": self.model,
+            "prompt": prompt,
+            "stream": stream
+        }
+
+        try:
+            response = requests.post(self.base_url, headers=headers, data=json.dumps(data))
+            response.raise_for_status()
+
+            if stream:
+                return self._handle_stream_response(response)
+            else:
+                output = response.json().get("response", "").strip()
+                return output
+        except Exception as e:
+            return f"⚠️ Errore comunicazione con Ollama: {e}"
+
+    def _handle_stream_response(self, response) -> str:
+        output = ""
+        for line in response.iter_lines():
+            if line:
+                try:
+                    decoded = json.loads(line.decode("utf-8"))
+                    chunk = decoded.get("response", "")
+                    output += chunk
+                except json.JSONDecodeError:
+                    continue
+        return output
+
+
+# Test del modulo
+if __name__ == "__main__":
+    ollama = Ollama3Interface()
+    reply = ollama.ask("Scrivi una funzione Python che calcola il fattoriale.")
+    print(reply)
+
+## modules/openbb_terminal.py
+# modules/openbb_terminal.py
+
+"""
+Modulo: openbb_terminal.py
+Descrizione: Wrapper per OpenBB Terminal. Supporta richieste CLI per dati e strategie via comando.
+"""
+
+import subprocess
+
+class OpenBBWrapper:
+    def run_command(self, command: str) -> str:
+        try:
+            result = subprocess.run(
+                command, shell=True, capture_output=True, text=True
+            )
+            return result.stdout or "✅ Comando eseguito"
+        except Exception as e:
+            return f"❌ Errore: {e}"
+
+
+# Test
+if __name__ == "__main__":
+    obb = OpenBBWrapper()
+    print(obb.run_command("echo 'Simulazione OpenBB'"))
+
+## modules/planner.py
+"""
+Modulo: planner.py
+Responsabilità: Pianificazione strategica delle azioni in base a obiettivi e contesto
+Autore: Mercurius∞ Engineer Mode
+"""
+
+from typing import List, Dict, Any
+
+
+class ActionPlanner:
+    """
+    Planner strategico per sequenziare azioni sulla base di obiettivi e contesto.
+    """
+
+    def __init__(self):
+        self.last_plan: List[Dict[str, Any]] = []
+
+    def generate_plan(self, goal: str, context: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Genera una sequenza di azioni per raggiungere un obiettivo dato il contesto.
+        """
+        # Placeholder semplice. In futuro: agenti LLM o regole fuzzy.
+        plan = []
+
+        if goal == "analizza_ambiente":
+            plan.append({"action": "attiva_sensori", "params": {"tipo": "ambientali"}})
+            plan.append({"action": "acquisisci_dati"})
+            plan.append({"action": "valuta_rischi"})
+
+        elif goal == "raggiungi_destinazione":
+            plan.append({"action": "calcola_percorso", "params": {"destinazione": context.get("destinazione")}})
+            plan.append({"action": "avvia_navigazione"})
+            plan.append({"action": "monitoraggio_progresso"})
+
+        elif goal == "interagisci_utente":
+            plan.append({"action": "saluta"})
+            plan.append({"action": "richiedi_input"})
+            plan.append({"action": "rispondi"})
+
+        else:
+            plan.append({"action": "log", "params": {"messaggio": f"Nessun piano noto per '{goal}'"}})
+
+        self.last_plan = plan
+        return plan
+
+    def describe_plan(self, plan: List[Dict[str, Any]]) -> str:
+        """
+        Descrive verbalmente un piano d'azione.
+        """
+        description = "Piano d'azione:\n"
+        for step in plan:
+            description += f" - {step['action']}"
+            if "params" in step:
+                description += f" con parametri {step['params']}"
+            description += "\n"
+        return description
+
+    def validate_plan(self, plan: List[Dict[str, Any]]) -> bool:
+        """
+        Verifica che il piano contenga azioni ben definite.
+        """
+        for step in plan:
+            if not isinstance(step.get("action"), str):
+                return False
+        return True
+
+    def plan_summary(self) -> Dict[str, Any]:
+        """
+        Riepilogo dell'ultimo piano generato.
+        """
+        return {
+            "step_count": len(self.last_plan),
+            "actions": [step["action"] for step in self.last_plan]
+        }
+
+## modules/qlib_quant.py
+# modules/qlib_quant.py
+"""
+Modulo: qlib_quant.py
+Descrizione: Integrazione con Qlib per predizione di prezzi, analisi dati storici e backtest quantitativi.
+"""
+import random
+
+class QlibQuant:
+    def __init__(self):
+        # Mantiene ultime previsioni per simulare continuità (es. prezzo ultimo conosciuto per ticker)
+        self.last_price = {}
+
+    def predict(self, ticker: str) -> float:
+        """Restituisce una previsione simulata del prezzo per il ticker dato."""
+        base_price = self.last_price.get(ticker, random.uniform(50, 150))  # prezzo base casuale se sconosciuto
+        # Simula variazione percentuale casuale tra -1% e +1%
+        change = random.uniform(-0.01, 0.01)
+        predicted_price = base_price * (1 + change)
+        # Aggiorna lo storico del prezzo
+        self.last_price[ticker] = predicted_price
+        print(f"📈 QlibQuant: Predizione per {ticker} = {predicted_price:.2f}")
+        return predicted_price
+
+    def backtest(self):
+        """Esegue un backtest simulato e restituisce un report sintetico."""
+        # Simula calcolo di uno Sharpe Ratio basato su dati casuali
+        sharpe_ratio = round(random.uniform(0.5, 2.0), 2)
+        return f"✅ Backtest completato: Sharpe Ratio {sharpe_ratio}"
+
+## modules/reasoner_dispatcher.py
+"""reasoner_dispatcher.py
+=======================
+Dispatcher multi-agent che instrada i prompt ai vari Reasoner (GPT-4o, Ollama3, AZR, ecc.)
+Seleziona e fonde le risposte, gestendo fallback ed errori.
+"""
+
+from __future__ import annotations
+
+from typing import Dict
+import json
+
+from utils.logger import setup_logger
+from modules.llm.chatgpt_interface import ChatGPTAgent
+from modules.llm.ollama3_interface import Ollama3Agent
+from modules.llm.azr_reasoner import AZRAgent
+from modules.llm.gpt4o_validator import GPT4oAgent
+
+logger = setup_logger("ReasonerDispatcher")
+
+
+class ReasonerDispatcher:
+    """Gestisce l'inoltro dei prompt ai vari reasoner e ne combina le risposte."""
+
+    def __init__(self) -> None:
+        self.reasoners = {
+            "chatgpt4": ChatGPTAgent(),
+            "ollama3": Ollama3Agent(),
+            "azr": AZRAgent(),
+            "gpt4o": GPT4oAgent(),
+        }
+
+    def dispatch(self, prompt: str) -> str:
+        """Invia il prompt a tutti i reasoner disponibili e sintetizza la risposta migliore."""
+        logger.info(f"[DISPATCH] Prompt ricevuto: {prompt}")
+        responses: Dict[str, str] = {}
+        for name, agent in self.reasoners.items():
+            try:
+                if name == "chatgpt4":
+                    responses[name] = agent.elaborate(prompt)
+                elif name == "ollama3":
+                    responses[name] = agent.generate(prompt)
+                elif name == "azr":
+                    responses[name] = agent.analyze(prompt)
+                elif name == "gpt4o":
+                    responses[name] = agent.validate(prompt)
+            except Exception as exc:
+                responses[name] = f"Errore {name}: {exc}"
+                logger.error(f"Errore nel reasoner {name}: {exc}")
+
+        # Sintesi finale con GPT4o se disponibile
+        synth_prompt = "Sintetizza in una risposta unica e coerente le seguenti risposte:\n" + json.dumps(responses, ensure_ascii=False, indent=2)
+        try:
+            final_resp = self.reasoners["gpt4o"].validate(synth_prompt)
+        except Exception as exc:  # fallback se GPT4o fallisce
+            logger.error(f"Fallback GPT4o: {exc}")
+            # Selezione semplice: risposta più lunga senza errore
+            valid = [r for r in responses.values() if not r.lower().startswith("errore") and r]
+            final_resp = max(valid, key=len) if valid else "Nessuna risposta disponibile."
+        logger.info("[DISPATCH] Risposta finale generata")
+        return final_resp
+
+
+def dispatch_to_reasoner(prompt: str) -> str:
+    """Funzione helper per utilizzo rapido del dispatcher."""
+    dispatcher = ReasonerDispatcher()
+    return dispatcher.dispatch(prompt)
+
+
+# Test rapido
+if __name__ == "__main__":
+    test_prompt = "Spiega la teoria della relativit\u00e0 in breve"
+    print(dispatch_to_reasoner(test_prompt))
+
+## modules/speech.py
+"""
+Modulo: speech.py
+Responsabilità: Gestione input vocale (ASR) e output vocale (TTS)
+Autore: Mercurius∞ Engineer Mode
+"""
+
+try:
+    import pyttsx3
+except Exception:  # pragma: no cover - optional engine
+    pyttsx3 = None
+import speech_recognition as sr
+
+
+class TextToSpeech:
+    """
+    Sintesi vocale basata su pyttsx3.
+    """
+    def __init__(self, voice_id=None):
+        self.engine = None
+        if pyttsx3 is not None:
+            try:
+                self.engine = pyttsx3.init()
+                self.set_voice(voice_id)
+            except Exception:
+                self.engine = None
+
+    def set_voice(self, voice_id):
+        if not self.engine:
+            return
+        if voice_id is not None:
+            self.engine.setProperty('voice', voice_id)
+        else:
+            voices = self.engine.getProperty('voices')
+            if voices:
+                self.engine.setProperty('voice', voices[0].id)
+
+    def speak(self, text: str):
+        if self.engine:
+            self.engine.say(text)
+            self.engine.runAndWait()
+        else:
+            print(f"[TTS] {text}")
+
+
+class SpeechToText:
+    """
+    Riconoscimento vocale basato su speech_recognition.
+    """
+    def __init__(self, language: str = "it-IT"):
+        self.recognizer = sr.Recognizer()
+        self.language = language
+
+    def listen(self, timeout: int = 5) -> str:
+        with sr.Microphone() as source:
+            print("🎙️ In ascolto...")
+            audio = self.recognizer.listen(source, timeout=timeout)
+            try:
+                text = self.recognizer.recognize_google(audio, language=self.language)
+                print("🗣️ Riconosciuto:", text)
+                return text
+            except sr.UnknownValueError:
+                return "[ERROR] Non ho capito."
+            except sr.RequestError as e:
+                return f"[ERROR] Errore di connessione: {e}"
+
+## modules/superagi_agent.py
+# modules/superagi_agent.py
+
+"""
+Modulo: superagi_agent.py
+Descrizione: Framework per task evolutivi autonomi multi-step. Simula workflow AI dinamici tramite SuperAGI.
+"""
+
+class SuperAGIAgent:
+    def __init__(self, name="MercuriusExecutor"):
+        self.name = name
+        self.steps = []
+
+    def assign_task(self, task: str):
+        self.steps = [f"Step {i+1}: {subtask}" for i, subtask in enumerate(task.split("."))]
+        return f"🧠 {self.name} ha pianificato {len(self.steps)} subtask."
+
+    def execute(self):
+        results = [f"✅ {step} completato." for step in self.steps]
+        return "\n".join(results)
+
+
+# Test
+if __name__ == "__main__":
+    agent = SuperAGIAgent()
+    print(agent.assign_task("Analizza i dati. Genera il report. Invia l’output."))
+    print(agent.execute())
+
+## modules/supervisor.py
+"""
+Modulo: supervisor.py
+Responsabilità: Monitoraggio comportamentale e strategico del sistema
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import time
+import datetime
+from typing import Dict, List
+
+
+class ActionLog:
+    """
+    Rappresenta un'azione osservata dal supervisore.
+    """
+
+    def __init__(self, action: str, outcome: str, success: bool, context: Dict):
+        self.timestamp = datetime.datetime.now().isoformat()
+        self.action = action
+        self.outcome = outcome
+        self.success = success
+        self.context = context
+
+    def to_dict(self) -> Dict:
+        return {
+            "timestamp": self.timestamp,
+            "action": self.action,
+            "outcome": self.outcome,
+            "success": self.success,
+            "context": self.context
+        }
+
+
+class Supervisor:
+    """
+    Sistema di supervisione del comportamento cognitivo e operativo.
+    """
+
+    def __init__(self):
+        self.logs: List[Dict] = []
+        self.total_actions = 0
+        self.total_success = 0
+        self.total_failures = 0
+        self.start_time = time.time()
+
+    def observe(self, action: str, outcome: str, success: bool, context: Dict):
+        """
+        Registra un evento/azione osservato.
+        """
+        self.total_actions += 1
+        if success:
+            self.total_success += 1
+        else:
+            self.total_failures += 1
+
+        log_entry = ActionLog(action, outcome, success, context)
+        self.logs.append(log_entry.to_dict())
+
+    def performance_report(self) -> Dict:
+        """
+        Fornisce un report generale delle prestazioni osservate.
+        """
+        uptime = time.time() - self.start_time
+        return {
+            "uptime_sec": int(uptime),
+            "actions_total": self.total_actions,
+            "successes": self.total_success,
+            "failures": self.total_failures,
+            "success_rate": round((self.total_success / self.total_actions) * 100, 2) if self.total_actions else 0.0
+        }
+
+    def last_actions(self, count: int = 5) -> List[Dict]:
+        return self.logs[-count:]
+
+## modules/task_manager_cli.py
+import argparse
+from modules.Neo.trainer_orchestrator import bootstrap_agents
+from modules.Localai.local_ai import LocalAI
+from modules.Leonai.leon_ai import LeonAI
+
+class TaskManagerCLI:
+    def __init__(self):
+        self.localai = LocalAI()
+        self.leonai = LeonAI()
+        print("🕹️ TaskManager CLI interattivo pronto! Scrivi 'ai: ...' per LLM offline, 'pc: ...' per comandi PC, 'exit' per uscire.")
+
+    def run(self):
+        while True:
+            try:
+                cmd = input("Task> ").strip()
+                if not cmd:
+                    continue
+                if cmd.lower() == "exit":
+                    print("Bye Jarvis!")
+                    break
+                if cmd.startswith("ai:"):
+                    prompt = cmd[3:].strip()
+                    response = self.localai.rispondi(prompt)
+                    print(f"\n🤖 LocalAI: {response}\n")
+                elif cmd.startswith("pc:"):
+                    sys_cmd = cmd[3:].strip()
+                    try:
+                        out = self.leonai.esegui_comando(sys_cmd)
+                        print(f"\n🦾 LeonAI Output:\n{out}\n")
+                    except PermissionError as e:
+                        print(f"[SECURITY]: {e}")
+                else:
+                    print("❓ Comando non riconosciuto. Usa 'ai:' o 'pc:' davanti.")
+            except KeyboardInterrupt:
+                print("\nInterrotto. Exit.")
+                break
+
+def create_agent(nome):
+    print(f"🧬 Creo nuovo agente: {nome}")
+    # Se bootstrap_agents non supporta argomenti, chiamalo senza parametri.
+    bootstrap_agents()
+
+
+
+def elenco_task():
+    print("📜 Task disponibili:")
+    print(" - crea_agente --nome <NomeAgente>")
+    print(" - avvia_bootstrap")
+    print(" - interactive (modalità CLI interattiva)")
+    print(" - help")
+
+def main():
+    parser = argparse.ArgumentParser(description="Mercurius∞ TaskManager CLI – Modalità Jarvis+ Ultra")
+    parser.add_argument("--task", type=str, help="Task da eseguire (es: crea_agente, avvia_bootstrap, interactive, help)")
+    parser.add_argument("--nome", type=str, help="Nome agente, modulo o oggetto")
+    args = parser.parse_args()
+
+    if not args.task or args.task == "interactive":
+        TaskManagerCLI().run()
+    elif args.task == "crea_agente" and args.nome:
+        create_agent(args.nome)
+    elif args.task == "avvia_bootstrap":
+        print("🟢 Avvio sequenza di bootstrap completa!")
+        bootstrap_agents()
+    elif args.task == "help":
+        elenco_task()
+    else:
+        print("❌ Comando non riconosciuto. Usa '--task help' per la lista.")
+
+
+## modules/url_learner.py
+# modules/knowledge/url_learner.py
+"""
+Scarica pagine web, le riassume con GPT e salva in Long-Term Memory.
+"""
+
+import requests
+import os
+import openai
+import readability
+from bs4 import BeautifulSoup
+from memory.long_term_memory import LongTermMemory
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+mem = LongTermMemory()                           # usa backend JSON
+
+def _clean_html(html: str) -> str:
+    # readability-lxml per estrarre solo il main <article>
+    doc = readability.Document(html)
+    soup = BeautifulSoup(doc.summary(), "html.parser")
+    return soup.get_text(separator="\n")
+
+def summarize(text: str, url: str) -> str:
+    prompt = (
+        f"Riassumi in 10 bullet il seguente articolo ({url}). "
+        "Evidenzia i concetti chiave e gli eventuali numeri importanti.\n\n"
+        f"{text[:8000]}"    # taglio altrimenti supero token
+    )
+    resp = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}],
+        temperature=0.4, max_tokens=500
+    )
+    return resp["choices"][0]["message"]["content"]
+
+def ingest_url(url: str):
+    r = requests.get(url, timeout=15)
+    r.raise_for_status()
+    text = _clean_html(r.text)
+    summary = summarize(text, url)
+    mem.save_experience({
+        "tags": ["url_knowledge"],
+        "source": url,
+        "summary": summary
+    })
+    print(f"✅ Ingested {url}")
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) < 2:
+        print("Usage: python -m modules.knowledge.url_learner <url1> <url2> …")
+        raise SystemExit
+    for u in sys.argv[1:]:
+        ingest_url(u)
+
+## modules/AZR/__init__.py
+# Init for AZR
+
+## modules/AZR/fine_tuner.py
+"""Modulo di fine-tuning per modelli AI locali."""
+
+def fine_tune_model(dataset_path):
+    print(f"🔧 Fine-tuning su dataset: {dataset_path}")
+
+## modules/AZR/train_model.py
+def train(data):
+    print("📚 Addestramento modello AZR")
+
+## modules/GPT/__init__.py
+# Init for GPT
+
+## modules/GPT/gpt_runner.py
+"""Esegue una richiesta GPT su prompt costruiti."""
+
+from .prompt_builder import build_gpt_prompt
+
+def run_gpt(intent):
+    prompt = build_gpt_prompt(intent)
+    return f"GPT> {prompt}"
+
+## modules/GPT/prompt_builder.py
+def build_gpt_prompt(intent):
+    return f"Richiesta: {intent}"
+
+## modules/Leonai/__init__.py
+
+## modules/Leonai/leon_ai.py
+import subprocess
+import platform
+import datetime
+
+class LeonAI:
+    def __init__(self):
+        self.os_type = platform.system()
+        print(f"🦾 LeonAI avviato su: {self.os_type}")
+
+    def esegui_comando(self, comando: str) -> str:
+        # Sicurezza: blocca comandi potenzialmente pericolosi
+        proibiti = ["rm", "del", "shutdown", "format", "mkfs", "dd", ">", ":", "sudo", "su"]
+        if any(x in comando for x in proibiti):
+            raise PermissionError("❌ Comando pericoloso bloccato da LeonAI.")
+        try:
+            result = subprocess.check_output(comando, shell=True, stderr=subprocess.STDOUT, timeout=15, text=True)
+            self._log(comando, result)
+            return result
+        except subprocess.CalledProcessError as e:
+            self._log(comando, e.output)
+            return f"❌ Errore comando: {e.output}"
+        except Exception as ex:
+            self._log(comando, str(ex))
+            return f"❌ Errore generale: {str(ex)}"
+
+    def _log(self, comando, output):
+        with open("logs/leonai_commands.log", "a", encoding="utf-8") as f:
+            f.write(f"[{datetime.datetime.now()}] CMD: {comando}\nOUTPUT:\n{output}\n{'='*50}\n")
+
+if __name__ == "__main__":
+    ai = LeonAI()
+    while True:
+        cmd = input("LeonAI$ ")
+        try:
+            print(ai.esegui_comando(cmd))
+        except Exception as ex:
+            print(f"[LeonAI] Errore: {ex}")
+
+## modules/Localai/__init__.py
+
+## modules/Localai/local_ai.py
+import os
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+class LocalAI:
+    def __init__(self, model_name="gpt2", device=None):
+        self.model_name = model_name
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        print(f"🤖 LocalAI loading model: {model_name} ({self.device})")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name).to(self.device)
+
+    def rispondi(self, prompt: str, max_new_tokens: int = 128) -> str:
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
+        with torch.no_grad():
+            output = self.model.generate(
+                **inputs,
+                max_new_tokens=max_new_tokens,
+                do_sample=True,
+                temperature=0.8,
+                top_p=0.95
+            )
+        result = self.tokenizer.decode(output[0], skip_special_tokens=True)
+        print(f"[LocalAI] Input: {prompt}\n[LocalAI] Output: {result}")
+        self._log_interaction(prompt, result)
+        return result
+
+    def _log_interaction(self, prompt, result):
+        with open("logs/localai_interactions.log", "a", encoding="utf-8") as f:
+            f.write(f"PROMPT: {prompt}\nOUTPUT: {result}\n{'-'*40}\n")
+
+if __name__ == "__main__":
+    ai = LocalAI()
+    while True:
+        txt = input("Prompt> ")
+        print(ai.rispondi(txt))
+
+## modules/Neo/__init__.py
+# Init for Neo
+
+## modules/Neo/adaptive_weights.py
+"""Assegna pesi adattivi ai moduli in base al loro utilizzo."""
+
+module_weights = {}
+
+def update_weight(module_name, increment=0.1):
+    module_weights[module_name] = module_weights.get(module_name, 1.0) + increment
+    return module_weights[module_name]
+
+## modules/Neo/agent_generator.py
+"""Genera nuovi agenti AI con configurazione autonoma."""
+
+def generate_agent(name):
+    with open(f"generated_agents/{name}.py", "w") as f:
+        f.write(f"# Agente AI generato automaticamente: {name}\n")
+from .adaptive_weights import update_weight
+
+## modules/Neo/auto_refinement.py
+"""Migliora risposte ed elaborazioni sulla base di feedback osservato."""
+
+def refine_response(raw, feedback):
+    if "troppo complesso" in feedback:
+        return "Versione semplificata: " + raw[:50]
+    return raw
+
+## modules/Neo/context_memory.py
+"""Memoria contestuale temporanea, per analisi conversazioni recenti."""
+
+context_stack = []
+
+def add_context(fragment):
+    context_stack.append(fragment)
+    if len(context_stack) > 20:
+        context_stack.pop(0)
+
+def get_recent_context():
+    return context_stack[-5:]
+
+## modules/Neo/interaction_style.py
+"""Gestione adattiva dello stile comunicativo."""
+
+user_profile = {"tone": "neutro", "style": "tecnico"}
+
+def set_style(tone, style):
+    user_profile["tone"] = tone
+    user_profile["style"] = style
+
+def get_style():
+    return user_profile
+
+## modules/Neo/memory_strengthener.py
+"""Rafforza le memorie e moduli più attivi (simulazione LTP - potenziamento a lungo termine)."""
+
+def strengthen_memory(module_name):
+    print(f"🧠 Potenziamento sinaptico simulato per: {module_name}")
+
+## modules/Neo/neuro_learning_engine.py
+# modules/Neo/neuro_learning_engine.py
+"""Motore di apprendimento visivo basato su input video e pseudocodice."""
+def parse_video_and_generate_knowledge(video_title: str) -> dict:
+    """
+    Simula il parsing di contenuti video o pseudocodice e genera conoscenza.
+    Ritorna un dizionario con un 'concept' appreso e un 'model' suggerito.
+    """
+    title_lower = video_title.lower()
+    # Logica simulata: determina il concetto in base al titolo del video
+    if "sinaps" in title_lower or "neuro" in title_lower:
+        concept = "plasticità sinaptica"
+        model = "rafforzamento progressivo dei moduli usati frequentemente"
+    elif "trade" in title_lower or "borsa" in title_lower or "mercato" in title_lower:
+        concept = "analisi delle serie storiche di mercato"
+        model = "modello ARIMA per la previsione dei trend finanziari"
+    else:
+        concept = "apprendimento generico"
+        model = "rete neurale generativa multi-scopo"
+    return {"concept": concept, "model": model}
+
+## modules/Neo/self_awareness.py
+"""Modulo per tracciare stati interni, scopi e operazioni in corso."""
+
+self_state = {"active_task": None, "last_reflection": None}
+
+def update_state(task):
+    self_state["active_task"] = task
+
+def get_current_state():
+    return self_state
+
+## modules/Neo/self_reflection.py
+"""
+Modulo: self_reflection.py
+Responsabilità: Fornire capacità di auto-riflessione al sistema Mercurius∞
+Autore: Mercurius∞ Engineer Mode
+"""
+
+import json
+import datetime
+import os
+from typing import List, Dict, Any
+
+
+class ReflectionLog:
+    """
+    Classe per la gestione dei log di riflessione cognitiva.
+    """
+    def __init__(self, path: str = "data/reflection_log.json"):
+        self.path = path
+        if not os.path.exists(os.path.dirname(self.path)):
+            os.makedirs(os.path.dirname(self.path))
+        self._initialize_log()
+
+    def _initialize_log(self):
+        if not os.path.exists(self.path):
+            with open(self.path, "w") as f:
+                json.dump([], f)
+
+    def append_reflection(self, entry: Dict[str, Any]):
+        entry["timestamp"] = datetime.datetime.now().isoformat()
+        log = self.load_log()
+        log.append(entry)
+        with open(self.path, "w") as f:
+            json.dump(log, f, indent=4)
+
+    def load_log(self) -> List[Dict[str, Any]]:
+        with open(self.path, "r") as f:
+            return json.load(f)
+
+    def clear_log(self):
+        with open(self.path, "w") as f:

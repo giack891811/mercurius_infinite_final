@@ -1,0 +1,901 @@
+Questa è la parte 22 di project_tree. Continua da quella precedente.
+
+        plist_path = os.path.expanduser(f"~/Library/LaunchAgents/{plist_name}")
+        content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.mercurius.autostart</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>{self.exec_path}</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>WorkingDirectory</key>
+    <string>{os.path.dirname(self.exec_path)}</string>
+</dict>
+</plist>
+"""
+
+        try:
+            os.makedirs(os.path.dirname(plist_path), exist_ok=True)
+            with open(plist_path, "w") as f:
+                f.write(content)
+            subprocess.run(["launchctl", "load", plist_path])
+            return "[✅] Launchd configurato per macOS."
+        except Exception as e:
+            return f"[❌] Errore Launchd: {e}"
+
+    def _windows_task_scheduler(self):
+        try:
+            task_name = "MercuriusBoot"
+            cmd = f'schtasks /Create /SC ONLOGON /TN {task_name} /TR "python {self.exec_path}" /RL HIGHEST /F'
+            subprocess.run(cmd, shell=True, check=True)
+            return "[✅] Task creato in Windows Scheduler."
+        except Exception as e:
+            return f"[❌] Errore Scheduler: {e}"
+
+## deployment/remote_access.py
+# deployment/remote_access.py
+
+"""
+Modulo: remote_access.py
+Descrizione: Server FastAPI per interazione remota sicura con Mercurius∞. Include supporto SSH tunnel opzionale.
+"""
+
+from fastapi import FastAPI
+from deployment.telemetry_monitor import TelemetryMonitor
+import uvicorn
+
+app = FastAPI()
+monitor = TelemetryMonitor()
+
+
+@app.get("/status")
+def status():
+    return {
+        "uptime": monitor.get_uptime(),
+        "system": monitor.get_system_status(),
+    }
+
+@app.get("/logs")
+def logs():
+    return monitor.get_logs_tail("logs/system_operations.log", 20)
+
+def start_remote_server(host="0.0.0.0", port=8800):
+    uvicorn.run(app, host=host, port=port)
+
+## deployment/task_scheduler.py
+# deployment/task_scheduler.py
+
+"""
+Modulo: task_scheduler.py
+Descrizione: Pianifica task periodici per Mercurius∞ (backup, aggiornamenti, invio telemetria).
+"""
+
+import schedule
+import time
+import threading
+import logging
+
+
+class TaskScheduler:
+    def __init__(self):
+        self.tasks = []
+        logging.basicConfig(level=logging.INFO)
+
+    def add_task(self, label: str, function, every_minutes: int = 1):
+        schedule.every(every_minutes).minutes.do(self._wrapped_task, label, function)
+        self.tasks.append((label, function))
+
+    def _wrapped_task(self, label, func):
+        try:
+            result = func()
+            logging.info(f"[Task OK] {label} ➜ {result}")
+        except Exception as e:
+            logging.error(f"[Task ERR] {label}: {e}")
+
+    def start_loop(self):
+        def runner():
+            while True:
+                schedule.run_pending()
+                time.sleep(1)
+        threading.Thread(target=runner, daemon=True).start()
+
+## deployment/telemetry_monitor.py
+# deployment/telemetry_monitor.py
+
+"""
+Modulo: telemetry_monitor.py
+Descrizione: Telemetria di base per Mercurius∞. Traccia uptime, stato, log recenti.
+"""
+
+import os
+import time
+import platform
+import psutil
+from datetime import datetime
+
+
+class TelemetryMonitor:
+    def __init__(self):
+        self.start_time = time.time()
+
+    def get_uptime(self) -> str:
+        uptime_sec = time.time() - self.start_time
+        return str(datetime.timedelta(seconds=int(uptime_sec)))
+
+    def get_system_status(self) -> dict:
+        return {
+            "platform": platform.platform(),
+            "cpu_percent": psutil.cpu_percent(interval=1),
+            "memory": psutil.virtual_memory()._asdict(),
+            "disk": psutil.disk_usage("/")._asdict(),
+        }
+
+    def get_logs_tail(self, path: str, lines: int = 10) -> str:
+        if not os.path.exists(path):
+            return "[Nessun log trovato]"
+        with open(path, "r") as f:
+            return "\n".join(f.readlines()[-lines:])
+
+## docs/ARCHITECTURE.md
+
+## docs/USAGE_GUIDE.md
+
+## evolution/auto_updater.py
+# evolution/auto_updater.py
+
+"""
+Modulo: auto_updater.py
+Descrizione: Sistema di auto-evoluzione per Mercurius∞.
+Analizza contenuti scaricati, genera codice, verifica in sandbox e salva come nuovo modulo.
+"""
+
+import os
+from core.sandbox_executor import SandboxExecutor
+from evolution.web_scraper import WebScraper
+from memory.synaptic_log import SynapticLog
+import datetime
+
+
+class AutoUpdater:
+    def __init__(self):
+        self.scraper = WebScraper()
+        self.sandbox = SandboxExecutor()
+        self.logger = SynapticLog()
+
+    def evolve_from_url(self, url: str, save_dir: str = "modules/generated/") -> str:
+        """
+        Scarica un contenuto e tenta di generare codice eseguibile da esso.
+        """
+        os.makedirs(save_dir, exist_ok=True)
+        raw_html = self.scraper.get_text_from_url(url)
+        code_blocks = self.scraper.extract_code_blocks(raw_html)
+
+        generated_files = []
+        for i, code in enumerate(code_blocks):
+            if not self.sandbox.static_analysis(code):
+                continue
+
+            result = self.sandbox.run_sandboxed(code)
+            if result["success"]:
+                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                file_name = f"{save_dir}/evo_snippet_{i}_{timestamp}.py"
+                with open(file_name, "w") as f:
+                    f.write(code)
+                self.logger.log_event("AutoUpdater", "Generated", file_name)
+                generated_files.append(file_name)
+
+        return f"✅ {len(generated_files)} snippet salvati da {url}"
+
+## evolution/behavior_simulator.py
+# evolution/behavior_simulator.py
+
+"""
+Modulo: behavior_simulator.py
+Descrizione: Simula scenari comportamentali per Mercurius∞ e valuta le risposte.
+Utilizza la memoria episodica per registrare gli esiti.
+"""
+
+from typing import Dict
+from memory.episodic_memory import EpisodicMemory
+from memory.synaptic_log import SynapticLog
+
+
+class BehaviorSimulator:
+    def __init__(self):
+        self.memory = EpisodicMemory()
+        self.log = SynapticLog()
+
+    def simulate_behavior_scenario(self, scenario: Dict) -> None:
+        """
+        Simula un comportamento e registra l'episodio risultante.
+        """
+        context = scenario.get("context", "default_behavior_test")
+        user_input = scenario.get("stimulus", "Simulazione di risposta")
+        ai_response = scenario.get("expected_response", "Risposta AI simulata")
+
+        self.memory.record_episode(context, user_input, ai_response)
+        self.log.log_event("BehaviorSimulator", "Simulated Scenario", f"{context} -> {ai_response}")
+
+## evolution/logic_injector.py
+# evolution/logic_injector.py
+
+"""
+Modulo: logic_injector.py
+Descrizione: Inietta dinamicamente nuove funzioni o logiche all'interno di moduli Python di Mercurius∞.
+Include verifica della sintassi, esecuzione in sandbox e tracciamento tramite log sinaptico.
+"""
+
+import importlib
+import types
+import traceback
+
+from memory.synaptic_log import SynapticLog
+from core.sandbox_executor import SandboxExecutor
+
+
+class LogicInjector:
+    def __init__(self):
+        self.logger = SynapticLog()
+        self.sandbox = SandboxExecutor()
+
+    def inject_logic(self, module_name: str, function_code: str, function_name: str) -> bool:
+        """
+        Inietta una funzione in un modulo esistente, con controlli di sicurezza.
+
+        Args:
+            module_name (str): Nome del modulo Python (es. "core.executor")
+            function_code (str): Codice Python della funzione (come stringa)
+            function_name (str): Nome della funzione da iniettare
+        Returns:
+            bool: True se l'iniezione è riuscita, False altrimenti
+        """
+        try:
+            # Step 1: Verifica statica
+            if not self.verify_syntax(function_code):
+                self.logger.log_event("LogicInjector", "SyntaxError", "❌ Codice con sintassi errata.")
+                return False
+
+            # Step 2: Esecuzione sandboxata preventiva
+            sandbox_result = self.sandbox.run_sandboxed(function_code)
+            if not sandbox_result.get("success", False):
+                self.logger.log_event("LogicInjector", "SandboxFail", sandbox_result.get("output", "Nessun output"))
+                return False
+
+            # Step 3: Iniezione del codice
+            compiled_func = compile(function_code, "<injected_function>", "exec")
+            module = importlib.import_module(module_name)
+
+            exec_env = {}
+            exec(compiled_func, exec_env)
+
+            if function_name not in exec_env:
+                raise NameError(f"La funzione '{function_name}' non è stata trovata nel codice fornito.")
+
+            new_func = exec_env[function_name]
+
+            if not isinstance(new_func, types.FunctionType):
+                raise TypeError(f"L'oggetto '{function_name}' non è una funzione valida.")
+
+            setattr(module, function_name, new_func)
+            self.logger.log_event("LogicInjector", "InjectionSuccess", f"✅ Funzione {function_name} iniettata nel modulo {module_name}")
+            return True
+
+        except Exception:
+            self.logger.log_event("LogicInjector", "InjectionFailed", traceback.format_exc())
+            return False
+
+    def verify_syntax(self, code: str) -> bool:
+        """
+        Verifica se il codice fornito ha una sintassi valida.
+
+        Args:
+            code (str): Codice da verificare.
+        Returns:
+            bool: True se valido, False in caso di SyntaxError.
+        """
+        try:
+            compile(code, "<syntax_check>", "exec")
+            return True
+        except SyntaxError as e:
+            self.logger.log_event("LogicInjector", "SyntaxError", str(e))
+            return False
+
+    def test_injection(self, module_name: str, function_name: str, test_args: tuple = ()) -> str:
+        """
+        Testa una funzione precedentemente iniettata eseguendola.
+
+        Args:
+            module_name (str): Nome del modulo target
+            function_name (str): Nome della funzione da testare
+            test_args (tuple): Argomenti di test da passare alla funzione
+
+        Returns:
+            str: Output del test o errore catturato.
+        """
+        try:
+            module = importlib.import_module(module_name)
+            func = getattr(module, function_name)
+            result = func(*test_args)
+            return f"✅ Output della funzione: {result}"
+[TRONCATO]
+
+## evolution/neural_plasticity.py
+# evolution/neural_plasticity.py
+
+"""
+Modulo: neural_plasticity.py
+Descrizione: Simula la plasticità neurale rinforzando l'uso dei moduli più attivi nel sistema Mercurius∞.
+Aggiorna il log sinaptico e crea una mappa di rafforzamento.
+"""
+
+from memory.synaptic_log import SynapticLog
+from collections import defaultdict
+import json
+import os
+
+PLASTICITY_TRACKER = "data/plasticity_weights.json"
+
+
+class NeuralPlasticity:
+    def __init__(self):
+        self.log = SynapticLog()
+        self.weights = defaultdict(int)
+        self._load_weights()
+
+    def _load_weights(self):
+        if os.path.exists(PLASTICITY_TRACKER):
+            with open(PLASTICITY_TRACKER, "r") as f:
+                self.weights.update(json.load(f))
+
+    def _save_weights(self):
+        with open(PLASTICITY_TRACKER, "w") as f:
+            json.dump(self.weights, f, indent=2)
+
+    def reinforce_module_usage(self, module_name: str):
+        self.weights[module_name] += 1
+        self._save_weights()
+        self.log.log_event("NeuralPlasticity", "Reinforced", f"{module_name}: {self.weights[module_name]}")
+
+## evolution/open_evolve.py
+class OpenEvolve:
+    def __init__(self):
+        self.name = "OpenEvolve"
+
+    def evolve(self, population: list, generations: int = 10) -> list:
+        return [f"{indiv}_gen{generations}" for indiv in population]
+
+## evolution/openalpha_evolve.py
+class OpenAlphaEvolve:
+    def __init__(self):
+        self.name = "OpenAlphaEvolve"
+
+    def simulate_strategy(self, context: dict) -> str:
+        return f"[{self.name}] Strategia simulata con successo in contesto: {context}"
+
+## evolution/pwb_alphaevolve.py
+class PWBAlphaEvolve:
+    def __init__(self):
+        self.name = "PWB-AlphaEvolve"
+
+    def evolve_strategy(self, data: list, constraints: dict = {}) -> str:
+        return f"[{self.name}] Strategia evoluta su {len(data)} dati con vincoli {constraints}"
+
+## evolution/web_scraper.py
+# evolution/web_scraper.py
+
+"""
+Modulo: web_scraper.py
+Descrizione: Sistema di acquisizione automatica per l’auto-evoluzione di Mercurius∞.
+Scarica, estrae e indicizza contenuti testuali e di codice da pagine web, GitHub e documentazione.
+"""
+
+import requests
+from bs4 import BeautifulSoup
+from typing import List
+
+
+class WebScraper:
+    def __init__(self, user_agent: str = "MercuriusBot/1.0"):
+        self.headers = {"User-Agent": user_agent}
+
+    def get_text_from_url(self, url: str) -> str:
+        """
+        Scarica testo leggibile da una pagina web.
+        """
+        try:
+            response = requests.get(url, headers=self.headers, timeout=10)
+            if response.status_code != 200:
+                return f"[Errore HTTP {response.status_code}]"
+
+            soup = BeautifulSoup(response.text, "html.parser")
+            texts = [p.get_text() for p in soup.find_all(["p", "pre", "code", "li"])]
+            return "\n".join(texts).strip()
+
+        except Exception as e:
+            return f"[Errore scraping]: {e}"
+
+    def extract_code_blocks(self, html_text: str) -> List[str]:
+        """
+        Estrae blocchi <code> o <pre> come frammenti di codice.
+        """
+        soup = BeautifulSoup(html_text, "html.parser")
+        code_blocks = soup.find_all(["code", "pre"])
+        return [block.get_text() for block in code_blocks if block.get_text()]
+
+## exports/README.txt
+🧠 Mercurius∞ – Builder Esegubile Desktop
+
+▶ Per creare la versione installabile dell'interfaccia grafica:
+
+1. Installa PyInstaller (se non già presente):
+   pip install pyinstaller
+
+2. Avvia il processo build:
+
+   - Windows:
+     build_win.bat
+
+   - macOS/Linux:
+     bash build_mac.sh
+
+▶ Output:
+Troverai l'eseguibile finale in: dist/MercuriusGUI(.exe)
+
+📎 Requisiti:
+- Python 3.9+
+- dashboard.py funzionante
+- Icona in /exports/icon/
+
+## exports/build_dashboard.py
+# build_dashboard.py
+"""
+Script: build_dashboard.py
+Uso: genera un eseguibile standalone per il modulo dashboard.py
+"""
+
+import os
+
+ENTRY = "dashboard.py"
+ICON = "icon/icon.ico"
+
+os.system(f"pyinstaller --onefile --windowed --icon={ICON} --name=MercuriusGUI {ENTRY}")
+
+## generated_agents/ApprendimentoGenericoAgent.py
+"""
+Agente auto-generato basato sul concetto: apprendimento generico – Modello: rete neurale generativa multi-scopo.
+"""
+from modules.ai_kernel.agent_core import AgentCore
+
+class ApprendimentoGenericoAgent(AgentCore):
+    def __init__(self):
+        super().__init__(name="ApprendimentoGenericoAgent")
+        # Inizializzazione aggiuntiva basata sul concetto estratto (se necessaria)
+
+    def think(self, input_data):
+        # Metodo di esempio che utilizza il concetto appreso
+        print(f"🧠 {self.name} applica il concetto di apprendimento generico all'input fornito.")
+        return "Insight basato su rete neurale generativa multi-scopo"
+
+## generated_agents/__init__.py
+# Inizializzazione agenti generati
+
+## genesis_core/autogpt_bridge.py
+import subprocess
+import os
+
+def run_autogpt(task_prompt: str):
+    os.chdir("AutoGPT")
+    with open("input.txt", "w") as f:
+        f.write(task_prompt)
+
+    result = subprocess.run(["python", "-m", "autogpt"], capture_output=True, text=True)
+    return result.stdout
+
+## installer/package_builder.py
+# installer/package_builder.py
+
+"""
+Modulo: package_builder.py
+Descrizione: Creazione automatica di eseguibili desktop Mercurius∞ per Windows, Linux, Mac.
+"""
+
+import os
+import subprocess
+from datetime import datetime
+
+class PackageBuilder:
+    def __init__(self, exports_dir="exports/"):
+        self.exports_dir = exports_dir
+        os.makedirs(exports_dir, exist_ok=True)
+
+    def build_windows_exe(self, entry_script: str, icon: str = None):
+        cmd = [
+            "pyinstaller", "--onefile", "--noconsole", entry_script,
+            "--distpath", self.exports_dir,
+            "--name", "Mercurius"
+        ]
+        if icon:
+            cmd += ["--icon", icon]
+        self._run(cmd, "windows")
+
+    def build_linux_sh(self, entry_script: str):
+        output_file = os.path.join(self.exports_dir, "mercurius.sh")
+        with open(output_file, "w") as f:
+            f.write(f"#!/bin/bash\npython3 {entry_script}")
+        os.chmod(output_file, 0o755)
+        self._log_build("linux", output_file)
+
+    def build_mac_app(self, entry_script: str):
+        app_path = os.path.join(self.exports_dir, "Mercurius.app")
+        os.makedirs(app_path, exist_ok=True)
+        os.symlink(entry_script, os.path.join(app_path, "Mercurius"))
+        self._log_build("mac", app_path)
+
+    def _run(self, cmd, platform: str):
+        try:
+            subprocess.run(cmd, check=True)
+            self._log_build(platform, self.exports_dir)
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Errore durante build {platform}: {e}")
+
+    def _log_build(self, platform: str, path: str):
+        log_path = os.path.join(self.exports_dir, "README.txt")
+        with open(log_path, "a") as f:
+            f.write(f"[{datetime.now().isoformat()}] Build completata ({platform}): {path}\n")
+
+## integrations/README.md
+# 🌐 Integration – Interoperabilità
+
+Modulo per connettività con ambienti esterni: GitHub, Colab, sistema operativo.
+
+## Contenuto
+
+- `github_sync.py`
+- `colab_linker.py`
+- `system_control.py`
+
+## Obiettivo
+
+Gestire flussi DevOps, sincronizzazioni remote e automazioni locali.
+
+## integrations/__init__.py
+
+## integrations/bridge_josch.py
+"""bridge_josch.py
+===================
+Interfaccia FastAPI per comunicare con il sistema "Josh" (alias JOSCH).
+
+Il modulo espone un piccolo server FastAPI che consente l'esecuzione remota
+di comandi su un sistema esterno e fornisce inoltre la funzione
+``send_command_to_pc`` da utilizzare all'interno di Mercurius∞ per inviare
+comandi al bridge.
+"""
+
+import requests
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import subprocess
+import uvicorn
+import time
+
+app = FastAPI(title="JOSCH Bridge")
+start_time = time.time()
+
+
+class CommandRequest(BaseModel):
+    command: str
+    mode: str = "cmd"  # cmd | powershell | python
+
+
+@app.get("/ping")
+def ping():
+    return {"status": "online", "uptime": f"{int(time.time() - start_time)}s"}
+
+
+@app.post("/cmd")
+def run_command(req: CommandRequest):
+    try:
+        if req.mode == "cmd":
+            result = subprocess.run(req.command, shell=True, capture_output=True, text=True)
+        elif req.mode == "powershell":
+            result = subprocess.run(["powershell", "-Command", req.command], capture_output=True, text=True)
+        elif req.mode == "python":
+            result = subprocess.run(["python", "-c", req.command], capture_output=True, text=True)
+        else:
+            raise HTTPException(status_code=400, detail="Invalid mode specified")
+
+        return {
+            "returncode": result.returncode,
+            "stdout": result.stdout.strip(),
+            "stderr": result.stderr.strip(),
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def send_command_to_pc(command: str, mode: str = "cmd", base_url: str = "http://localhost:3020") -> dict:
+    """Invia un comando al bridge JOSCH e restituisce la risposta JSON."""
+    try:
+        res = requests.post(
+            f"{base_url}/cmd",
+            json={"command": command, "mode": mode},
+            timeout=5,
+        )
+        if res.status_code == 200:
+            return res.json()
+        return {"error": res.text, "status": res.status_code}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+def start_bridge(host="0.0.0.0", port=3020):
+    uvicorn.run(app, host=host, port=port)
+
+
+if __name__ == "__main__":
+    start_bridge()
+
+## integrations/colab_linker.py
+class ColabLinker:
+    def __init__(self):
+        self.name = "ColabLinker"
+
+    def send_code(self, module: str):
+        return f"[{self.name}] Modulo {module} inviato a Colab"
+
+## integrations/finviz_connector.py
+"""
+finviz_connector.py
+===================
+Scraping dei fondamentali e notizie da Finviz per Mercurius∞.
+"""
+
+import requests
+from bs4 import BeautifulSoup
+
+
+class FinvizConnector:
+    def __init__(self):
+        self.base = "https://finviz.com/quote.ashx?t="
+
+    def fetch(self, symbol):
+        url = self.base + symbol
+        headers = {"User-Agent": "Mozilla/5.0"}
+        soup = BeautifulSoup(requests.get(url, headers=headers).text, "html.parser")
+        data = {}
+        for row in soup.select("table.snapshot-table2 tr"):
+            cells = row.find_all("td")
+            for i in range(0, len(cells), 2):
+                if i+1 < len(cells):
+                    key = cells[i].text.strip()
+                    val = cells[i+1].text.strip()
+                    data[key] = val
+        return data
+
+## integrations/system_control.py
+class SystemControl:
+    def __init__(self):
+        self.name = "SystemControl"
+
+    def execute(self, system_command: str) -> str:
+        return f"[{self.name}] Comando eseguito: {system_command}"
+
+## integrations/tradingview_feed.py
+"""
+tradingview_feed.py
+===================
+Feed di dati simulato compatibile con layout TradingView. Simula ticker in tempo reale.
+"""
+
+import random
+import time
+from threading import Thread
+
+class TradingViewFeed:
+    def __init__(self, symbols, callback=None, interval=1.0):
+        self.symbols = symbols
+        self.interval = interval
+        self.callback = callback
+        self.running = False
+
+    def _generate_tick(self, symbol):
+        price = round(random.uniform(100, 500), 2)
+        volume = random.randint(1000, 10000)
+        return {
+            "symbol": symbol,
+            "price": price,
+            "volume": volume,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+    def _run_feed(self):
+        while self.running:
+            for symbol in self.symbols:
+                tick = self._generate_tick(symbol)
+                if self.callback:
+                    self.callback(tick)
+            time.sleep(self.interval)
+
+    def start(self):
+        self.running = True
+        Thread(target=self._run_feed, daemon=True).start()
+
+    def stop(self):
+        self.running = False
+
+## integrations/agenda/__init__.py
+
+## integrations/agenda/agenda_manager.py
+# integrations/agenda/agenda_manager.py
+"""
+Modulo: agenda_manager.py
+Descrizione: Gestione eventi calendario (Google Calendar oppure ICS locale).
+• crea_evento
+• lista_eventi
+• elimina_evento
+"""
+
+import os
+from datetime import datetime, timedelta
+from pathlib import Path
+import json
+
+ICS_FILE = Path("integrations/agenda/local_calendar.json")  # fallback JSON
+
+class AgendaManager:
+    def __init__(self):
+        self._load_local()
+
+    # ---------- API Calendario ----------
+    def crea_evento(self, titolo: str, start: datetime, end: datetime | None = None):
+        event = {
+            "id": len(self._events) + 1,
+            "title": titolo,
+            "start": start.isoformat(),
+            "end": (end or start + timedelta(hours=1)).isoformat(),
+        }
+        self._events.append(event)
+        self._save_local()
+        return event
+
+    def lista_eventi(self, date: datetime | None = None):
+        if date:
+            return [e for e in self._events if e["start"].startswith(date.date().isoformat())]
+        return self._events
+
+    def elimina_evento(self, event_id: int):
+        self._events = [e for e in self._events if e["id"] != event_id]
+        self._save_local()
+
+    # ---------- interno ----------
+    def _load_local(self):
+        if ICS_FILE.exists():
+            self._events = json.loads(ICS_FILE.read_text(encoding="utf-8"))
+        else:
+            self._events = []
+
+    def _save_local(self):
+        ICS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        ICS_FILE.write_text(json.dumps(self._events, indent=2), encoding="utf-8")
+
+## integrations/smart_home/__init__.py
+
+## integrations/smart_home/home_assistant_bridge.py
+# integrations/smart_home/home_assistant_bridge.py
+"""
+Modulo: home_assistant_bridge.py
+Descrizione: Controlla dispositivi Home Assistant via REST API.
+"""
+
+import os
+import requests
+
+HASS_URL = os.getenv("HASS_URL", "http://localhost:8123")
+HASS_TOKEN = os.getenv("HASS_TOKEN", "")
+
+HEADERS = {"Authorization": f"Bearer {HASS_TOKEN}", "Content-Type": "application/json"}
+
+class HomeAssistantBridge:
+    def call_service(self, domain: str, service: str, data: dict):
+        url = f"{HASS_URL}/api/services/{domain}/{service}"
+        r = requests.post(url, json=data, headers=HEADERS, timeout=5)
+        return r.ok
+
+    # esempi pratici
+    def turn_on_light(self, entity_id: str):
+        return self.call_service("light", "turn_on", {"entity_id": entity_id})
+
+    def set_temperature(self, entity_id: str, temp: float):
+        return self.call_service("climate", "set_temperature",
+                                 {"entity_id": entity_id, "temperature": temp})
+
+## interface/dashboard_stub.py
+# interface/dashboard.py
+
+"""
+Mercurius∞ – Interfaccia Dashboard Unificata (CLI + Streamlit)
+Autore: Mercurius Dev AI
+Funzioni:
+- KPI dinamici (CLI & GUI)
+- Drag-and-drop file multimediali
+- URL input (YouTube, PDF, Immagini, Web)
+- OCR, Parser, Video Analyzer
+"""
+
+import streamlit as st
+import tempfile
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from learning.video_learner import extract_insights_from_video
+from learning.document_parser import parse_document
+from vision.ocr_module import extract_text_from_image
+
+# ─── Configurazione Base ───────────────────────────────────────────────────────
+st.set_page_config(page_title="Mercurius∞ Dashboard", layout="wide")
+st.title("🧠 Mercurius∞ Dashboard – Centro di Controllo")
+
+if "kpi" not in st.session_state:
+    st.session_state["kpi"] = {}
+if "result" not in st.session_state:
+    st.session_state["result"] = ""
+
+# ─── KPI View ──────────────────────────────────────────────────────────────────
+with st.sidebar:
+    st.header("📊 KPI & Stato")
+    for k, v in st.session_state["kpi"].items():
+        st.text(f"{k}: {v}")
+
+# ─── Tab ───────────────────────────────────────────────────────────────────────
+tab1, tab2 = st.tabs(["🌐 Input Multicanale", "📖 Output / Risultati"])
+
+# ─── Tab 1: Input ──────────────────────────────────────────────────────────────
+with tab1:
+    st.subheader("🔗 Inserisci un URL (YouTube, pagina, documento)")
+    url = st.text_input("📎 URL:")
+    if url:
+        st.info("📺 Estrazione in corso da URL...")
+        try:
+            output = extract_insights_from_video(url)
+            st.session_state["result"] = output
+            st.session_state["kpi"]["URL Status"] = "✅ Elaborato"
+        except Exception as e:
+            st.session_state["result"] = f"Errore: {e}"
+            st.session_state["kpi"]["URL Status"] = "❌ Errore"
+
+    st.subheader("📁 Trascina un file (PDF, Immagine, Video)")
+    uploaded_file = st.file_uploader("Drag & Drop / Seleziona file", type=["pdf", "jpg", "jpeg", "png", "mp4", "mov"])
+
+    if uploaded_file is not None:
+        suffix = os.path.splitext(uploaded_file.name)[1].lower()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            tmp.write(uploaded_file.getvalue())
+            filepath = tmp.name
+
+        st.success(f"📂 File ricevuto: {uploaded_file.name}")
+        result = None
+
+        try:
+            if suffix == ".pdf":
+                st.info("📑 Analisi PDF...")
+                result = parse_document(filepath)
+            elif suffix in [".jpg", ".jpeg", ".png"]:
+                st.info("🖼️ OCR Immagine...")
+                result = extract_text_from_image(filepath)
+            elif suffix in [".mp4", ".mov"]:
+                st.warning("🎞️ Supporto video locale in sviluppo. Usa un URL YouTube.")
+            else:
+                st.error("⚠️ Tipo di file non supportato.")
+
+            if result:
+                st.session_state["result"] = result
+                st.session_state["kpi"]["File Status"] = "✅ Elaborato"
+        except Exception as e:
