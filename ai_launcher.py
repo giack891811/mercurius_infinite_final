@@ -40,6 +40,12 @@ def ensure_ai_online():
     launch_service("AZR", "http://localhost:4010/introspect", ["python", "agents/azr_server.py"], delay=2)
     launch_service("JOSCH", "http://localhost:3020/ping", ["python", "integrations/bridge_josch.py"], delay=2)
     launch_service("n8n", "http://localhost:5678", ["n8n", "start"], delay=4)
+    try:
+        from trading.tv_watcher import start_watcher
+        start_watcher()
+        logger.info("tv_watcher avviato")
+    except Exception as exc:
+        logger.error(f"tv_watcher non avviato: {exc}")
 
 if __name__ == "__main__":
     ensure_ai_online()
