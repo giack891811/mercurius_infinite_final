@@ -30,3 +30,13 @@ memory/*
 
 # ⚙️ Config - ignora file specifici ma non l'intera cartella
 config/llm_config.yaml
+# Exclude temporary/duplicated directories
+markdown/
+Copia/
+Modifica/
+venv-mercurius/
+
+# Ignore binary artifacts
+*.dll
+*.exe
+*.so
