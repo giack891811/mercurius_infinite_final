@@ -1,0 +1,921 @@
+commit 2d0a9cb15144079cb797540484a248ea80d59caf
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Mon Jun 9 12:21:28 2025 +0200
+
+    � Rimuove file non ignorati correttamente (venv, .dll, .exe)
+
+commit 38116c1619ab3d8b1e4320b7075e4ea1fdad5c43
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Mon Jun 9 12:08:40 2025 +0200
+
+    .
+
+commit 0b885882f0d332e43dfdb58071992b48181fc657
+Merge: 74b03d0c 9190c7ee
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Mon Jun 9 10:15:32 2025 +0200
+
+    Merge branch 'main' of https://github.com/giack891811/mercurius_infinite_final
+
+commit 9190c7ee6ac1982805c8d7603fce64809f057b3e
+Merge: fad82faf e4b6591c
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Mon Jun 9 10:09:35 2025 +0200
+
+    Merge pull request #27 from giack891811/codex/automatizzare-avvio-e-monitoraggio-servizi-critici
+    
+    Enable TradingView hook and auto service startup
+
+commit e4b6591c22bdebd2f12dda5492e301c317bd9fa7
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Mon Jun 9 10:09:20 2025 +0200
+
+    Add TradingView integration and service launcher
+
+commit 74b03d0c3dfd518bb00e38989c27d7aa01b77d6c
+Merge: 98b2a1b4 fad82faf
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Mon Jun 9 10:04:15 2025 +0200
+
+    Merge .gitignore – combined HEAD and incoming rules
+
+commit fad82fafde7a5b172e29ec0bd4a8f6b63d120520
+Merge: aaa93868 b1ac6d67
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Mon Jun 9 09:56:13 2025 +0200
+
+    Merge pull request #26 from giack891811/codex/correggi-orchestrator.load_agents-e-config.yaml
+    
+    Maintain config and service start-up
+
+commit b1ac6d677abaa1cd0545b5376b1cd9a331917029
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Mon Jun 9 09:50:01 2025 +0200
+
+    Update gitignore for runtime artifacts
+
+commit 98b2a1b4e32399d41bb55f677b709f1ee961b93e
+Merge: b894e6d2 aaa93868
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Mon Jun 9 09:29:29 2025 +0200
+
+    Merge branch 'main' of https://github.com/giack891811/mercurius_infinite_final
+
+commit b894e6d21a90732c444e2280d3f4598c895f23d0
+Merge: 1eded73d e0b0809d
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Mon Jun 9 09:29:11 2025 +0200
+
+    .
+
+commit aaa93868eb6f542a0a85a5154c57a423a3cd8fdf
+Merge: e0b0809d ed0a2cf7
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Mon Jun 9 09:25:21 2025 +0200
+
+    Merge pull request #25 from giack891811/codex/verifica-persistenza-mercurius-e-loop-continuo
+    
+    Ensure persistent boot and optional dependencies
+
+commit ed0a2cf7b83733d3c04495997cd3a2ae031e995c
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Mon Jun 9 09:25:00 2025 +0200
+
+    Improve persistence and optional dependencies
+
+commit e0b0809d9531840ab04de301404fe5db9c5386a2
+Merge: 93789df0 a1ceff4b
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Mon Jun 9 09:14:13 2025 +0200
+
+    Merge pull request #24 from giack891811/codex/verifica-e-correzione-avvio-persistente-mercurius∞
+    
+    Fix AION boot persistence
+
+commit a1ceff4b07b8fd3843e316e59c2ffe79f976b2c6
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Mon Jun 9 09:06:45 2025 +0200
+
+    fix: keep AION boot process alive
+
+commit 1eded73d44f7f7e66f79b0bbb0391cd7b8948c15
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Mon Jun 9 08:45:59 2025 +0200
+
+    Aggiorna .gitignore per escludere venv e file pesanti
+
+commit 4feeb7bc26e1f0b826fa63839c0792495c1345ef
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Mon Jun 9 08:26:37 2025 +0200
+
+    .
+
+commit 35b8949083910a16392f1f1a5d3233fa91338ecf
+Merge: 95f1059f 93789df0
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Mon Jun 9 07:26:02 2025 +0200
+
+    Merge branch 'main' of https://github.com/giack891811/mercurius_infinite_final
+
+commit 93789df05f54478681cfc2336b0baab1ca865528
+Merge: 46628a8b d039f146
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Mon Jun 9 07:24:34 2025 +0200
+
+    Merge pull request #23 from giack891811/codex/fix-orchestrazione-e-configurazione-genesis
+    
+    Fix Genesis bootstrap and agent loading
+
+commit d039f146859f371c3f252e75ec7c51e2e610b1ba
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Mon Jun 9 07:24:09 2025 +0200
+
+    Fix agent loader and add bootstrap script
+
+commit 95f1059f882e7c7181397a64aa18b138f1d0b176
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 8 22:01:07 2025 +0200
+
+    .
+
+commit 46628a8bc25cdc3d7ef6f347eb9a63897267b731
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 8 20:31:57 2025 +0200
+
+    .
+
+commit 80f5de8db70bfa0f2be6e968b8f3258c705e1261
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 8 10:12:32 2025 +0200
+
+    .
+
+commit c9e260705f310480a148201dddb8e2bd8b460d62
+Merge: 606d6e7d 98663dc0
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Sat Jun 7 17:14:57 2025 +0200
+
+    Merge pull request #22 from giack891811/codex/splitta-e-aggiorna-file-project_tree
+    
+    Add dynamic project tree splitting and update hooks
+
+commit 98663dc0c03459fbcdda01557ebe8b0191b0b4b9
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Sat Jun 7 17:09:22 2025 +0200
+
+    Add project tree splitting and update hooks
+
+commit 606d6e7d284a7602ae4995331a6eebefc63e13b6
+Merge: 8569312e 1503a5d2
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Sat Jun 7 15:55:55 2025 +0200
+
+    Merge pull request #21 from giack891811/codex/aggiorna-requirements.txt-e-test-automatici
+    
+    Add tests and update coverage utility
+
+commit 1503a5d279c494468dc46c745f2e2c4393376bbe
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Sat Jun 7 15:55:38 2025 +0200
+
+    Update coverage script with warnings
+
+commit 8569312e759e3110063c9e6c42bc9f2ba0d9a5a9
+Merge: b4357598 4dbb98ae
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Sat Jun 7 15:46:35 2025 +0200
+
+    Merge pull request #20 from giack891811/codex/crea-codice-completo-per-sistema-mercurius∞
+    
+    Implement logging and add coverage report
+
+commit 4dbb98ae50bb08404eade6ed03ed19177ee8d27d
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Sat Jun 7 15:43:59 2025 +0200
+
+    Add logging and coverage reporting
+
+commit b43575987dd40a76886906610678fabf0df0b82c
+Merge: 3bde82e3 6f8106b1
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Sat Jun 7 12:20:15 2025 +0200
+
+    Merge pull request #19 from giack891811/codex/crea-script-python-e-git-hook-pre-commit
+    
+    Add project tree updater and git hook
+
+commit 6f8106b1225957671047f8ec7e12d942c58f5354
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Sat Jun 7 12:18:36 2025 +0200
+
+    Add project tree updater and pre-commit hook
+
+commit 3bde82e33545499b39de0b3843eea7d1f5a6a14b
+Merge: 1c7f2d5b ed083de2
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Fri Jun 6 21:59:47 2025 +0200
+
+    Merge pull request #18 from giack891811/codex/realizza-sistema-automatico-per-aggiornamento-file
+    
+    Add project tree prompt automation
+
+commit ed083de2538add0a4643278989ec78df6a5ad642
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Fri Jun 6 21:58:53 2025 +0200
+
+    Add automated project tree and prompt scripts
+
+commit 1c7f2d5b9ebc2f341218ab42292cba1b6c662d32
+Merge: 03a3782a 00503a33
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Fri Jun 6 20:22:32 2025 +0200
+
+    Merge pull request #17 from giack891811/codex/integra-moduli-per-sistema-mercurius
+    
+    Add messaging layer and Josh bridge
+
+commit 00503a3352fd772dee8169860ffbd55c5466f687
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Fri Jun 6 20:22:01 2025 +0200
+
+    Add messaging module and Josh connector
+
+commit 03a3782af810d8bb4f656760c5531c865c6334d7
+Merge: 671e6626 6e08d0f0
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Fri Jun 6 13:54:35 2025 +0200
+
+    Merge pull request #16 from giack891811/codex/controlla-e-migliora-il-sistema-mercurius
+    
+    Add control scripts and tests
+
+commit 6e08d0f01dd3bf4b2812eaf13e501c89e9ce7ea0
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Fri Jun 6 13:54:13 2025 +0200
+
+    Add control scripts and basic tests
+
+commit 671e6626cca4a8d482f0fdd1469d4732940835f5
+Merge: d8833456 c2f916a3
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Fri Jun 6 12:22:10 2025 +0200
+
+    Merge pull request #15 from giack891811/codex/integra-gpt_engineer-in-mercurius∞
+    
+    Integrate strategic brain with GPT-Engineer
+
+commit c2f916a38b0abb7d1badc3a1b12c2b10287dec35
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Fri Jun 6 12:21:46 2025 +0200
+
+    Add StrategicBrain module with GPT-Engineer integration
+
+commit d8833456354a915c119bebe2326f8f521b3832c8
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Thu Jun 5 21:28:53 2025 +0200
+
+    .
+
+commit 14eb3313bb0b3b6d3d3f4625fadeefa463249b63
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Thu Jun 5 20:38:06 2025 +0200
+
+    .
+
+commit 151c3bd2faf41c581b615010dfc2a29b1e13a60f
+Merge: 88d6a566 55f62da3
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 20:10:22 2025 +0200
+
+    Merge pull request #14 from giack891811/codex/configurare-e-avviare-i-servizi-mercurius∞
+    
+    Add service launcher script improvements
+
+commit 55f62da31be2708133646fe71c4054d2cc665942
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 20:09:58 2025 +0200
+
+    Add service launcher with logging
+
+commit 88d6a56617c8ed1b37d087c1e23c34a53d9163f1
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Thu Jun 5 20:04:35 2025 +0200
+
+    .
+
+commit 5f100ce6ef949357360f41d5ad41a269f654fd84
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Thu Jun 5 19:39:46 2025 +0200
+
+    .
+
+commit 051b8ff639d595c4bd0bbca9284ceb24440df1bd
+Merge: 7b38113d 8d3d6209
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 19:33:56 2025 +0200
+
+    Merge pull request #13 from giack891811/codex/genera-moduli-reasoner_dispatcher-e-codex_cli
+    
+    Add reasoner dispatcher and codex CLI modules
+
+commit 8d3d62095e3d2cc0e758f88d31d46ed2cc2e5c34
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 19:33:36 2025 +0200
+
+    Add reasoner dispatcher and codex CLI modules
+
+commit 7b38113d261f1fc6a3bc4f6101331f5711490f62
+Merge: 6de442c2 62db5641
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Thu Jun 5 19:20:30 2025 +0200
+
+    Merge branch 'main' of https://github.com/giack891811/mercurius_infinite_final
+
+commit 6de442c2ff37b6a76bdfab18f51996f7c0493889
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Thu Jun 5 19:14:09 2025 +0200
+
+    .
+
+commit 62db5641464ea6b2f5604d7bf8dbb6de12a109c9
+Merge: d91bcd01 13858a71
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 19:11:45 2025 +0200
+
+    Merge pull request #12 from giack891811/codex/integrare-mercurius∞-con-josch-locale
+    
+    Implement JOSCH bridge with multisensor sensors
+
+commit 13858a71c97ea4a67c53fcc84d756662dc9e9ec6
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 19:11:18 2025 +0200
+
+    Add JOSCH bridge and sensor hub
+
+commit d91bcd01b7aaa1863f8a4ef633e4cc0212e20d61
+Merge: db73b8d9 ce0baab9
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 18:09:35 2025 +0200
+
+    Merge pull request #11 from giack891811/codex/transform-mercurius-into-self-evolving-ai-platform
+    
+    Add self-evolving Mission Controller
+
+commit ce0baab9e04cf6e921c1398f8bf192b6fa32358d
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 18:03:03 2025 +0200
+
+    Add mission controller and GUI
+
+commit db73b8d92ca5776005ff723559af9564e2006ad0
+Merge: 07d4f424 e9655434
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 17:26:33 2025 +0200
+
+    Merge pull request #10 from giack891811/codex/audit-e-fix-del-progetto-mercurius∞
+    
+    Fix speech fallback and add goal utilities
+
+commit e965543422d10ab41e284e3eebb73225d5736853
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 17:26:04 2025 +0200
+
+    Fix speech fallback and goal manager methods
+
+commit 07d4f424a5e0e561618c92455760ed0bfb2c911b
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Thu Jun 5 16:46:49 2025 +0200
+
+    .
+
+commit e0d326eb068b9a95ab709ab57faa3a7139e6829a
+Merge: fde450fb 93859611
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 16:13:50 2025 +0200
+
+    Merge pull request #9 from giack891811/bpcmzh-codex/analizzare-e-correggere-errori-in-codice
+    
+    Fix imports and syntax
+
+commit 9385961141d1c55576007343d6f025ad457242ec
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Thu Jun 5 16:13:34 2025 +0200
+
+    Fix syntax and remove unused imports
+
+commit fde450fb591c8fe5a9282c7a766c2875ac7b5d02
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Thu Jun 5 16:03:10 2025 +0200
+
+    .
+
+commit 28dc05ddbe3fe41baa54e0961ea843b1fbb3a00c
+Merge: cdc8936d 9f399b67
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 19:52:08 2025 +0200
+
+    Merge pull request #8 from giack891811/codex/crea-app-flutter-per-aion-con-integrazione-ai
+    
+    Implement Aion API and enhance mobile UI
+
+commit 9f399b678cbdaa89e9f82e869cd9cb18e604359b
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 19:51:30 2025 +0200
+
+    Add Aion API server and update mobile UI
+
+commit cdc8936d701d3b562f49cf3cc4fdfdae0540c899
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Wed Jun 4 18:32:10 2025 +0200
+
+    .
+
+commit 1d87a7a0f4fd2744f8400e7194850609b28df72c
+Merge: c0dfe42b 80fc37b8
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 17:01:18 2025 +0200
+
+    Merge pull request #7 from giack891811/codex/crea-app-flutter-android-jarvis-like
+    
+    Add mobile Flutter UI skeleton
+
+commit 80fc37b84bbf5f8229fc8b79d45b5d1c4526ef1e
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 17:00:06 2025 +0200
+
+    Add Flutter mobile UI skeleton and integration
+
+commit c0dfe42b5cab34847ea814b124c5bd58dbfa7d0a
+Merge: e11d1085 4abb5481
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 16:06:24 2025 +0200
+
+    Merge pull request #6 from giack891811/codex/aggiungi-analisi-dispositivi-e-report-ricerche
+    
+    Implement network search analysis
+
+commit e11d1085d59b85322fc8337016fead487c327e95
+Merge: f299c6ed 829e3024
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 16:06:02 2025 +0200
+
+    Merge pull request #5 from giack891811/codex/crea-modulo-thinking_loop-e-interfaccia-mobile
+    
+    Add thinking loop core and mobile HUD
+
+commit 4abb548118e4a389c8685f384d5b5afe3f30df19
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 16:05:04 2025 +0200
+
+    Add network analyzer module and update requirements
+
+commit 829e3024d322a7fab1030d64300bdb1383cbed40
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 15:55:22 2025 +0200
+
+    feat: add thinking loop and mobile hud
+
+commit f299c6ed981563b6b0d62f3c7df93112605e5412
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Wed Jun 4 15:43:32 2025 +0200
+
+    .
+
+commit cc6c7652e3a822723f74842cc9e0d791d314c415
+Merge: 0f8b866a f844d0b0
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Wed Jun 4 15:32:40 2025 +0200
+
+    ✅ Merge aggiornamento da Codex – AION JARVIS Mode
+
+commit 0f8b866acca4a768aa1ceb48f521008b26eeccf7
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Wed Jun 4 15:32:28 2025 +0200
+
+    .
+
+commit f844d0b056d5b05b717781a09f794deb58a5b39f
+Merge: 1ac88bae 42840d0f
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 15:31:24 2025 +0200
+
+    Merge pull request #4 from giack891811/codex/crea-modulo-note10_jarvis_bridge.py
+    
+    Add Note10 Jarvis bridge module
+
+commit 42840d0fa177e81466bbbe4429c38a2c00a9042b
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 15:28:03 2025 +0200
+
+    Add Note10 Jarvis voice bridge
+
+commit 1ac88baecd627a5087599b3850b428c779f09374
+Merge: c717211e fe1bd9db
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 14:56:46 2025 +0200
+
+    Merge pull request #3 from giack891811/codex/complete-and-integrate-missing-modules-in-mercurius-project
+    
+    Enable GENESIS features
+
+commit fe1bd9db1d8843021436fe40b41658c2a880c965
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 14:55:12 2025 +0200
+
+    Add GENESIS modules and voice loop
+
+commit c717211e07232ae39fdf8ad94e7c05e1058983ba
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Wed Jun 4 14:16:45 2025 +0200
+
+    .
+
+commit 2e74ebb74f7af6bae82a1d6f145329304bdf1a42
+Merge: 6e43feb8 4742edcb
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 13:41:36 2025 +0200
+
+    Merge pull request #1 from giack891811/codex/aggiornare-aion-per-modalità-jarvis-like
+    
+    Update modules and tests for AION
+
+commit 6e43feb85f428879ce4dbd93a3c82bc76a6ab9b2
+Merge: c35974d5 db549757
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 13:41:00 2025 +0200
+
+    Merge pull request #2 from giack891811/codex/esegui-bootstrap-script-e-completa-moduli
+    
+    Implement orchestrator utilities for bootstrap script
+
+commit db549757539d76494c27a379de61a33fa1d75e25
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 13:34:25 2025 +0200
+
+    Fix bootstrap_codex and add orchestration methods
+
+commit 4742edcbe6701a5f87d9469baac1d9af0e5a4e11
+Author: giack891811 <germagiacomo2@gmail.com>
+Date:   Wed Jun 4 13:15:44 2025 +0200
+
+    Fix controller init, clean tests and docs
+
+commit c35974d52c647fbea760aadde028396397209343
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Wed Jun 4 12:42:33 2025 +0200
+
+    .
+
+commit 8cc8f7de151057cc11e798082f6a5314f158fa8b
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Wed Jun 4 12:42:07 2025 +0200
+
+    ✨ Bootstrap Codex iniziale per avvio Mercurius∞
+
+commit 92670b6422489a439fa7e6e9c4a47cdaa4aef3e1
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 14:49:17 2025 +0200
+
+    .
+
+commit 51b1f248649a1e9a77aa72e2259915028bcff4e0
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 13:06:06 2025 +0200
+
+    .
+
+commit d8729c6897bea2cf620a23c8226800531a02642b
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 12:19:29 2025 +0200
+
+    .
+
+commit 7b7499709787fa9ad6b63787bfc49850b06d3846
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 11:01:48 2025 +0200
+
+    .
+
+commit c1f2bbff19a216dd2820f2adcbbe3a7ba7f80f28
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 10:49:44 2025 +0200
+
+    .
+
+commit 4c2b252b5693b7240f7f5ee1daad84c083591bac
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 10:32:32 2025 +0200
+
+    .
+
+commit 551fc69673a00e692728cb60966d948c3eb4d7cd
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 08:35:07 2025 +0200
+
+    .
+
+commit 0839d909031d825d2d549ee0014f0db698ba5e00
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 08:27:35 2025 +0200
+
+    .
+
+commit 330d7ad30fc53c69002e7dd1958d7b9bb4f3ce26
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 08:16:48 2025 +0200
+
+    .
+
+commit 61753490a6166309f6d9826206aee02c86d4c8ac
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 08:07:06 2025 +0200
+
+    .
+
+commit ee8d42c7f52395b78dd9d6f08bd98448ac4196e6
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 08:00:13 2025 +0200
+
+    .
+
+commit 7f015fa87460e341f35e8bffd1ac82b496b0be4b
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 07:49:36 2025 +0200
+
+    .
+
+commit 9fd6bc4463544bbb990b34d46d45a4a5f8f35213
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 07:44:43 2025 +0200
+
+    .
+
+commit 1458d8b7486dcb99348f7daa705b51cf46c18759
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 07:39:24 2025 +0200
+
+    .
+
+commit 732e07b8b66964f54970c591426a8b553ac25341
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sun Jun 1 07:21:40 2025 +0200
+
+    � Commit delle modifiche ai moduli voice_bridge, dashboard e kernel AI
+
+commit 40d0343b40dcf8a46ccdec6efbda2a82ef2f7dad
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 20:10:52 2025 +0200
+
+    .
+
+commit 787024eae2c65e834e03adaa3c463aeb98de4d56
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 20:04:00 2025 +0200
+
+    .
+
+commit 3e960a05407c1476f7b0c5d973ce1e910d369c5b
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 19:42:58 2025 +0200
+
+    .
+
+commit fddd76201548fbbaec5369ba13664bbc8ce0d7dc
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 19:34:37 2025 +0200
+
+    .
+
+commit 2ebe90faf76e1036048de9342b6cfc2e210f14e0
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 19:31:31 2025 +0200
+
+    .
+
+commit c154a099b1cae00178fae4124a2279c366a5c68e
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 19:14:40 2025 +0200
+
+    � Aggiunto workflow CI/CD completo e stabile
+
+commit dcfaf85f7bdaffe638921474bfd3078b31adadf7
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 17:22:18 2025 +0200
+
+    � Sync: Aggiornati __init__.py e requirements.txt
+
+commit 4294e28f25c69ff0065f44c2520851f8a124dfd2
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 16:57:36 2025 +0200
+
+    � Aggiorna requirements con pacchetti reali usati da Mercurius∞
+
+commit c9a026d96964a87e44b9c432ceb60695b23b9217
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 16:21:15 2025 +0200
+
+    Aggiunti moduli di memoria: episodic, long_term, synaptic, neural_plasticity
+
+commit 03e6bb6588fb106c53a10dee28bf3bdb27ed2fc1
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 16:20:42 2025 +0200
+
+    Update .gitignore per includere moduli intelligenti
+
+commit 321666aff24ebbb930479bcdacff81b954e43b21
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 16:01:38 2025 +0200
+
+    � Sync totale file locali per verifica GPT
+
+commit 40dd2c56789c48bdec3b9dc1184c32b4154b47af
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 15:37:04 2025 +0200
+
+    .
+
+commit 94c338617eafd887ca0a56f955beb05e2bcf2db9
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 14:55:56 2025 +0200
+
+    .
+
+commit af421fbfa76ac1b03c8f37d181c2dd2fd12a5511
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 13:12:18 2025 +0200
+
+    .
+
+commit 12530a8fb7fc2b755796dfab2086c44b8df7a246
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 13:09:39 2025 +0200
+
+    .
+
+commit 4ff6637d7bbf45d17eab8f7a8f8345b6cde1050c
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 13:04:08 2025 +0200
+
+    .
+
+commit 7ed6f4eb069ee594996ca364131749a27858aee6
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 13:02:06 2025 +0200
+
+    .
+
+commit ed6b29cd2cc84f7cc468308487ad3697c168abe4
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 12:30:38 2025 +0200
+
+    .
+
+commit ec38faf96f5924e3f17610af99e4d58f5df63d0a
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 10:48:10 2025 +0200
+
+    .
+
+commit a61220886f2417d5ae9fb1680d121016fa95c9b8
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 09:57:51 2025 +0200
+
+    .
+
+commit e61ce56f02f4424a0fe349395aa2ff45ab974a4b
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 09:45:14 2025 +0200
+
+    .
+
+commit 3865f8bcf47772734860d05e9b994954061c5638
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 09:27:03 2025 +0200
+
+    � Protect config/llm_config.yaml from future pushes
+
+commit 1041bb9ac9ca2906e9b29b1ccf0f98ee1ac6640c
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 09:21:23 2025 +0200
+
+    .
+
+commit ee407410b5dd435d71c6d8917865fa67f302a7f6
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 09:13:26 2025 +0200
+
+    .
+
+commit dcd602832d71c8d4a2160dcbf5956d94202dd915
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 09:05:23 2025 +0200
+
+    .
+
+commit 3b17f63919b8b2a2e2cb94800ad1045966879c11
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 08:54:59 2025 +0200
+
+    .
+
+commit 50f793164e77cb258c844f8b0301d97077761ba7
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 08:45:03 2025 +0200
+
+    .
+
+commit f0ce6e15611f4d8fd07e2e0c0bb09c7c100940dd
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 08:28:12 2025 +0200
+
+    .
+
+commit 9b3152be25cec98b4c7d61dd7584706d393fc43c
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 08:24:22 2025 +0200
+
+    .
+
+commit 2b6578203108993b39f372b2f23ce8e2dddd5b87
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 08:20:56 2025 +0200
+
+    .
+
+commit dd78cbae1ba424c8bc83de91a6040a101238e022
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 08:15:59 2025 +0200
+
+    .
+
+commit b56b46fd35963408499f0e4ee424e3f15aa30ed1
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 07:40:45 2025 +0200
+
+    .
+
+commit f605767b26d5f6195c8004cdf2f621b71b33b4bb
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 07:32:10 2025 +0200
+
+    .
+
+commit 5d1dd4fd950343c814ebd89a0746303f4ae17150
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 07:30:26 2025 +0200
+
+    .
+
+commit 36b675b710178df9b4594131bb897ddac666823a
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Sat May 31 07:27:47 2025 +0200
+
+    .
+
+commit 7f3ee80508308a6944eaf29811ac949316a8264d
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Fri May 30 21:15:29 2025 +0200
+
+    .
+
+commit aded0f6ed9f1918392067d01d72c58b6b991fea8
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Fri May 30 21:11:12 2025 +0200
+
+    .
+
+commit 21bda08a18ec619c0b9b0ceb9ceef81d18086e00
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Fri May 30 20:53:58 2025 +0200
+
+    .
+
+commit dce1377336d841891497bf1d74172d824fab188f
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Fri May 30 20:48:37 2025 +0200
+
+    .
+
+commit f48fd998fb57bb14157148e0790b01d2a5b5a21c
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Fri May 30 20:17:40 2025 +0200
+
+    .
+
+commit 02b5765d1bc9ae5a8828b3d9be3c4e1c6938054c
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Fri May 30 19:33:20 2025 +0200
+
+    Aggiunto .gitignore per file temporanei e ambienti
+
+commit f127c49f6151f19b24cef238f13d7d67b8e95fa3
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Fri May 30 19:31:51 2025 +0200
+
+    Rimuovi .venv dal tracking
+
+commit 139ffbc7b27e47c6254bd6836a77794fbfc8ad56
+Author: Jeck <germagiacomo@hotmail.it>
+Date:   Fri May 30 19:15:04 2025 +0200
+
+    Upload completamento cicli Mercurius∞
