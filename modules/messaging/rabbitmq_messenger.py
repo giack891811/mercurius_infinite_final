@@ -9,10 +9,15 @@ funzioni restituiscono errori gestiti senza sollevare eccezioni critiche.
 
 from typing import Callable, Optional
 
-import pika
 from utils.logger import setup_logger
 
 logger = setup_logger("RabbitMQMessenger")
+
+try:  # pragma: no cover - optional dependency
+    import pika
+except Exception as exc:  # pragma: no cover - handle missing pika
+    pika = None
+    logger.warning(f"pika import failed: {exc}. RabbitMQ features disabled.")
 
 
 def publish_message(queue: str, message: str, url: str = "amqp://guest:guest@localhost:5672/") -> bool:
@@ -20,6 +25,9 @@ def publish_message(queue: str, message: str, url: str = "amqp://guest:guest@loc
 
     Ritorna ``True`` se l'operazione è andata a buon fine, altrimenti ``False``.
     """
+    if pika is None:
+        logger.error("pika library not available - cannot publish message")
+        return False
     try:
         params = pika.URLParameters(url)
         connection = pika.BlockingConnection(params)
@@ -40,6 +48,9 @@ def consume_messages(queue: str, handler: Callable[[str], None], url: str = "amq
     ``limit`` permette di definire quante messaggi leggere prima di chiudere la
     connessione (``None`` per ciclo infinito).
     """
+    if pika is None:
+        logger.error("pika library not available - cannot consume messages")
+        return
     try:
         params = pika.URLParameters(url)
         connection = pika.BlockingConnection(params)

@@ -13,11 +13,13 @@ from utils.environment import Environment
 def main():
     print("🧬 Avvio AION – Modalità: dialogic-autonomous")
 
-    if sys.platform.startswith("win"):
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+    if hasattr(sys.stdout, "reconfigure"):
         try:
             sys.stdout.reconfigure(encoding="utf-8")
         except Exception:
             pass
+
 
     env = Environment()
     os.environ["RUN_MODE"] = "dialogic-autonomous"
@@ -46,9 +48,13 @@ def main():
         print(f"⚠️ Voice module non disponibile: {exc}")
 
     try:
-        from modules.dashboard import launch_dashboard
-        print("🖥️ Avvio dashboard...")
-        threading.Thread(target=launch_dashboard, daemon=True).start()
+        headless = env.get("HEADLESS", "0") == "1"
+        if not headless:
+            from modules.dashboard import launch_dashboard
+            print("🖥️ Avvio dashboard...")
+            threading.Thread(target=launch_dashboard, daemon=True).start()
+        else:
+            print("🖥️ Modalità headless attiva - dashboard disabilitata")
     except Exception as exc:
         print(f"⚠️ Dashboard non trovata: {exc}")
 
