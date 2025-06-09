@@ -17,11 +17,11 @@ def main():
 
     orchestrator = Orchestrator()
 
+    print("🚀 Avvio sistema GENESIS...")
+    orchestrator.activate_genesis()
+
     print("🔍 Eseguo self-check...")
     orchestrator.run_self_check(path=".")
-
-    print("🧠 Eseguo missione #SELF_MISSION...")
-    orchestrator.execute_mission("#SELF_MISSION")
 
     try:
         from deployment.aion_api import start_api
