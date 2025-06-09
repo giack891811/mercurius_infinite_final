@@ -34,7 +34,7 @@ Progettato per **apprendere**, **riflettere**, **generare codice** e **interagir
 Per avviare Mercurius∞ con tutti i moduli attivi, eseguire:
 
 ```bash
-python scripts/aion_boot.py
+python aion_boot.py
 ```
 
 Il comando abilita la rete di agenti (OpenAI, Ollama, AZR), la voce (Whisper + gTTS) e la visione YOLO tramite webcam IP.

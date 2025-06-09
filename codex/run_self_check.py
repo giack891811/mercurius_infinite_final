@@ -3,8 +3,12 @@ Verifica completa della struttura e dei moduli di Mercurius∞.
 """
 
 import os
+import sys
 import importlib
 from pathlib import Path
+
+# Ensure project root is in sys.path when executed directly
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 LOG_PATH = Path("logs/self_tuning_report.md")
 MODULES = [
