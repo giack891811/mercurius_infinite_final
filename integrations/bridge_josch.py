@@ -17,6 +17,7 @@ import uvicorn
 import time
 import json
 import os
+from scripts.run_selfmission import run_codex_from_md
 
 app = FastAPI(title="JOSCH Bridge")
 start_time = time.time()
@@ -35,6 +36,11 @@ def ping():
 @app.post("/cmd")
 def run_command(req: CommandRequest):
     try:
+        if req.command.strip().startswith("#SELF_MISSION:"):
+            path = req.command.split(":", 1)[1].strip()
+            output = run_codex_from_md(path)
+            return {"returncode": 0, "stdout": output, "stderr": ""}
+
         if req.mode == "cmd":
             result = subprocess.run(req.command, shell=True, capture_output=True, text=True)
         elif req.mode == "powershell":
