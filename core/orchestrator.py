@@ -80,19 +80,48 @@ class Orchestrator:
         print("✅ GENESIS attiva – Rete neurale in esecuzione.")
 
     def load_agents(self):
+        """Load agents based on config/config.yaml."""
         print("🔌 Caricamento agenti dalla configurazione...")
-        agent_groups = self.config.get("agents", {})
-        for group, agent_list in agent_groups.items():
-            self.agents[group] = []
-            for agent_name in agent_list:
+
+        agent_cfg = self.config.get("agents", {})
+        self.agents = {}
+
+        agent_path_map = {
+            "OPENAI": ("modules.llm.chatgpt_interface", "ChatGPTAgent"),
+            "OLLAMA": ("modules.llm.ollama3_interface", "Ollama3Agent"),
+            "AZR": ("modules.llm.azr_reasoner", "AZRAgent"),
+        }
+
+        if isinstance(agent_cfg, dict) and "enabled" in agent_cfg:
+            enabled_agents = agent_cfg.get("enabled", [])
+            self.agents["enabled"] = []
+            for agent_name in enabled_agents:
                 try:
-                    module_path = f"agents.{agent_name.lower()}"
+                    module_path, class_name = agent_path_map.get(
+                        agent_name.upper(), (f"agents.{agent_name.lower()}", agent_name)
+                    )
                     agent_module = importlib.import_module(module_path)
-                    agent = getattr(agent_module, agent_name)()
-                    self.agents[group].append(agent)
-                    print(f"🧠 Caricato agente: {agent_name} in {group}")
+                    agent_cls = getattr(agent_module, class_name)
+                    agent = agent_cls()
+                    self.agents["enabled"].append(agent)
+                    print(f"🧠 Caricato agente: {agent_name}")
                 except Exception as e:
                     print(f"⚠️ Errore caricamento {agent_name}: {e}")
+        else:
+            for group, agent_list in agent_cfg.items():
+                self.agents[group] = []
+                for agent_name in agent_list:
+                    try:
+                        module_path, class_name = agent_path_map.get(
+                            agent_name.upper(), (f"agents.{agent_name.lower()}", agent_name)
+                        )
+                        agent_module = importlib.import_module(module_path)
+                        agent_cls = getattr(agent_module, class_name)
+                        agent = agent_cls()
+                        self.agents[group].append(agent)
+                        print(f"🧠 Caricato agente: {agent_name} in {group}")
+                    except Exception as e:
+                        print(f"⚠️ Errore caricamento {agent_name}: {e}")
 
     def start_feedback_loop(self):
         if self.config["communication"]["feedback_loop"]:
