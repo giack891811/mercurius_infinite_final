@@ -21,7 +21,7 @@ def setup_logger(name: str = "MercuriusLogger", logfile: str = "logs/execution.l
 
         if logfile:
             os.makedirs(os.path.dirname(logfile), exist_ok=True)
-            fh = logging.FileHandler(logfile)
+            fh = logging.FileHandler(logfile, encoding="utf-8")
             fh.setLevel(logging.DEBUG)
             fh.setFormatter(formatter)
             logger.addHandler(fh)
@@ -31,7 +31,7 @@ def get_file_logger(name="MercuriusFileLogger", filename="mercurius.log"):
     logger = logging.getLogger(name)
     if not logger.hasHandlers():
         logger.setLevel(logging.INFO)
-        fh = logging.FileHandler(filename)
+        fh = logging.FileHandler(filename, encoding="utf-8")
         formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(message)s')
         fh.setFormatter(formatter)
         logger.addHandler(fh)
