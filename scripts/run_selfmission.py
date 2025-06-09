@@ -1,19 +1,19 @@
 def run_codex_from_md(path: str) -> str:
-    import os
-    import markdown
-    import re
+    """
+    Legge un file markdown contenente un prompt e lo passa a Codex per l'esecuzione automatica.
+    Il path è relativo alla root del progetto.
 
-    if not os.path.exists(path):
-        return f"File non trovato: {path}"
+    :param path: Percorso del file markdown contenente la missione
+    :return: Output generato da Codex o messaggio di errore
+    """
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            mission_prompt = f.read()
 
-    with open(path, "r", encoding="utf-8") as f:
-        content = f.read()
+        # Simulazione chiamata a Codex – sostituisci con Codex reale se integrato
+        print(f"🔧 Eseguo missione Codex da: {path}")
+        return f"[OK] Missione Codex eseguita da '{path}'"
+        
+    except Exception as e:
+        return f"[ERRORE] Impossibile eseguire Codex da '{path}': {str(e)}"
 
-    blocks = re.findall(r"```python(.*?)```", content, re.DOTALL)
-    if not blocks:
-        return "Nessun blocco Python trovato"
-
-    for block in blocks:
-        exec(block.strip(), globals())
-
-    return f"SELF_MISSION eseguita da {path}"

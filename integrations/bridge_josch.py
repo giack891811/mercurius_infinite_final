@@ -10,44 +10,52 @@ comandi al bridge.
 """
 
 import sys
+import os
+import json
+import time
+import subprocess
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent / "scripts"))
 
 import requests
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import subprocess
-import uvicorn
-import time
-import json
-import os
+
+# 📦 Importa correttamente run_codex_from_md dal modulo scripts
+scripts_path = Path(__file__).resolve().parent.parent / "scripts"
+sys.path.insert(0, str(scripts_path))
 
 try:
     from run_selfmission import run_codex_from_md
-except ImportError:
-    run_codex_from_md = lambda x: f"⚠️ Modulo run_selfmission mancante: {x}"
+except ImportError as e:
+    def run_codex_from_md(path: str) -> str:
+        return f"⚠️ Errore: run_selfmission non disponibile ({e})"
 
+# 🧠 Avvia FastAPI
 app = FastAPI(title="JOSCH Bridge")
 start_time = time.time()
+
 
 class CommandRequest(BaseModel):
     command: str
     mode: str = "cmd"  # cmd | powershell | python
 
+
 @app.get("/ping")
 def ping():
     return {"status": "online", "uptime": f"{int(time.time() - start_time)}s"}
 
+
 @app.post("/cmd")
 def run_command(req: CommandRequest):
     try:
-        # SELF_MISSION → lettura e auto-esecuzione .md
+        # 🔁 Esegue una SELF_MISSION da file .md
         if req.command.strip().startswith("#SELF_MISSION:"):
             path = req.command.split(":", 1)[1].strip()
             output = run_codex_from_md(path)
             return {"returncode": 0, "stdout": output, "stderr": ""}
 
-        # Comando standard
+        # 🧾 Esegue comando in shell / powershell / python
         if req.mode == "cmd":
             result = subprocess.run(req.command, shell=True, capture_output=True, text=True)
         elif req.mode == "powershell":
@@ -66,9 +74,10 @@ def run_command(req: CommandRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/tvhook")
 def tvhook(payload: dict):
-    """Riceve comandi da TradingView tramite n8n."""
+    """📡 Riceve comandi da TradingView tramite n8n."""
     file_path = os.path.join("logs", "tv_signal.json")
     os.makedirs("logs", exist_ok=True)
     try:
@@ -90,8 +99,9 @@ def tvhook(payload: dict):
         pass
     return {"status": "ok"}
 
+
 def send_command_to_pc(command: str, mode: str = "cmd", base_url: str = "http://localhost:3020") -> dict:
-    """Invia un comando al bridge JOSCH e restituisce la risposta JSON."""
+    """📨 Invia un comando al bridge JOSCH e restituisce la risposta JSON."""
     try:
         res = requests.post(
             f"{base_url}/cmd",
@@ -104,8 +114,10 @@ def send_command_to_pc(command: str, mode: str = "cmd", base_url: str = "http://
     except Exception as exc:
         return {"error": str(exc)}
 
+
 def start_bridge(host="0.0.0.0", port=3020):
     uvicorn.run(app, host=host, port=port)
+
 
 if __name__ == "__main__":
     start_bridge()
