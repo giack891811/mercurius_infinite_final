@@ -20,6 +20,9 @@ MODULES = [
     "modules.llm.azr_reasoner",
     "modules.llm.gpt4o_validator",
     "integrations.bridge_josch",
+    "modules.vision.eye_agent",
+    "modules.scheduler.sleep_time_compute",
+    "memory.logical_state_tracker",
     "utils.logger"
 ]
 
