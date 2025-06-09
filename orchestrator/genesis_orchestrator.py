@@ -11,6 +11,7 @@ from modules.llm.chatgpt_interface import ChatGPTAgent
 from modules.llm.ollama3_interface import Ollama3Agent
 from modules.llm.azr_reasoner import AZRAgent
 from modules.llm.gpt4o_validator import GPT4oAgent
+from modules.scout.ai_scout import AIScout
 
 class GenesisOrchestrator:
     def __init__(self):
@@ -19,6 +20,10 @@ class GenesisOrchestrator:
             "ollama3": Ollama3Agent(),
             "azr": AZRAgent(),
             "gpt4o": GPT4oAgent()
+        }
+        # Moduli operativi aggiuntivi
+        self.modules = {
+            "ai_scout": AIScout()
         }
 
     def route_task(self, task: str, context: dict = None) -> dict:
