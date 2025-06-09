@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+import threading
 
 # Aggiunge la root del progetto al path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -10,6 +12,12 @@ from utils.environment import Environment
 
 def main():
     print("🧬 Avvio AION – Modalità: dialogic-autonomous")
+
+    if sys.platform.startswith("win"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 
     env = Environment()
     os.environ["RUN_MODE"] = "dialogic-autonomous"
@@ -25,7 +33,6 @@ def main():
 
     try:
         from deployment.aion_api import start_api
-        import threading
         threading.Thread(target=start_api, daemon=True).start()
         print("🌐 Aion API server avviato sulla porta 8000")
     except Exception as exc:
@@ -34,18 +41,21 @@ def main():
     try:
         from modules.voice_bridge.voice_loop import start_listening
         print("🎙️ Voice recognition attiva...")
-        start_listening()
-    except ImportError:
-        print("⚠️ Voice module non disponibile")
+        threading.Thread(target=start_listening, daemon=True).start()
+    except Exception as exc:
+        print(f"⚠️ Voice module non disponibile: {exc}")
 
     try:
         from modules.dashboard import launch_dashboard
         print("🖥️ Avvio dashboard...")
-        launch_dashboard()
-    except ImportError:
-        print("⚠️ Dashboard non trovata")
+        threading.Thread(target=launch_dashboard, daemon=True).start()
+    except Exception as exc:
+        print(f"⚠️ Dashboard non trovata: {exc}")
 
     print("✅ AION operativo. In ascolto comandi.")
+
+    while True:
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()
