@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from core.orchestrator import Orchestrator
 from utils.environment import Environment
+from ai_launcher import ensure_ai_online
 
 
 def main():
@@ -24,6 +25,9 @@ def main():
     env = Environment()
     os.environ["RUN_MODE"] = "dialogic-autonomous"
     print(f"🌐 AION_RUN_MODE = {env.get('RUN_MODE')}")
+
+    print("🔧 Verifica servizi critici...")
+    ensure_ai_online()
 
     orchestrator = Orchestrator()
 
