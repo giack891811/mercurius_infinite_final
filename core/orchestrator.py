@@ -17,6 +17,8 @@ from core.thinking_loop import ThinkingLoop
 from integrations.bridge_josch import send_command_to_pc
 from sensors.sensor_hub import capture_screen_stream, listen_microphone
 
+GOAL_FILE = Path("GOAL.txt")
+
 CONFIG_PATH = Path("config/genesis_config.yaml")
 
 class Orchestrator:
@@ -27,6 +29,16 @@ class Orchestrator:
         self.sleep_monitor = SleepMonitor(idle_threshold=self.config.get("sleep_threshold", 300))
         self.thinking_loop: ThinkingLoop | None = None
         self.multisensorial_enabled = True
+        self.goal_text = self._load_goal()
+
+    def _load_goal(self) -> str:
+        """Read the GOAL file if available."""
+        if GOAL_FILE.exists():
+            try:
+                return GOAL_FILE.read_text(encoding="utf-8")
+            except Exception:
+                return ""
+        return ""
 
     def load_config(self):
         with open('config/config.yaml', encoding='utf-8') as f:
@@ -38,6 +50,8 @@ class Orchestrator:
         self.load_agents()
         self.start_feedback_loop()
         self.start_sleep_monitor()
+        if self.goal_text:
+            print("\n🎯 GOAL OPERATIVO:\n" + self.goal_text + "\n")
 
         try:
             with open(CONFIG_PATH, "r", encoding="utf-8") as f:
