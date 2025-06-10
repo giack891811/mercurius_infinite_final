@@ -8,11 +8,23 @@ import cv2
 import threading
 import speech_recognition as sr
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QLabel, QPushButton,
-    QTextEdit, QListWidget, QHBoxLayout, QSplitter, QGraphicsView, QGraphicsScene
+    QApplication,
+    QWidget,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QTextEdit,
+    QListWidget,
+    QHBoxLayout,
+    QSplitter,
+    QGraphicsView,
+    QGraphicsScene,
+    QCheckBox,
 )
 from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap
+
+from modules.teacher_mode import TeacherMode
 
 
 class WebcamThread(QThread):
@@ -63,10 +75,13 @@ class MercuriusDashboard(QWidget):
 
         self.btn_action = QPushButton("Esegui Comando")
         self.btn_action.clicked.connect(self.execute_action)
+        self.teacher_toggle = QCheckBox("Teacher Mode")
+        self.teacher_toggle.stateChanged.connect(self.set_teacher_mode)
 
         sidebar = QVBoxLayout()
         sidebar.addWidget(QLabel("🔧 Menu"))
         sidebar.addWidget(self.menu)
+        sidebar.addWidget(self.teacher_toggle)
         sidebar.addWidget(self.btn_action)
 
         sidebar_widget = QWidget()
@@ -97,6 +112,7 @@ class MercuriusDashboard(QWidget):
         self.stt_thread = SpeechThread()
         self.stt_thread.result_ready.connect(self.update_speech)
         self.stt_thread.start()
+        self.teacher = TeacherMode()
 
     def update_cam(self, image):
         self.cam_view.setPixmap(QPixmap.fromImage(image).scaled(480, 360, Qt.KeepAspectRatio))
@@ -144,6 +160,9 @@ class MercuriusDashboard(QWidget):
     def refresh_status(self):
         if self.menu.currentRow() == 0:
             self.change_section(0)
+
+    def set_teacher_mode(self, state: int) -> None:
+        self.teacher.toggle(state == Qt.Checked)
 
 
 if __name__ == "__main__":
