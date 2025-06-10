@@ -7,8 +7,17 @@ e moduli di supporto (AIScout, EyeAgent, SleepTimeCompute, TeacherMode).
 import subprocess
 import threading
 import time
-from typing import Iterable
+from typing import Iterable, Optional
+import os
+import sys
+from pathlib import Path
+from dotenv import load_dotenv
 
+# ====================== BOOTSTRAP PATH E ENV ======================
+load_dotenv()
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+# ====================== IMPORT MERCURIUS ======================
 from utils.logger import setup_logger
 from modules.llm.chatgpt_interface import ChatGPTAgent
 from modules.llm.ollama3_interface import Ollama3Agent
@@ -21,20 +30,19 @@ from modules.vision.eye_agent import EyeAgent
 
 logger = setup_logger("MercuriusGenesis")
 
-
+# ====================== AVVIO SERVIZI ESTERNI ======================
 def auto_start_services(services: Iterable[str]) -> None:
     """Avvia in background servizi esterni richiesti."""
     for srv in services:
         try:
             subprocess.Popen([srv])
             logger.info(f"[BOOT] Avvio servizio: {srv}")
-        except Exception as exc:  # pragma: no cover
+        except Exception as exc:
             logger.error("Errore avvio %s: %s", srv, exc)
 
-
+# ====================== ORCHESTRATORE ======================
 class GenesisOrchestrator:
     def __init__(self):
-        # Agenti cognitivi
         self.agents = {
             "chatgpt4": ChatGPTAgent(),
             "ollama3": Ollama3Agent(),
@@ -42,39 +50,38 @@ class GenesisOrchestrator:
             "gpt4o": GPT4oAgent()
         }
 
-        # Moduli operativi
         self.modules = {
             "ai_scout": AIScout(),
-            "sleep": SleepTimeCompute(),
-            "eye_agent": EyeAgent(source=0, use_placeholder=True)
+            "eye_agent": EyeAgent(source=0, use_placeholder=True),
+            "sleep": SleepTimeCompute()
         }
 
-        # Modalità insegnante
         self.teacher_mode = TeacherMode()
 
-        # Avvio moduli in background
+        # Avvio moduli intelligenti in background
         threading.Thread(target=self.modules["sleep"].run, daemon=True).start()
         threading.Thread(target=self.modules["eye_agent"].start_stream, daemon=True).start()
         threading.Thread(target=self.teacher_mode.start, daemon=True).start()
 
-        # Avvio ciclico Prompt di Dio
+        # Prompt di Dio (ciclo ogni N minuti)
         threading.Thread(target=self.run_dioprompt_every_n, daemon=True).start()
 
-    def route_task(self, task: str, context: dict = None) -> dict:
-        """Instrada il task all'agente più adatto."""
+    def route_task(self, task: str, context: Optional[dict] = None) -> dict:
+        """Smista un task all'agente più adatto."""
         logger.info(f"[GENESIS] Routing del task: {task}")
+        context = context or {}
         if "debug" in task or "logica" in task:
-            return self.agents["azr"].analyze(task, context or {})
+            return self.agents["azr"].analyze(task, context)
         elif "sintesi" in task or "finalizza" in task:
-            return self.agents["gpt4o"].validate(task, context or {})
+            return self.agents["gpt4o"].validate(task, context)
         elif "crea codice" in task or "script" in task:
-            return self.agents["ollama3"].generate(task, context or {})
+            return self.agents["ollama3"].generate(task, context)
         else:
-            return self.agents["chatgpt4"].elaborate(task, context or {})
+            return self.agents["chatgpt4"].elaborate(task, context)
 
     def coordinated_response(self, task: str) -> dict:
-        """Tutti gli agenti contribuiscono; seleziona la risposta più coerente."""
-        logger.info(f"[GENESIS] Task condiviso per risposta congiunta: {task}")
+        """Richiede risposta congiunta da tutti gli agenti."""
+        logger.info(f"[GENESIS] Task congiunto: {task}")
         responses = {
             "chatgpt4": self.agents["chatgpt4"].elaborate(task),
             "ollama3": self.agents["ollama3"].generate(task),
@@ -90,9 +97,7 @@ class GenesisOrchestrator:
 
         logger.warning("⚠️ Nessuna risposta valida. Attivazione fallback AZR...")
         azr_retry = self.agents["azr"].solve(task)
-        if azr_retry and isinstance(azr_retry, dict):
-            return {"source": "azr-fallback", "response": azr_retry}
-        return {"source": "none", "response": "Nessuna risposta utile nemmeno da fallback AZR."}
+        return {"source": "azr-fallback", "response": azr_retry or "Nessuna risposta utile."}
 
     def run_dioprompt_every_n(self, n: int = 3):
         """Esegue il Prompt di Dio ogni N minuti."""
@@ -107,12 +112,11 @@ class GenesisOrchestrator:
             except Exception as e:
                 logger.error(f"[PromptDiDio] Errore esecuzione: {e}")
 
-
+# ====================== ESECUZIONE LOCALE ======================
 if __name__ == "__main__":
     auto_start_services(["azr", "ollama", "n8n", "bridge_josch"])
     orchestrator = GenesisOrchestrator()
-    sample_task = "crea codice per gestire input vocale e risposta testuale"
-    result = orchestrator.coordinated_response(sample_task)
+    result = orchestrator.coordinated_response("analizza una strategia di breakout su BTC/USD")
     print(f"🎯 Risposta selezionata ({result['source']}):\n{result['response']}")
 else:
     auto_start_services(["azr", "ollama", "n8n", "bridge_josch"])
