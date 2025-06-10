@@ -41,3 +41,16 @@ class TeacherMode:
                 if feedback:
                     speak_feedback(feedback)
             time.sleep(5)
+
+    def start(self) -> None:
+        """Avvia la modalità tutor in un loop continuo (placeholder)."""
+        self.toggle(True)
+        logger.info("👨‍🏫 TeacherMode start() avviato")
+        try:
+            while self.active:
+                logger.debug("TeacherMode heartbeat")
+                time.sleep(10)
+        except Exception as exc:  # pragma: no cover - runtime safeguard
+            logger.error("TeacherMode error: %s", exc)
+        finally:
+            self.active = False
