@@ -4,7 +4,19 @@ Descrizione: Coordinamento neurale tra agenti cognitivi (ChatGPT-4, AZR, Ollama3
 """
 
 from utils.logger import setup_logger
+import subprocess
+from typing import Iterable
 logger = setup_logger("MercuriusGenesis")
+
+
+def auto_start_services(services: Iterable[str]) -> None:
+    """Avvia in background servizi esterni richiesti."""
+    for srv in services:
+        try:
+            subprocess.Popen([srv])
+            logger.info(f"[BOOT] Avvio servizio: {srv}")
+        except Exception as exc:  # pragma: no cover
+            logger.error("Errore avvio %s: %s", srv, exc)
 
 # Agenti cognitivi integrati
 from modules.llm.chatgpt_interface import ChatGPTAgent
@@ -12,6 +24,7 @@ from modules.llm.ollama3_interface import Ollama3Agent
 from modules.llm.azr_reasoner import AZRAgent
 from modules.llm.gpt4o_validator import GPT4oAgent
 from modules.scout.ai_scout import AIScout
+from modules.teacher_mode import TeacherMode
 
 class GenesisOrchestrator:
     def __init__(self):
@@ -25,6 +38,7 @@ class GenesisOrchestrator:
         self.modules = {
             "ai_scout": AIScout()
         }
+        self.teacher_mode = TeacherMode()
 
     def route_task(self, task: str, context: dict = None) -> dict:
         """
@@ -74,3 +88,5 @@ if __name__ == "__main__":
     sample_task = "crea codice per gestire input vocale e risposta testuale"
     result = orchestrator.coordinated_response(sample_task)
     print(f"🎯 Risposta selezionata ({result['source']}):\n{result['response']}")
+else:
+    auto_start_services(["azr", "ollama", "n8n", "bridge_josch"])
