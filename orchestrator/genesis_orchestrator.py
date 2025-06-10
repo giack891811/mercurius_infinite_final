@@ -1,11 +1,24 @@
 """
 Modulo: genesis_orchestrator.py
-Descrizione: Coordinamento neurale tra agenti cognitivi (ChatGPT-4, AZR, Ollama3, GPT-4o).
+Descrizione: Coordinamento neurale tra agenti cognitivi (ChatGPT-4, AZR, Ollama3, GPT-4o)
+e moduli di supporto (AIScout, EyeAgent, SleepTimeCompute, TeacherMode).
 """
 
-from utils.logger import setup_logger
 import subprocess
+import threading
+import time
 from typing import Iterable
+
+from utils.logger import setup_logger
+from modules.llm.chatgpt_interface import ChatGPTAgent
+from modules.llm.ollama3_interface import Ollama3Agent
+from modules.llm.azr_reasoner import AZRAgent
+from modules.llm.gpt4o_validator import GPT4oAgent
+from modules.scout.ai_scout import AIScout
+from modules.teacher_mode import TeacherMode
+from modules.scheduler.sleep_time_compute import SleepTimeCompute
+from modules.vision.eye_agent import EyeAgent
+
 logger = setup_logger("MercuriusGenesis")
 
 
@@ -18,32 +31,37 @@ def auto_start_services(services: Iterable[str]) -> None:
         except Exception as exc:  # pragma: no cover
             logger.error("Errore avvio %s: %s", srv, exc)
 
-# Agenti cognitivi integrati
-from modules.llm.chatgpt_interface import ChatGPTAgent
-from modules.llm.ollama3_interface import Ollama3Agent
-from modules.llm.azr_reasoner import AZRAgent
-from modules.llm.gpt4o_validator import GPT4oAgent
-from modules.scout.ai_scout import AIScout
-from modules.teacher_mode import TeacherMode
 
 class GenesisOrchestrator:
     def __init__(self):
+        # Agenti cognitivi
         self.agents = {
             "chatgpt4": ChatGPTAgent(),
             "ollama3": Ollama3Agent(),
             "azr": AZRAgent(),
             "gpt4o": GPT4oAgent()
         }
-        # Moduli operativi aggiuntivi
+
+        # Moduli operativi
         self.modules = {
-            "ai_scout": AIScout()
+            "ai_scout": AIScout(),
+            "sleep": SleepTimeCompute(),
+            "eye_agent": EyeAgent(source=0, use_placeholder=True)
         }
+
+        # Modalità insegnante
         self.teacher_mode = TeacherMode()
 
+        # Avvio moduli in background
+        threading.Thread(target=self.modules["sleep"].run, daemon=True).start()
+        threading.Thread(target=self.modules["eye_agent"].start_stream, daemon=True).start()
+        threading.Thread(target=self.teacher_mode.start, daemon=True).start()
+
+        # Avvio ciclico Prompt di Dio
+        threading.Thread(target=self.run_dioprompt_every_n, daemon=True).start()
+
     def route_task(self, task: str, context: dict = None) -> dict:
-        """
-        Analizza il task e lo instrada all'agente più adatto, restituendo il risultato.
-        """
+        """Instrada il task all'agente più adatto."""
         logger.info(f"[GENESIS] Routing del task: {task}")
         if "debug" in task or "logica" in task:
             return self.agents["azr"].analyze(task, context or {})
@@ -55,11 +73,7 @@ class GenesisOrchestrator:
             return self.agents["chatgpt4"].elaborate(task, context or {})
 
     def coordinated_response(self, task: str) -> dict:
-        """
-        Ogni agente contribuisce con un parere per un task comune; 
-        il sistema seleziona la risposta più coerente tra quelle fornite.
-        Se nessuna risposta è valida, attiva fallback evolutivo su AZR.
-        """
+        """Tutti gli agenti contribuiscono; seleziona la risposta più coerente."""
         logger.info(f"[GENESIS] Task condiviso per risposta congiunta: {task}")
         responses = {
             "chatgpt4": self.agents["chatgpt4"].elaborate(task),
@@ -68,22 +82,34 @@ class GenesisOrchestrator:
             "gpt4o": self.agents["gpt4o"].validate(task)
         }
 
-        # Valutazione semplice basata su priorità predefinita (in futuro: ponderazione dinamica)
         priority = ["azr", "gpt4o", "chatgpt4", "ollama3"]
         for agent_key in priority:
             resp = str(responses.get(agent_key, "")).lower()
             if responses[agent_key] and "error" not in resp and "errore" not in resp:
                 return {"source": agent_key, "response": responses[agent_key]}
 
-        # 🧠 Fallback evolutivo AZR – auto-ragionamento
-        logger.warning("⚠️ Nessuna risposta valida disponibile. Attivazione fallback AZR Reasoner...")
-        azr_retry = self.agents["azr"].solve(task)  # Metodo custom evolutivo
+        logger.warning("⚠️ Nessuna risposta valida. Attivazione fallback AZR...")
+        azr_retry = self.agents["azr"].solve(task)
         if azr_retry and isinstance(azr_retry, dict):
             return {"source": "azr-fallback", "response": azr_retry}
         return {"source": "none", "response": "Nessuna risposta utile nemmeno da fallback AZR."}
 
+    def run_dioprompt_every_n(self, n: int = 3):
+        """Esegue il Prompt di Dio ogni N minuti."""
+        while True:
+            time.sleep(n * 60)
+            try:
+                with open("config/prompt_di_dio.md", "r", encoding="utf-8") as f:
+                    prompt = f.read()
+                logger.info("📖 Prompt di Dio letto, invio agli agenti...")
+                result = self.coordinated_response(prompt)
+                logger.info(f"🧠 Risultato Prompt di Dio ({result['source']}):\n{result['response']}")
+            except Exception as e:
+                logger.error(f"[PromptDiDio] Errore esecuzione: {e}")
+
 
 if __name__ == "__main__":
+    auto_start_services(["azr", "ollama", "n8n", "bridge_josch"])
     orchestrator = GenesisOrchestrator()
     sample_task = "crea codice per gestire input vocale e risposta testuale"
     result = orchestrator.coordinated_response(sample_task)
