@@ -12,6 +12,7 @@ except Exception:  # pragma: no cover - cv2 may not be available
 
 from utils.logger import setup_logger
 from modules.stream_vision.video_pipeline import VideoPipeline
+from vision.ocr_module import extract_text_from_image
 
 logger = setup_logger(__name__)
 
@@ -37,7 +38,7 @@ class EyeAgent:
         logger.error("[EYE] Nessun frame catturato")
         return None
 
-    def screenshot(self, path: str = "logs/screenshot.jpg") -> Optional[str]:
+    def screenshot(self, path: str = "logs/eye/screenshot.jpg") -> Optional[str]:
         """Salva un singolo screenshot."""
         frame = self.capture_frame()
         if frame is None:
@@ -46,6 +47,13 @@ class EyeAgent:
         cv2.imwrite(path, frame)
         logger.info(f"[EYE] Screenshot salvato in {path}")
         return path
+
+    def ocr_snapshot(self, path: str = "logs/eye/ocr_shot.jpg") -> str:
+        """Cattura screenshot e restituisce testo OCR."""
+        img_path = self.screenshot(path)
+        if not img_path:
+            return ""
+        return extract_text_from_image(img_path)
 
     def start_stream(self):
         """Avvia la pipeline video in streaming."""
