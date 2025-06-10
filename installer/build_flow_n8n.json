@@ -1,0 +1,33 @@
+{
+  "name": "Mercurius Installer Build",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "build-installer",
+        "httpMethod": "POST",
+        "responseMode": "onReceived"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "id": "1"
+    },
+    {
+      "parameters": {
+        "command": "powershell -ExecutionPolicy Bypass -File installer/create_installer.ps1"
+      },
+      "name": "Run Build Script",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [550, 300],
+      "id": "2"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [ [ { "node": "Run Build Script", "type": "main", "index": 0 } ] ]
+    }
+  },
+  "active": false
+}

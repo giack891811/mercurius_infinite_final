@@ -1,0 +1,26 @@
+"DeploymentProject"
+{
+    "ProductName" = "8:Mercurius∞"
+    "ProductCode" = "8:{22222222-2222-2222-2222-222222222222}"
+    "PackageCode" = "8:{33333333-3333-3333-3333-333333333333}"
+    "InstallAllUsers" = "11:TRUE"
+    "Compression" = "3:2"
+    "Directory" 
+    {
+        "ProgramFilesFolder" 
+        {
+            "Folder"
+            {
+                "Name" = "8:Mercurius"
+                "AlwaysCreate" = "11:TRUE"
+                "Files"
+                {
+                    "File"
+                    {
+                        "SourcePath" = "8:..\\exports\\Mercurius.exe"
+                    }
+                }
+            }
+        }
+    }
+}
