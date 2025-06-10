@@ -82,3 +82,16 @@ Attiva l'hook con:
 `git config core.hooksPath githooks && chmod +x githooks/pre-commit`
 (valido sia su Linux che su Windows con Git Bash).
 
+
+## 🛠️ Installer di Mercurius∞
+
+Nella cartella `installer/` trovi il progetto Visual Studio (`MercuriusInstaller.sln`) con relativo `.vdproj` per generare l'installer Windows. Per compilarlo esegui:
+
+```powershell
+cd installer
+./create_installer.ps1
+```
+
+Puoi avviare tutti i servizi necessari tramite `start_all_services.ps1` e integrare il flusso di build in `n8n` importando `build_flow_n8n.json`.
+
+Per il deploy mobile è disponibile la cartella `mobile/` dove verranno caricati script e APK dedicati.
