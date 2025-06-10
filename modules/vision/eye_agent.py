@@ -1,14 +1,21 @@
-"""eye_agent.py
+"""
+eye_agent.py
 Gestisce la visione artificiale in tempo reale con funzioni di screenshot.
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, TYPE_CHECKING, Any
 
 try:
     import cv2
 except Exception:  # pragma: no cover - cv2 may not be available
     cv2 = None
+
+if TYPE_CHECKING:
+    import cv2  # solo per type hinting statico
+    MatType = Optional["cv2.typing.MatLike"]
+else:
+    MatType = Optional[Any]
 
 from utils.logger import setup_logger
 from modules.stream_vision.video_pipeline import VideoPipeline
@@ -23,7 +30,7 @@ class EyeAgent:
         self.pipeline = VideoPipeline(source=source, use_placeholder=use_placeholder)
         self.source = source
 
-    def capture_frame(self) -> Optional["cv2.typing.MatLike"]:
+    def capture_frame(self) -> MatType:
         """Restituisce un singolo frame dalla sorgente."""
         if cv2 is None:
             logger.warning("cv2 non disponibile; impossibile catturare frame")
