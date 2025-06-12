@@ -4,38 +4,33 @@ Coordina agenti AI organizzativi: CrewAI, SuperAGI, Autogen.
 Assegna task, raccoglie risposte, sincronizza con l’orchestratore.
 """
 
+from modules.agent_router import send_to_agent
+
+
 class AgentOrganizer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.agents = {
-            "CrewAI": self.run_crewai,
-            "SuperAGI": self.run_superagi,
-            "Autogen": self.run_autogen
+            "AZR": "analyze",
+            "Reasoner": "decide",
+            "GPT": "evolve",
         }
 
-    def dispatch_task(self, task: str, meta_context: dict = {}) -> dict:
-        print("📤 Invio task a tutti gli agenti organizzativi...")
-        results = {}
-        for name, runner in self.agents.items():
+    def dispatch_task(self, task: str, meta_context: dict | None = None) -> dict:
+        meta_context = meta_context or {}
+        results: dict[str, str] = {}
+        for name, command in self.agents.items():
             try:
-                results[name] = runner(task, meta_context)
+                results[name] = send_to_agent(name, command, task, meta_context)
             except Exception as e:
-                results[name] = f"❌ Errore: {str(e)}"
+                results[name] = f"❌ Errore: {e}"
         return results
 
     def evaluate_outcomes(self, results: dict) -> str:
-        print("📊 Valutazione dei risultati agenti organizzativi...")
-        for agent, output in results.items():
-            print(f" - {agent}: {output[:80]}...")
-        return max(results.items(), key=lambda x: len(x[1]))[1]
+        ranked = sorted(results.items(), key=lambda x: len(x[1]), reverse=True)
+        return ranked[0][1] if ranked else ""
 
     def run_crewai(self, task: str, ctx: dict) -> str:
         return f"[CrewAI] Coordinamento squadra AI per: {task}"
-
-    def run_superagi(self, task: str, ctx: dict) -> str:
-        return f"[SuperAGI] Pianificazione e autonomia su task: {task}"
-
-    def run_autogen(self, task: str, ctx: dict) -> str:
-        return f"[Autogen] Task iterativo distribuito: {task}"
 
 # Test diretto
 if __name__ == "__main__":
