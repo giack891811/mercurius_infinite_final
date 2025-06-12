@@ -49,3 +49,19 @@ class PipelineController:
         for i in range(n):
             self.logger.info(f"▶️ Esecuzione sessione simulata {i + 1}/{n}")
             self.run_batch_session()
+
+    # --- Nuove funzionalità per integrazione trading ---
+    def fetch_signals(self) -> list[dict]:
+        """Pipeline compatta: dati -> feature -> modello -> segnali."""
+        data = self.data_handler.fetch_market_data()
+        feats = self.feature_engineer.transform(data)
+        model = self.model_trainer.train(feats)
+        return self.strategy.generate_signals(model, feats)
+
+    def validate_strategy(self, signals: list[dict]) -> list[dict]:
+        """Filtra i segnali in base alla logica dell'agente."""
+        return self.agent.evaluate_signals(signals)
+
+    def execute_trades(self, signals: list[dict]) -> None:
+        """Esegue i trade tramite l'agente adattivo."""
+        self.agent.execute_trades(signals)

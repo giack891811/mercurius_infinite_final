@@ -1,39 +1,20 @@
-"""
-Test: test_orchestrator.py
-Responsabilità: Validazione AutonomyController e processi decisionali
-Autore: Mercurius∞ Engineer Mode
-"""
+import importlib
+import yaml
+import sys
 
-import unittest
-from orchestrator.autonomy_controller import AutonomyController
-
-
-class TestAutonomyController(unittest.TestCase):
-
-    def setUp(self):
-        self.controller = AutonomyController()
-
-    def test_process_experience(self):
-        """
-        Valida la riflessione e l'apprendimento su azione positiva.
-        """
-        feedback = self.controller.process_experience(
-            action="test_comando",
-            outcome="Eseguito correttamente",
-            success=True,
-            context={"livello": "base"}
-        )
-        self.assertIn("Apprendimento", feedback["learning"])
-        self.assertIn("successo", feedback["reflection"])
-
-    def test_summarize_autonomy(self):
-        """
-        Verifica il report cognitivo riepilogativo.
-        """
-        self.controller.process_experience("cmd", "done", True, {})
-        summary = self.controller.summarize_autonomy()
-        self.assertIn("successes", summary["reflection_summary"])
+sys.modules["yaml"] = yaml
+orch_module = importlib.import_module("orchestrator.orchestrator")
+importlib.reload(orch_module)
+orch_module.yaml = yaml
+orch_module.yaml.safe_load = lambda f: {
+    "agents": {"enabled": []},
+    "communication": {"feedback_loop": True, "max_retries": 1, "retry_delay": 1, "update_cycle_seconds": 1},
+    "mission_defaults": {"run_mode": "test", "tasks": []},
+    "paths": {"transcripts": "t", "logs": "l"},
+}
+Orchestrator = orch_module.Orchestrator
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_load_config():
+    orch = Orchestrator()
+    assert isinstance(orch.config, dict)

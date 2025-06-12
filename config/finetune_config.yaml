@@ -1,0 +1,4 @@
+model: gpt-3.5-turbo
+epochs: 3
+dataset_md: data/finetune_prompts.md
+dataset_jsonl: data/finetune_dataset.jsonl
