@@ -1,48 +1,27 @@
-"""
-Modulo: multimodal_controller
-Descrizione: Gestione input/output multimodale vocale per Mercurius∞.
-Autore: Mercurius∞ AI Engineer
-"""
+\"\"\"Multimodal Controller – gestisce input vocali / video ed eventi.  
+Versione placeholder ma importabile.
+\"\"\"
 
-import time
-from modules.voice_bridge.speech_to_text import WhisperSTT
+from utils.logger import setup_logger
 
-# TTS avanzato (Nari Dia) + fallback
-try:
-    from modules.voice_bridge.nari_dia_tts import NariDiaTTS
-    TTS_ENGINE = "nari"
-except ImportError:
-    from modules.voice_bridge.text_to_speech import TextToSpeech
-    TTS_ENGINE = "pyttsx3"
+logger = setup_logger(__name__)
 
 class MultimodalController:
+    \"\"\"Gestisce routing tra voice bridge, eye agent e LLM.\"\"\"
+
     def __init__(self):
-        self.stt = WhisperSTT()
-        if TTS_ENGINE == "nari":
-            self.tts = NariDiaTTS()
-        else:
-            self.tts = TextToSpeech()
+        self.active = False
 
-    def listen_and_respond(self, audio_file_path: str, ai_callback):
-        """
-        Ascolta un file audio, lo trascrive, passa il testo all'AI,
-        e vocalizza la risposta.
-        """
-        print("🎧 Ricezione vocale in corso...")
-        input_text = self.stt.transcribe(audio_file_path)
-        print("🗣 Input:", input_text)
+    def start(self):
+        self.active = True
+        logger.info("MultimodalController avviato")
 
-        response = ai_callback(input_text)
-        print("🧠 Risposta AI:", response)
+    def stop(self):
+        self.active = False
+        logger.info("MultimodalController fermato")
 
-        time.sleep(0.5)  # Ottimizzazione dialogo
-        self.tts.speak(response)
-        return response
-
-# Esecuzione di prova
-if __name__ == "__main__":
-    def mock_ai(text):
-        return f"Hai detto: {text}"
-
-    mmc = MultimodalController()
-    mmc.listen_and_respond("sample_audio.wav", mock_ai)
+    def handle_event(self, event: dict):
+        \"\"\"Route di un evento (stub).\"\"\"
+        logger.debug("Evento ricevuto: %s", event)
+        # TODO: integrazione con eye_agent / speech_agent
+        return {"handled": True, "event": event}

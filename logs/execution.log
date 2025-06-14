@@ -66,3 +66,179 @@ utils/logger.py                                  27     20    26%
 -----------------------------------------------------------------
 TOTAL                                          1479    537    64%
 Report saved to logs/test_report.md
+[2025-06-10 14:06:12,061] ERROR - Errore avvio azr: [WinError 2] Impossibile trovare il file specificato
+[2025-06-10 14:06:12,124] INFO - [BOOT] Avvio servizio: ollama
+[2025-06-10 14:06:12,125] ERROR - Errore avvio n8n: [WinError 2] Impossibile trovare il file specificato
+[2025-06-10 14:06:12,127] ERROR - Errore avvio bridge_josch: [WinError 2] Impossibile trovare il file specificato
+[2025-06-10 14:06:12,128] INFO - [SLEEP] Avvio SleepTimeCompute
+[2025-06-10 14:06:12,128] DEBUG - [SLEEP] Esecuzione routine di ottimizzazione
+[2025-06-10 14:06:12,128] INFO - [VISION] Avvio pipeline video su '0' (placeholder)
+[2025-06-10 14:06:12,129] INFO - 📹 VideoPipeline avviata su '0' (placeholder)
+[2025-06-10 14:06:12,128] INFO - 🧠 Scansione dei moduli in corso...
+[2025-06-10 14:25:17,058] ERROR - Errore avvio azr: [WinError 2] Impossibile trovare il file specificato
+[2025-06-10 14:25:17,118] INFO - [BOOT] Avvio servizio: ollama
+[2025-06-10 14:25:17,119] ERROR - Errore avvio n8n: [WinError 2] Impossibile trovare il file specificato
+[2025-06-10 14:25:17,121] ERROR - Errore avvio bridge_josch: [WinError 2] Impossibile trovare il file specificato
+[2025-06-10 14:25:17,121] INFO - [SLEEP] Avvio SleepTimeCompute
+[2025-06-10 14:25:17,122] DEBUG - [SLEEP] Esecuzione routine di ottimizzazione
+[2025-06-10 14:25:17,122] INFO - [VISION] Avvio pipeline video su '0' (placeholder)
+[2025-06-10 14:25:17,122] INFO - 🧠 Scansione dei moduli in corso...
+[2025-06-10 14:25:17,122] INFO - Teacher Mode ON
+[2025-06-10 14:25:17,122] INFO - 📹 VideoPipeline avviata su '0' (placeholder)
+[2025-06-10 14:25:17,123] INFO - [GENESIS] Task congiunto: analizza una strategia di breakout su BTC/USD
+[2025-06-10 14:25:17,124] INFO - 👨‍🏫 TeacherMode start() avviato
+[2025-06-10 14:25:17,125] DEBUG - TeacherMode heartbeat
+[2025-06-10 14:25:17,264] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:25:21,442] INFO - 🔄 Ottimizzazione dei collegamenti interni...
+[2025-06-10 14:25:21,443] INFO - ✅ Report salvato in: logs/self_tuning_report.md
+[2025-06-10 14:25:22,336] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:25:27,130] DEBUG - TeacherMode heartbeat
+[2025-06-10 14:25:27,451] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:25:32,555] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:25:37,135] DEBUG - TeacherMode heartbeat
+[2025-06-10 14:25:37,663] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:25:42,754] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:25:47,143] DEBUG - TeacherMode heartbeat
+[2025-06-10 14:25:47,863] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:25:52,976] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:25:57,164] DEBUG - TeacherMode heartbeat
+[2025-06-10 14:25:58,084] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:26:03,188] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:26:07,207] DEBUG - TeacherMode heartbeat
+[2025-06-10 14:26:08,288] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:26:13,398] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:26:17,221] DEBUG - TeacherMode heartbeat
+[2025-06-10 14:26:18,515] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:26:23,626] ERROR - [EYE] Nessun frame catturato
+[2025-06-10 14:26:27,226] DEBUG - TeacherMode heartbeat
+[2025-06-12 19:27:33,657] ERROR - Errore avvio azr: [WinError 2] Impossibile trovare il file specificato
+[2025-06-12 19:27:33,666] INFO - [BOOT] Avvio servizio: ollama
+[2025-06-12 19:27:33,667] ERROR - Errore avvio n8n: [WinError 2] Impossibile trovare il file specificato
+[2025-06-12 19:27:33,668] ERROR - Errore avvio bridge_josch: [WinError 2] Impossibile trovare il file specificato
+[2025-06-12 19:27:33,669] INFO - [SLEEP] Avvio SleepTimeCompute
+[2025-06-12 19:27:33,669] DEBUG - [SLEEP] Esecuzione routine di ottimizzazione
+[2025-06-12 19:27:33,669] INFO - [VISION] Avvio pipeline video su '0' (placeholder)
+[2025-06-12 19:27:33,670] INFO - 📹 VideoPipeline avviata su '0' (placeholder)
+[2025-06-12 19:27:33,670] INFO - 🧠 Scansione dei moduli in corso...
+[2025-06-12 19:27:33,670] INFO - Teacher Mode ON
+[2025-06-12 19:27:33,670] INFO - [GENESIS] Task congiunto: analizza una strategia di breakout su BTC/USD
+[2025-06-12 19:27:33,672] INFO - 👨‍🏫 TeacherMode start() avviato
+[2025-06-12 19:27:33,673] DEBUG - TeacherMode heartbeat
+[2025-06-12 19:27:33,764] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:27:38,376] INFO - 🔄 Ottimizzazione dei collegamenti interni...
+[2025-06-12 19:27:38,377] INFO - ✅ Report salvato in: logs/self_tuning_report.md
+[2025-06-12 19:27:38,835] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:27:43,689] DEBUG - TeacherMode heartbeat
+[2025-06-12 19:27:43,950] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:27:49,050] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:27:53,702] DEBUG - TeacherMode heartbeat
+[2025-06-12 19:27:54,158] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:27:59,252] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:28:03,713] DEBUG - TeacherMode heartbeat
+[2025-06-12 19:28:04,353] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:28:09,460] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:28:13,723] DEBUG - TeacherMode heartbeat
+[2025-06-12 19:28:14,577] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:28:19,686] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:28:23,729] DEBUG - TeacherMode heartbeat
+[2025-06-12 19:28:24,792] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:28:29,896] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:28:33,737] DEBUG - TeacherMode heartbeat
+[2025-06-12 19:28:35,014] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:28:40,110] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:28:43,744] DEBUG - TeacherMode heartbeat
+[2025-06-12 19:28:45,219] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:28:50,319] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:28:53,746] DEBUG - TeacherMode heartbeat
+[2025-06-12 19:28:55,418] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:29:00,531] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:29:03,752] DEBUG - TeacherMode heartbeat
+[2025-06-12 19:29:05,634] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 19:29:07,294] DEBUG - AZR validation started
+[2025-06-12 19:29:07,294] ERROR - AZR syntax error: invalid syntax (<unknown>, line 1)
+[2025-06-12 19:29:07,295] ERROR - Errore GPT4o: 
+
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+
+[2025-06-12 19:29:07,295] WARNING - ⚠️ Nessuna risposta valida. Attivazione fallback AZR...
+[2025-06-12 20:18:56,895] ERROR - Errore avvio azr: [WinError 2] Impossibile trovare il file specificato
+[2025-06-12 20:18:56,907] INFO - [BOOT] Avvio servizio: ollama
+[2025-06-12 20:18:56,908] ERROR - Errore avvio n8n: [WinError 2] Impossibile trovare il file specificato
+[2025-06-12 20:18:56,909] ERROR - Errore avvio bridge_josch: [WinError 2] Impossibile trovare il file specificato
+[2025-06-12 20:18:56,910] INFO - [SLEEP] Avvio SleepTimeCompute
+[2025-06-12 20:18:56,911] DEBUG - [SLEEP] Esecuzione routine di ottimizzazione
+[2025-06-12 20:18:56,911] INFO - [VISION] Avvio pipeline video su '0' (placeholder)
+[2025-06-12 20:18:56,911] INFO - 🧠 Scansione dei moduli in corso...
+[2025-06-12 20:18:56,911] INFO - Teacher Mode ON
+[2025-06-12 20:18:56,912] INFO - [GENESIS] Task congiunto: analizza una strategia di breakout su BTC/USD
+[2025-06-12 20:18:56,911] INFO - 📹 VideoPipeline avviata su '0' (placeholder)
+[2025-06-12 20:18:56,915] INFO - 👨‍🏫 TeacherMode start() avviato
+[2025-06-12 20:18:56,915] DEBUG - TeacherMode heartbeat
+[2025-06-12 20:18:57,018] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:18:59,251] INFO - 🔄 Ottimizzazione dei collegamenti interni...
+[2025-06-12 20:18:59,252] INFO - ✅ Report salvato in: logs/self_tuning_report.md
+[2025-06-12 20:19:02,101] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:19:06,927] DEBUG - TeacherMode heartbeat
+[2025-06-12 20:19:07,225] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:19:12,333] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:19:16,934] DEBUG - TeacherMode heartbeat
+[2025-06-12 20:19:17,442] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:19:22,562] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:19:26,950] DEBUG - TeacherMode heartbeat
+[2025-06-12 20:19:27,677] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:19:32,797] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:19:36,970] DEBUG - TeacherMode heartbeat
+[2025-06-12 20:19:37,907] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:19:43,017] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:19:46,983] DEBUG - TeacherMode heartbeat
+[2025-06-12 20:19:48,134] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:19:53,254] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:19:56,984] DEBUG - TeacherMode heartbeat
+[2025-06-12 20:19:58,362] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:20:03,479] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:20:06,995] DEBUG - TeacherMode heartbeat
+[2025-06-12 20:20:08,597] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:20:13,703] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:20:16,999] DEBUG - TeacherMode heartbeat
+[2025-06-12 20:20:18,812] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:20:23,927] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:20:27,012] DEBUG - TeacherMode heartbeat
+[2025-06-12 20:20:29,037] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:20:34,175] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:20:37,027] DEBUG - TeacherMode heartbeat
+[2025-06-12 20:20:39,290] ERROR - [EYE] Nessun frame catturato
+[2025-06-12 20:20:41,318] DEBUG - AZR validation started
+[2025-06-12 20:20:41,318] ERROR - AZR syntax error: invalid syntax (<unknown>, line 1)
+[2025-06-12 20:20:41,318] ERROR - Errore GPT4o: 
+
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+
+[2025-06-12 20:20:41,318] WARNING - ⚠️ Nessuna risposta valida. Attivazione fallback AZR...
+[2025-06-13 16:32:29,606] INFO - [CODEX] Invio prompt: #PROMPT_TYPE: System Audit
+[2025-06-13 16:32:29,607] ERROR - Errore Codex: 
+
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+
+[2025-06-13 16:40:32,635] INFO - [CODEX] Invio prompt: #PROMPT_TYPE: System Audit
+[2025-06-13 16:44:39,024] INFO - [CODEX] Invio prompt: #PROMPT_TYPE: Code Analysis
+[2025-06-13 16:47:58,478] INFO - [CODEX] Invio prompt: #PROMPT_TYPE: System Self-Audit
+[2025-06-13 17:54:51,937] INFO - [CODEX] Invio prompt: #PROMPT_TYPE: System Self-Audit
+[2025-06-13 18:40:58,774] INFO - [CODEX] Invio prompt: #SELF_MISSION: missions/repair_critical_modules.md

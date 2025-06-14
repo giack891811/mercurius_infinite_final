@@ -8,8 +8,8 @@ Descrizione: Gestione del dialogo AI-utente con memoria, emozioni e contesto.
 
 import json
 from datetime import datetime
-from memory.synaptic_memory import SynapticMemory
-from core.azr_reasoning import validate_with_azr
+from memory.synaptic_log import SynapticMemory
+from modules.llm.azr_reasoner import validate_with_azr
 from core.emotion_analyzer import EmotionAnalyzer
 
 

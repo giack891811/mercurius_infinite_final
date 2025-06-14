@@ -1,23 +1,99 @@
-# 🔍 SELF CHECK – Mercurius∞
+# 📘 Rapporto Auto-Adattamento – Mercurius∞
 
-**Moduli da verificare:**
-✅ orchestrator.orchestrator importato correttamente.
-✅ orchestrator.genesis_orchestrator importato correttamente.
-✅ orchestrator.mission_controller importato correttamente.
-✅ modules.llm.chatgpt_interface importato correttamente.
-✅ modules.llm.ollama3_interface importato correttamente.
-✅ modules.llm.azr_reasoner importato correttamente.
-✅ modules.llm.gpt4o_validator importato correttamente.
-✅ integrations.bridge_josch importato correttamente.
-✅ modules.vision.eye_agent importato correttamente.
-✅ modules.scheduler.sleep_time_compute importato correttamente.
-✅ memory.logical_state_tracker importato correttamente.
-✅ utils.logger importato correttamente.
-
-**Controllo cartelle essenziali:**
-✅ logs/ esiste
-✅ missions/ esiste
-✅ modules/ esiste
-✅ orchestrator/ esiste
-
-**Controllo completato.**
+🔧 Modulo incompleto: get-pip.py
+🔧 Modulo incompleto: core\dialogue_manager.py
+🔧 Modulo incompleto: core\self_tuner.py
+🔧 Modulo incompleto: core\thinking_loop.py
+🔧 Modulo incompleto: deploy\deployment_handler.py
+🔧 Modulo incompleto: evolution\logic_injector.py
+🔧 Modulo incompleto: flutter\engine\src\build\gn_helpers.py
+🔧 Modulo incompleto: flutter\engine\src\build\gn_run_binary.py
+🔧 Modulo incompleto: flutter\engine\src\build\gn_run_malioc.py
+🔧 Modulo incompleto: flutter\engine\src\build\vs_toolchain.py
+🔧 Modulo incompleto: flutter\engine\src\build\android\gyp\jar.py
+🔧 Modulo incompleto: flutter\engine\src\build\android\gyp\javac.py
+🔧 Modulo incompleto: flutter\engine\src\build\android\gyp\util\build_utils.py
+🔧 Modulo incompleto: flutter\engine\src\build\config\linux\pkg-config.py
+🔧 Modulo incompleto: flutter\engine\src\build\config\linux\sysroot_ld_path.py
+🔧 Modulo incompleto: flutter\engine\src\build\linux\sysroot_scripts\install-sysroot.py
+🔧 Modulo incompleto: flutter\engine\src\build\mac\change_mach_o_flags.py
+🔧 Modulo incompleto: flutter\engine\src\build\mac\tweak_info_plist.py
+🔧 Modulo incompleto: flutter\engine\src\build\pyutil\file_util.py
+🔧 Modulo incompleto: flutter\engine\src\build\toolchain\wrapper_utils.py
+🔧 Modulo incompleto: flutter\engine\src\build\toolchain\win\setup_toolchain.py
+🔧 Modulo incompleto: flutter\engine\src\build\toolchain\win\tool_wrapper.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\build\generate_coverage.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\build\dart\internal\gen_executable_call.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\build\dart\tools\dart_pkg.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\ci\compatibility_helper.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\ci\impeller_cmake_build_test.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\impeller\tools\malioc_diff.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\impeller\tools\metal_library.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\impeller\tools\xxd.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\shell\platform\fuchsia\flutter\build\gen_debug_wrapper_main.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\sky\tools\create_embedder_framework.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\sky\tools\create_macos_framework.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\testing\run_tests.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\testing\android\native_activity\native_activity_apk.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\testing\benchmark\displaylist_benchmark_parser.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\testing\fuchsia\run_tests.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\tools\download_fuchsia_sdk.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\tools\font_subset\test.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\tools\fuchsia\build_fuchsia_artifacts.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\tools\fuchsia\copy_debug_symbols.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\tools\fuchsia\merge_and_upload_debug_symbols.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\tools\fuchsia\upload_to_symbol_server.py
+🔧 Modulo incompleto: flutter\engine\src\flutter\tools\fuchsia\dart\gen_dart_package_config.py
+🔧 Modulo incompleto: integrations\bridge_josch.py
+🔧 Modulo incompleto: memory\long_term_memory.py
+🔧 Modulo incompleto: modules\agent_registry.py
+🔧 Modulo incompleto: modules\network_analyzer.py
+🔧 Modulo incompleto: modules\local\leon_ai_bridge.py
+🔧 Modulo incompleto: modules\mobile\note_interface.py
+🔧 Modulo incompleto: modules\voice_bridge\multimodal_controller.py
+🔧 Modulo incompleto: scripts\aion_boot.py
+🔧 Modulo incompleto: scripts\run_selfmission.py
+🔧 Modulo incompleto: scripts\run_teacher_mode.py
+🔧 Modulo incompleto: security\pairing_manager.py
+🔧 Modulo incompleto: src\mercurius-infinite\core\dialogue_manager.py
+🔧 Modulo incompleto: src\mercurius-infinite\core\self_tuner.py
+🔧 Modulo incompleto: src\mercurius-infinite\deploy\deployment_handler.py
+🔧 Modulo incompleto: src\mercurius-infinite\evolution\logic_injector.py
+🔧 Modulo incompleto: src\mercurius-infinite\memory\long_term_memory.py
+🔧 Modulo incompleto: src\mercurius-infinite\modules\voice_bridge\multimodal_controller.py
+🔧 Modulo incompleto: src\mercurius-infinite\security\pairing_manager.py
+🔧 Modulo incompleto: src\mercurius-infinite\tests\test_neuro_learning.py
+🔧 Modulo incompleto: src\mercurius-infinite\tests\test_policy.py
+🔧 Modulo incompleto: src\mercurius-infinite\tests\test_secure_executor.py
+🔧 Modulo incompleto: src\mercurius-infinite\trading\trading_core.py
+🔧 Modulo incompleto: src\mercurius-infinite\utils\environment.py
+🔧 Modulo incompleto: src\mercurius-infinite\vision\ocr_reader.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\get-pip.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\core\dialogue_manager.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\core\self_tuner.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\core\thinking_loop.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\deploy\deployment_handler.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\evolution\logic_injector.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\integrations\bridge_josch.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\memory\long_term_memory.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\modules\network_analyzer.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\modules\local\leon_ai_bridge.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\modules\mobile\note_interface.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\modules\voice_bridge\multimodal_controller.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\scripts\aion_boot.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\security\pairing_manager.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\tests\test_modular_end2end.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\tests\test_neuro_learning.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\tests\test_policy.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\tests\test_secure_executor.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\trading\trading_core.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\utils\environment.py
+🔧 Modulo incompleto: temp_clean\mercurius_infinite_final\vision\ocr_reader.py
+🔧 Modulo incompleto: tests\test_modular_end2end.py
+🔧 Modulo incompleto: tests\test_neuro_learning.py
+🔧 Modulo incompleto: tests\test_policy.py
+🔧 Modulo incompleto: tests\test_secure_executor.py
+🔧 Modulo incompleto: trading\trading_core.py
+🔧 Modulo incompleto: utils\environment.py
+🔧 Modulo incompleto: vision\ocr_reader.py
+💡 Suggerimento: consolidare dashboard → orchestrator con feedback loop.

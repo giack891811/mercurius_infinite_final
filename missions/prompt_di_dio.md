@@ -71,3 +71,23 @@ Mercurius\u221e \u00e8 una mente artificiale progettata per assistere in tempo r
 - Nuove cartelle e file creati correttamente
 - Attivazione `bridge_josch`, `azr`, `ollama`, `n8n`, `eye_agent`
 - Conferma finale di validazione da parte di AZR
+
+
+---
+
+## 🛠️ Fix Percorsi Avvio Servizi
+
+#PROMPT_TYPE: FixPath
+#ROLE: AI System Engineer
+#MODULE_TARGET: orchestrator/genesis_orchestrator.py
+#GOAL: Risolvere l'errore di avvio dei servizi di sistema.
+
+Modifica la funzione `auto_start_services()` in modo che esegua questi file con percorsi completi:
+
+- `azr.bat` → `"agents/azr.bat"` oppure `"./azr.bat"` se presente nella root.
+- `bridge_josch.bat` → `"bridge_josch.bat"` nella root oppure `"scripts/bridge_josch.bat"` se esiste.
+- `n8n.bat` → `"n8n.bat"` nella root o `"scripts/n8n.bat"` se necessario.
+
+La funzione deve essere robusta e tollerare file mancanti, loggando un errore ma continuando il bootstrap. Se i file non esistono, **non deve interrompere l'esecuzione**, ma scrivere nel log la causa.
+
+📌 Obiettivo: avviare i servizi senza errori in Windows, anche da terminale Git Bash o PowerShell.
